@@ -1,6 +1,6 @@
 // 가족 일정 (Firestore todos 컬렉션) + 옛 기기 저장 일정 이전
-import { $ } from './util.js?v=1.9';
-import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from './firebase-init.js?v=1.9';
+import { $ } from './util.js?v=1.10';
+import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from './firebase-init.js?v=1.10';
 
 let todos = [], tUnsub = null;
 const tList = $('todoList');

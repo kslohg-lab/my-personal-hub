@@ -1,6 +1,6 @@
 // 가족 채팅 (Firestore chats 컬렉션) + 연결 상태 표시 + 사진 확대
-import { $ } from './util.js?v=1.9';
-import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp } from './firebase-init.js?v=1.9';
+import { $ } from './util.js?v=1.10';
+import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp } from './firebase-init.js?v=1.10';
 
 const box = $('chatMessages'), input = $('chatMessage');
 let unsub = null, docs = [];
@@ -37,6 +37,16 @@ const fail = e => alert('전송 실패 (' + (e.code || e.message) + '). 로그�
 function openImg(src) { $('lbImg').src = src; $('lightbox').hidden = false; }
 $('lightbox').addEventListener('click', () => { $('lightbox').hidden = true; });
 
+// 이모지만 1~3개 보낸 메시지인지 확인 (글자가 섞이면 false)
+const EMO = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[‍️⃣]|[\u{1F3FB}-\u{1F3FF}]|[#*0-9]️?⃣)+$/u;
+function emojiCount(s) {
+  const t = (s || '').trim();
+  if (!t || t.length > 40 || !EMO.test(t.replace(/\s+/g, ''))) return 0;
+  const parts = t.replace(/\s+/g, '');
+  try { return [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(parts)].length; }
+  catch { return [...parts].filter(c => !/[‍️\u{1F3FB}-\u{1F3FF}⃣]/u.test(c)).length; }
+}
+
 // 채팅 렌더링 (텍스트는 모두 textContent)
 function render() {
   const stick = box.clientHeight === 0 || box.scrollHeight - box.scrollTop - box.clientHeight < 120;
@@ -56,10 +66,16 @@ function render() {
     nm.className = 'text-xs text-slate-400 mb-1 px-1';
     nm.textContent = d.sender || '익명';
     const bub = document.createElement('div');
-    bub.className = 'max-w-[85%] rounded-2xl px-4 py-2.5 break-words ' + (isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none border border-slate-700');
+    const n = !d.imageUrl ? emojiCount(d.text) : 0;
+    if (n >= 1 && n <= 3) {
+      bub.className = 'max-w-[85%] px-1 py-0.5 break-words';   // 이모지만: 말풍선 없이 크게
+    } else {
+      bub.className = 'max-w-[85%] rounded-2xl px-4 py-2.5 break-words ' + (isMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 rounded-bl-none border border-slate-700');
+    }
     if (d.text) {
       const t = document.createElement('div');
-      t.className = 'text-sm whitespace-pre-wrap';
+      t.className = (n >= 1 && n <= 3 ? '' : 'text-sm') + ' whitespace-pre-wrap';
+      if (n >= 1 && n <= 3) { t.style.fontSize = '2.75rem'; t.style.lineHeight = '1.2'; }
       t.textContent = d.text;
       bub.append(t);
     }
