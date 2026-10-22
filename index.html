@@ -51,20 +51,28 @@
   <img id="lbImg" alt="" class="max-w-full max-h-full rounded-lg">
 </div>
 
-<!-- 비밀번호 잠금 -->
+<!-- 로그인 -->
 <div id="lockScreen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-6">
   <div class="w-full max-w-sm bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl text-center space-y-6">
     <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl mx-auto flex items-center justify-center text-indigo-400">
       <svg class="ic ic-lg"><use href="#i-lock"/></svg>
     </div>
     <div>
-      <h2 class="text-xl font-bold text-slate-100 mb-1">가족 아지트 잠금</h2>
-      <p class="text-xs text-slate-400">가족 비밀번호를 입력하여 입장하세요.</p>
+      <h2 class="text-xl font-bold text-slate-100 mb-1">가족 아지트</h2>
+      <p id="loginSub" class="text-xs text-slate-400">연결 확인 중...</p>
     </div>
-    <div class="space-y-3">
-      <input type="password" id="accessPassword" inputmode="numeric" autocomplete="off" placeholder="비밀번호 4자리" maxlength="4" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-lg text-slate-100 tracking-widest focus:outline-none focus:border-indigo-500">
-      <p id="passwordError" class="text-xs text-red-400" hidden>비밀번호가 틀렸습니다. 다시 입력해주세요.</p>
-      <button id="pinBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/30">입장하기</button>
+    <div id="loginForm" hidden>
+      <div id="loginStep1">
+        <p class="text-xs text-slate-400 mb-3">누구세요?</p>
+        <div id="loginNames" class="grid grid-cols-2 gap-3"></div>
+      </div>
+      <div id="loginStep2" class="space-y-3" hidden>
+        <div id="loginPickName" class="text-lg font-bold text-indigo-400"></div>
+        <input type="password" id="loginPw" autocomplete="current-password" placeholder="비밀번호" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-lg text-slate-100 focus:outline-none focus:border-indigo-500">
+        <p id="loginErr" class="text-xs text-red-400" hidden></p>
+        <button id="loginBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/30">입장하기</button>
+        <button id="loginBack" class="text-xs text-slate-400 underline p-1">다른 사람 선택</button>
+      </div>
     </div>
   </div>
 </div>
@@ -77,6 +85,7 @@
       <h1 class="font-bold text-sm leading-none text-slate-100">내 아지트 (My Hub)</h1>
       <p class="text-[10px] text-slate-400">PWA Family Web App</p>
     </div>
+    <button id="logoutBtn" class="ml-auto text-[11px] text-slate-400 border border-slate-700 rounded-lg px-2 py-1"><span id="userLabel"></span> · 로그아웃</button>
   </header>
 
   <main class="flex-1 min-h-0 relative">
@@ -112,7 +121,7 @@
             <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2"><svg class="ic text-indigo-400"><use href="#i-chat"/></svg> 가족 채팅방</h2>
             <p class="text-xs text-slate-400">실시간 대화와 사진을 공유하세요.</p>
           </div>
-          <input type="text" id="chatSender" maxlength="10" value="아빠" class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-indigo-400 font-bold text-center focus:outline-none focus:border-indigo-500">
+          <span id="chatSender" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-indigo-400 font-bold"></span>
         </div>
         <div id="chatStatus" class="text-[10px] mb-1 shrink-0 text-slate-500">● 연결 중...</div>
         <div id="chatDetail" class="text-[10px] mb-1 shrink-0 text-amber-300 break-words"></div>
@@ -193,20 +202,15 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch {} }
 };
 
-// 비밀번호
-const PIN = "0502";
+// 로그인 상태에 따른 화면 전환 (실제 인증은 아래 module 스크립트에서 처리)
 function enterApp() { $('lockScreen').hidden = true; $('mainApp').hidden = false; fitHeight(); }
-function checkPassword() {
-  if ($('accessPassword').value.trim() === PIN) {
-    try { sessionStorage.setItem('hub_authenticated', 'true'); } catch {}
-    enterApp();
-  } else {
-    $('passwordError').hidden = false;
-    $('accessPassword').value = '';
-  }
+function showLogin() {
+  try { if (curGame) doClose(); } catch {}
+  switchTab('home');
+  $('mainApp').hidden = true; $('lockScreen').hidden = false;
+  $('loginSub').textContent = '가족만 입장할 수 있어요.';
+  $('loginForm').hidden = false;
 }
-$('pinBtn').addEventListener('click', checkPassword);
-$('accessPassword').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
 
 // 키보드가 올라와도 화면이 찌그러지지 않도록 실제 보이는 높이에 맞춤
 function fitHeight() {
@@ -386,12 +390,11 @@ document.addEventListener('fullscreenchange', () => { if (!document.fullscreenEl
   $('gpFlip').addEventListener('click', () => { flip = !flip; store.set('hub_flip', flip ? '1' : '0'); layoutPlayer(); });
 })();
 
-// 자동 로그인
-try { if (sessionStorage.getItem('hub_authenticated') === 'true') enterApp(); } catch {}
 
 // 채팅 모듈이 8초 안에 못 뜨면 안내
 setTimeout(() => {
   if (!window.__chatReady) {
+    $('loginSub').textContent = '⚠ 연결 모듈을 불러오지 못했어요. 인터넷을 확인하고 새로고침해 주세요.';
     const s = $('chatStatus');
     s.textContent = '⚠ 채팅 모듈을 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요.';
     s.className = 'text-[10px] mb-1 shrink-0 text-red-400';
@@ -403,6 +406,7 @@ setTimeout(() => {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { initializeFirestore, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 window.__chatReady = true;
 
@@ -415,18 +419,18 @@ const firebaseConfig = {
   appId: "1:157281213343:web:99e65a7b08e269ad333baa",
   measurementId: "G-W41Q8308RG"
 };
+// 앱에 보이는 이름 ↔ Firebase Authentication 계정 이메일
+const FAMILY = [
+  { name: '아빠', email: 'dad@family-hub.app' },
+  { name: '엄마', email: 'mom@family-hub.app' },
+  { name: '채아', email: 'chaea@family-hub.app' },
+  { name: '지아', email: 'jia@family-hub.app' }
+];
 
 const $ = id => document.getElementById(id);
-const box = $('chatMessages'), input = $('chatMessage'), nameInput = $('chatSender');
-
-// 기기 고유 ID: 같은 이름을 써도 "내 메시지"를 정확히 구분
-let cid = 'anon';
-try {
-  cid = localStorage.getItem('hub_cid');
-  if (!cid) { cid = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random()); localStorage.setItem('hub_cid', cid); }
-} catch {}
-try { nameInput.value = localStorage.getItem('hub_name') || '아빠'; } catch {}
-const myName = () => nameInput.value.trim() || '익명';
+const box = $('chatMessages'), input = $('chatMessage');
+let me = null, db = null, auth = null, unsub = null, docs = [];
+const myName = () => me ? me.name : '익명';
 
 function setStatus(ok, err, n) {
   const s = $('chatStatus');
@@ -437,7 +441,6 @@ function setStatus(ok, err, n) {
   s.className = 'text-[10px] mb-1 shrink-0 text-red-400';
   probe();
 }
-// 연결이 안 될 때 Firestore 서버에 직접 한 번 요청해서 원인을 화면에 표시
 let lastProbe = 0;
 async function probe() {
   if (Date.now() - lastProbe < 15000) return;
@@ -445,8 +448,10 @@ async function probe() {
   const d = $('chatDetail');
   d.textContent = '원인 확인 중...';
   const u = 'https://firestore.googleapis.com/v1/projects/' + firebaseConfig.projectId + '/databases/(default)/documents/chats?pageSize=1&key=' + firebaseConfig.apiKey;
+  const headers = {};
+  try { if (auth && auth.currentUser) headers.Authorization = 'Bearer ' + await auth.currentUser.getIdToken(); } catch {}
   try {
-    const r = await fetch(u);
+    const r = await fetch(u, { headers });
     if (r.ok) { d.textContent = '서버 접속·읽기 권한은 정상이에요. 새로고침하거나 다른 네트워크(와이파이/LTE)로 시도해 보세요.'; return; }
     let j = {}; try { j = await r.json(); } catch {}
     d.textContent = '서버 응답 ' + r.status + ': ' + ((j.error && j.error.message) || '알 수 없는 오류');
@@ -454,13 +459,12 @@ async function probe() {
     d.textContent = 'Firestore 서버(firestore.googleapis.com)에 접속할 수 없어요. 광고차단/VPN/방화벽/인터넷을 확인하세요.';
   }
 }
-const fail = e => alert('전송 실패 (' + (e.code || e.message) + '). Firestore 규칙과 인터넷 연결을 확인하세요.');
+const fail = e => alert('전송 실패 (' + (e.code || e.message) + '). 로그인 상태와 인터넷 연결을 확인하세요.');
 
 function openImg(src) { $('lbImg').src = src; $('lightbox').hidden = false; }
 $('lightbox').addEventListener('click', () => { $('lightbox').hidden = true; });
 
-// 렌더링 (모든 텍스트는 textContent로 넣어 특수문자/태그로 깨지지 않음)
-let docs = [];
+// 채팅 렌더링 (텍스트는 모두 textContent)
 function render() {
   const stick = box.clientHeight === 0 || box.scrollHeight - box.scrollTop - box.clientHeight < 120;
   box.replaceChildren();
@@ -472,7 +476,7 @@ function render() {
     return;
   }
   docs.forEach(d => {
-    const isMe = d.uid ? d.uid === cid : d.sender === myName();
+    const isMe = (me && d.uid === me.uid) || d.sender === myName();
     const row = document.createElement('div');
     row.className = 'flex flex-col mb-3 ' + (isMe ? 'items-end' : 'items-start');
     const nm = document.createElement('span');
@@ -501,17 +505,12 @@ function render() {
   });
   if (stick) box.scrollTop = box.scrollHeight;
 }
-nameInput.addEventListener('change', () => {
-  try { localStorage.setItem('hub_name', nameInput.value.trim()); } catch {}
-  render();
-});
 
-let db = null;
-try {
-  // 일부 네트워크/브라우저에서 기본 연결이 멈추는 문제를 피하기 위해 롱폴링 사용
-  db = initializeFirestore(initializeApp(firebaseConfig), { experimentalForceLongPolling: true });
+// 채팅 구독은 로그인한 뒤에만 시작
+function startChat() {
+  if (unsub || !db) return;
   const q = query(collection(db, 'chats'), orderBy('timestamp', 'asc'), limitToLast(100));
-  onSnapshot(q, snap => {
+  unsub = onSnapshot(q, snap => {
     docs = snap.docs.map(s => {
       const d = s.data({ serverTimestamps: 'estimate' });
       const t = d.timestamp && d.timestamp.toDate ? d.timestamp.toDate() : null;
@@ -521,17 +520,22 @@ try {
     else setStatus(true, null, docs.length);
     render();
   }, err => { console.error(err); setStatus(false, err); });
-} catch (e) { console.error(e); setStatus(false, e); }
+}
+function stopChat() {
+  if (unsub) { unsub(); unsub = null; }
+  docs = [];
+  box.replaceChildren();
+}
 
 function send(text, img) {
   return addDoc(collection(db, 'chats'), {
-    sender: myName(), uid: cid, text: text || '', imageUrl: img || null, timestamp: serverTimestamp()
+    sender: myName(), uid: me.uid, text: text || '', imageUrl: img || null, timestamp: serverTimestamp()
   });
 }
 function sendText() {
   const t = input.value.trim();
   if (!t) return;
-  if (!db) { alert('채팅 서버에 연결되지 않았어요. 새로고침해 주세요.'); return; }
+  if (!db || !me) { alert('로그인이 필요해요.'); return; }
   input.value = '';
   const timer = setTimeout(() => setStatus(false, { message: '전송이 지연되고 있어요. 인터넷 연결을 확인하세요' }), 8000);
   send(t).then(() => clearTimeout(timer)).catch(e => { clearTimeout(timer); input.value = t; fail(e); });
@@ -544,7 +548,7 @@ input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing
 $('imgInput').addEventListener('change', e => {
   const f = e.target.files[0];
   e.target.value = '';
-  if (!f || !db) return;
+  if (!f || !db || !me) return;
   const url = URL.createObjectURL(f);
   const img = new Image();
   img.onload = () => {
@@ -565,6 +569,72 @@ $('imgInput').addEventListener('change', e => {
   img.onerror = () => { URL.revokeObjectURL(url); alert('사진을 읽을 수 없어요.'); };
   img.src = url;
 });
+
+// ----- 로그인 화면 -----
+let picked = null;
+FAMILY.forEach(f => {
+  const b = document.createElement('button');
+  b.className = 'py-4 rounded-2xl bg-slate-800 border border-slate-700 text-base font-bold text-slate-100 active:bg-indigo-600';
+  b.textContent = f.name;
+  b.addEventListener('click', () => {
+    picked = f;
+    $('loginPickName').textContent = f.name;
+    $('loginPw').value = '';
+    $('loginErr').hidden = true;
+    $('loginStep1').hidden = true; $('loginStep2').hidden = false;
+    $('loginPw').focus();
+  });
+  $('loginNames').append(b);
+});
+$('loginBack').addEventListener('click', () => { $('loginStep1').hidden = false; $('loginStep2').hidden = true; });
+async function doLogin() {
+  const pw = $('loginPw').value;
+  if (!picked || !pw || !auth) return;
+  $('loginBtn').disabled = true; $('loginErr').hidden = true;
+  try {
+    await signInWithEmailAndPassword(auth, picked.email, pw);
+  } catch (e) {
+    const c = e.code || '';
+    $('loginErr').textContent =
+      /invalid-credential|wrong-password|user-not-found|invalid-email/.test(c) ? '비밀번호가 맞지 않아요.' :
+      c === 'auth/too-many-requests' ? '시도가 너무 많아요. 잠시 후 다시 해주세요.' :
+      c === 'auth/network-request-failed' ? '인터넷 연결을 확인해 주세요.' :
+      c === 'auth/operation-not-allowed' ? 'Firebase에서 이메일/비밀번호 로그인이 꺼져 있어요.' :
+      '로그인 실패: ' + (c || e.message);
+    $('loginErr').hidden = false;
+  } finally { $('loginBtn').disabled = false; }
+}
+$('loginBtn').addEventListener('click', doLogin);
+$('loginPw').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) doLogin(); });
+$('logoutBtn').addEventListener('click', () => { if (auth && confirm('로그아웃할까요?')) signOut(auth); });
+
+// ----- Firebase 시작 -----
+try {
+  const app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  // 일부 네트워크/브라우저에서 기본 연결이 멈추는 문제를 피하기 위해 롱폴링 사용
+  db = initializeFirestore(app, { experimentalForceLongPolling: true });
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      const f = FAMILY.find(x => x.email === user.email);
+      me = { uid: user.uid, name: f ? f.name : (user.email || '').split('@')[0] };
+      $('chatSender').textContent = me.name;
+      $('userLabel').textContent = me.name;
+      $('loginPw').value = '';
+      window.enterApp();
+      startChat();
+    } else {
+      me = null;
+      stopChat();
+      $('loginStep1').hidden = false; $('loginStep2').hidden = true;
+      window.showLogin();
+    }
+  }, e => { console.error(e); $('loginSub').textContent = '⚠ 로그인 확인 실패: ' + (e.code || e.message); });
+} catch (e) {
+  console.error(e);
+  $('loginSub').textContent = '⚠ 로그인 준비 실패: ' + (e.code || e.message);
+  setStatus(false, e);
+}
 </script>
 </body>
 </html>

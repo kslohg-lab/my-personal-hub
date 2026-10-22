@@ -1,6 +1,6 @@
 # 📌 My Personal Hub — 프로젝트 정리 (Project Summary)
 
-- **현재 버전:** v1.4
+- **현재 버전:** v1.5
 - **마지막 업데이트:** 2026-10-22
 - **저장소:** `kslohg-lab/my-personal-hub` (branch: `main`)
 - **이 문서의 목적:** 새 대화방이나 다른 AI가 이 문서만 읽고도 프로젝트를 정확히 이해하고, 기존 기능을 깨뜨리지 않고 수정할 수 있게 하는 **단일 상태 문서**입니다. 수정할 때마다 맨 아래 "변경 이력"과 필요한 섹션을 함께 갱신하세요.
@@ -38,13 +38,13 @@ my-personal-hub/
 | 탭 | 내용 |
 |---|---|
 | 홈 | 환영 카드, YouTube / Instagram 링크 카드 (현재 링크는 각 사이트 첫 화면 placeholder) |
-| 가족채팅 | Firebase Firestore 실시간 채팅, 사진 전송, 이름 변경 |
+| 가족채팅 | Firebase Firestore 실시간 채팅, 사진 전송 (보낸 사람 이름은 로그인 계정 기준) |
 | AI게임 | 게임 카드 목록 → 전체 화면 실행 |
 | 일정 | 할 일 추가/완료/삭제 (기기 localStorage 저장 → **가족 간 공유 안 됨**) |
 
 ### 코드 구조 (index.html) — **이 구조를 유지할 것**
 - **① 일반 `<script>`**: 비밀번호 잠금, 탭 전환, 일정, 게임 목록/플레이어, 내장 Cyber Runner. **Firebase와 무관.**
-- **② `<script type="module">`**: Firebase 채팅 전용. 이 부분이 실패해도 ①은 정상 동작해야 함.
+- **② `<script type="module">`**: Firebase **로그인(Authentication) + 채팅** 전용. 로그인 여부로 화면(`enterApp()` / `showLogin()`)을 전환함. 이 부분이 실패하면 로그인 화면에서 막히지만(안내 문구 표시), 한 번 로그인한 기기는 오프라인에서도 입장 가능. ①의 기능(탭, 일정, 게임)은 Firebase와 무관하게 동작해야 함.
 - **아이콘:** 외부 라이브러리 없이 파일 상단의 **인라인 SVG 스프라이트**(`#i-home` 등)를 `<use>`로 사용. (CDN 아이콘 라이브러리 사용 금지 — 아래 "문제 기록" 참고)
 - **레이아웃:** `header / main / nav`를 세로로 쌓은 구조(`.shell`, 높이 `100dvh`). 각 탭은 `.tab`(absolute, 보이는 탭만 `.active`). 하단 메뉴는 `fixed`가 아님.
 - **숨김 처리:** `hidden` 속성 + CSS `[hidden]{display:none!important}` 사용.
@@ -53,11 +53,8 @@ my-personal-hub/
 ### 브라우저 저장소 키
 | 키 | 용도 |
 |---|---|
-| `hub_cid` | 기기 고유 ID (채팅에서 "내 메시지" 구분) |
-| `hub_name` | 채팅 이름 |
 | `hub_flip` | 가로 전용 게임 방향 뒤집기 상태 |
 | `my_hub_todos` | 일정 목록 |
-| `sessionStorage: hub_authenticated` | 비밀번호 통과 여부 |
 
 ---
 
@@ -65,11 +62,15 @@ my-personal-hub/
 
 - **올바른 프로젝트 ID: `my-family-hub-daf46`**
   - ⚠️ `my-personal-hub-daf46`은 **존재하지 않는 값**입니다. (과거 AI가 잘못 바꿔 채팅이 끊긴 적 있음) 설정값(`firebaseConfig`)을 임의로 수정하거나 새로 만들지 말 것. 실제 값은 Firebase 콘솔 → 프로젝트 설정 → 내 앱에서 확인.
+- **로그인(Firebase Authentication): 이메일/비밀번호 방식 (v1.5~)**
+  - 가족 4명 계정은 Firebase 콘솔 → Authentication → 사용자에서 **직접 생성**(앱에 가입 기능 없음). 앱 로그인 화면에서는 이름 버튼을 누르고 비밀번호만 입력.
+  - 이름 ↔ 이메일 대응(코드의 `FAMILY` 배열): 아빠 `dad@family-hub.app`, 엄마 `mom@family-hub.app`, 채아 `chaea@family-hub.app`, 지아 `jia@family-hub.app` (실제 메일이 아니어도 됨, 비밀번호 분실 시 콘솔에서 직접 재설정)
+  - 비밀번호는 문서/코드에 적지 않음. 한 번 로그인하면 기기에 유지됨.
 - **Firestore 컬렉션:** `chats`
   | 필드 | 설명 |
   |---|---|
   | `sender` | 보낸 사람 이름 |
-  | `uid` | 기기 고유 ID (옛 메시지에는 없음) |
+  | `uid` | Firebase 로그인 계정 uid (옛 메시지에는 기기 ID 또는 없음) |
   | `text` | 메시지 내용 |
   | `imageUrl` | 사진(base64 data URL) 또는 `null` (옛 메시지에는 없음) |
   | `timestamp` | `serverTimestamp()` |
@@ -77,7 +78,7 @@ my-personal-hub/
 - **사진:** 브라우저에서 최대 800px JPEG로 줄여 Firestore 문서에 직접 저장 (문서 1MB 제한 때문에 용량 초과 시 전송 차단).
 - **연결 방식:** `initializeFirestore(..., { experimentalForceLongPolling: true })` — 일부 네트워크에서 연결이 멈추는 문제 방지.
 - **상태 표시:** 채팅창 위에 `● 연결됨 · 메시지 N개`. 연결 실패 시 빨간 문구 + 노란 줄에 원인(서버에 직접 요청해서 진단) 표시.
-- **확인할 것:** Firestore 규칙이 읽기/쓰기를 허용하는지, **테스트 모드 규칙의 만료일**이 지나지 않았는지.
+- **규칙 현황:** 아직 열려 있음(로그인 필수 아님). 가족 4명 로그인 확인 후 "허용된 4개 이메일만 읽기/쓰기"로 잠글 예정. **규칙을 먼저 잠그면 채팅이 끊기므로 반드시 로그인 확인 후에 진행.** 테스트 모드 규칙의 만료일도 확인할 것.
 
 ---
 
@@ -101,14 +102,14 @@ my-personal-hub/
 
 1. **요청한 부분만 수정**하고, 나머지는 그대로 유지할 것. 전체 파일을 새로 쓰지 말 것.
 2. 수정한 부분(어느 위치, 무엇을)을 알려줄 것.
-3. **Firebase `firebaseConfig` 값, 프로젝트 ID를 바꾸지 말 것.**
+3. **Firebase `firebaseConfig` 값, 프로젝트 ID, 가족 계정 목록(`FAMILY`)을 바꾸지 말 것.**
 4. 아이콘을 외부 CDN 라이브러리로 바꾸지 말 것 (인라인 SVG 유지).
 5. 스크립트 구조(① 일반 / ② 채팅 모듈 분리)와 레이아웃 구조(`header/main/nav` 세로 쌓기)를 유지할 것.
 6. 사용자 입력은 `innerHTML`이 아니라 `textContent`로 화면에 넣을 것.
 7. 한 번에 한 가지 기능만 수정할 것.
 
 ### 수정 후 확인 체크리스트
-- [ ] 비밀번호 입력 후 입장되는가
+- [ ] 이름 선택 + 비밀번호로 로그인되고, 로그아웃 후 다시 로그인 화면이 나오는가
 - [ ] 하단 메뉴 4개 아이콘이 모두 보이고 탭 이동이 되는가
 - [ ] 채팅: 상태가 `● 연결됨`이고, 메시지 전송 후 입력창이 비워지는가, 다른 기기에서도 보이는가
 - [ ] 채팅: 사진 전송과 확대 보기가 되는가
@@ -135,7 +136,7 @@ my-personal-hub/
 
 ## 7. 보안 메모
 
-- 저장소가 **공개(public)**이므로 `index.html`의 비밀번호(PIN)와 Firebase 설정은 누구나 볼 수 있음. 비밀번호는 **간단한 잠금 수준**이며 진짜 보안이 아님.
+- 저장소가 **공개(public)**이므로 `index.html`의 Firebase 설정과 가족 이메일 목록은 누구나 볼 수 있음. 보안은 **로그인 + Firestore 규칙**으로 확보함(비밀번호는 코드에 없음). 규칙을 잠그기 전까지는 Firestore가 열려 있다는 점에 유의.
 - 채팅 내용을 보호하려면 Firestore 규칙 강화 + Firebase 로그인(Authentication) 도입이 필요. 규칙을 `allow read, write: if true`로 장기간 열어두지 말 것.
 
 ---
@@ -143,7 +144,7 @@ my-personal-hub/
 ## 8. 로드맵
 
 1. **PWA 설정 보강:** manifest, 아이콘, (선택) service worker → 안드로이드 앱 설치 지원
-2. **보안 강화:** Firebase Authentication + Firestore 규칙 정리
+2. **보안 강화:** 로그인 적용 완료(v1.5) → 가족 4명 로그인 확인 → Firestore 규칙을 4명만 허용으로 잠그기 (다음)
 3. **일정 가족 공유:** 현재 기기 저장 → Firestore 동기화
 4. **게임 점수 랭킹:** 가족 점수판 (Firestore)
 5. **채팅 개선:** 메시지 삭제, 사진을 Firebase Storage로 이동, 알림
@@ -161,3 +162,4 @@ my-personal-hub/
 | v1.2 | 2026-10-22 | 채팅 연결 복구: 롱폴링, 원인 진단 표시, Firebase 프로젝트 ID 교정(`my-family-hub-daf46`) |
 | v1.3 | 2026-10-22 | AI게임 탭을 카드 목록으로 개편, 게임 5개 추가(`games/` 폴더), 카드 이미지 제작 |
 | v1.4 | 2026-10-22 | 게임 전체 화면 실행, 폰 뒤로가기/`←` 복귀, 동물 친구 달리기 가로 자동 전환 |
+| v1.5 | 2026-10-22 | 이메일/비밀번호 로그인 도입(아빠·엄마·채아·지아), PIN 잠금 제거, 채팅 보낸 사람을 계정 기준으로 표시, 로그아웃 추가 (Firestore 규칙은 아직 열림) |
