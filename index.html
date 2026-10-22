@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Personal Hub App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- PWA Basic Manifest setup -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            700: '#0e7490',
+                            900: '#164e63',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .glassmorphism {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <header class="sticky top-0 z-40 glassmorphism border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-cyan-500/30">
+                <i class="fa-solid font-bold text-white">HUB</i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold tracking-wide">내 아지트 (My Hub)</h1>
+                <p class="text-xs text-slate-400">PWA Web Application</p>
+            </div>
+        </div>
+        <button id="pwaInstallBtn" onclick="showInstallPrompt()" class="hidden text-xs bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1 shadow-md">
+            <i class="fa-solid fa-download"></i>
+            <span>앱설치</span>
+        </button>
+    </header>
+
+    <main class="flex-1 max-w-md w-full mx-auto p-4 pb-24 space-y-6">
+
+        <!-- TAB 1: HOME / DASHBOARD -->
+        <section id="tab-home" class="tab-content space-y-6">
+            <!-- Profile Greeting Card -->
+            <div class="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 border border-slate-800 shadow-xl">
+                <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl"></div>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                        🚀 Welcome Back!
+                    </span>
+                    <span id="currentDate" class="text-xs text-slate-400">2026.10.22</span>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-2">나만의 디지털 공간</h2>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    직접 만든 AI 게임, 스케줄 관리, 소셜 채널을 한곳에서 지속적으로 성장시키는 공간입니다.
+                </p>
+            </div>
+
+            <!-- Social Links Quick Hub -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes text-cyan-400"></i> 소셜 채널 & 링크
+                    </h3>
+                    <span class="text-xs text-slate-500">클릭 시 이동</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Youtube -->
+                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-red-500/50 hover:bg-slate-800 transition-all group flex flex-col justify-between space-y-3">
+                        <div class="flex justify-between items-center">
+                            <i class="fa-brands fa-youtube text-2xl text-red-500 group-hover:scale-110 transition-transform"></i>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-200">YouTube</div>
+                            <div class="text-xs text-slate-400">내 창작 채널 바로가기</div>
+                        </div>
+                    </a>
+
+                    <!-- Instagram -->
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-pink-500/50 hover:bg-slate-800 transition-all group flex flex-col justify-between space-y-3">
+                        <div class="flex justify-between items-center">
+                            <i class="fa-brands fa-instagram text-2xl text-pink-500 group-hover:scale-110 transition-transform"></i>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm text-slate-200">Instagram</div>
+                            <div class="text-xs text-slate-400">일상 & 개발 기록</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mini Dashboard Cards -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt text-amber-400"></i> 빠른 요약
+                </h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div onclick="switchTab('games')" class="cursor-pointer p-4 rounded-xl bg-gradient-to-br from-slate-900 to-indigo-950/40 border border-slate-800 hover:border-indigo-500/40 transition">
+                        <div class="text-xs text-indigo-400 font-semibold mb-1">AI 게임 레포</div>
+                        <div class="text-lg font-bold text-white">Cyber Runner</div>
+                        <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                            <span>플레이하기</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                    </div>
+                    <div onclick="switchTab('schedule')" class="cursor-pointer p-4 rounded-xl bg-gradient-to-br from-slate-900 to-emerald-950/40 border border-slate-800 hover:border-emerald-500/40 transition">
+                        <div class="text-xs text-emerald-400 font-semibold mb-1">오늘의 일정</div>
+                        <div id="homeScheduleCount" class="text-lg font-bold text-white">0개의 일정</div>
+                        <div class="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                            <span>확인하기</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-games" class="tab-content hidden space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-white">AI 미니 게임</h2>
+                    <p class="text-xs text-slate-400">내가 제작한 AI 모듈 게임 파트</p>
+                </div>
+                <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded border border-indigo-500/30">v1.0 Demo</span>
+            </div>
+
+            <!-- Game Box Canvas Shell -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl relative overflow-hidden flex flex-col items-center">
+                <div class="w-full flex justify-between items-center mb-3">
+                    <span class="text-xs font-semibold text-slate-300"><i class="fa-solid fa-gamepad text-cyan-400 mr-1"></i> Cyber Runner</span>
+                    <span id="gameScore" class="text-xs font-mono bg-slate-800 px-2.5 py-1 rounded text-cyan-400">Score: 0</span>
+                </div>
+                
+                <canvas id="gameCanvas" class="w-full h-48 bg-slate-950 rounded-xl border border-slate-800/80"></canvas>
+
+                <!-- Game Controls -->
+                <div class="w-full mt-4 flex items-center justify-between gap-3">
+                    <button id="startBtn" onclick="toggleGame()" class="flex-1 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition">
+                        게임 시작 / 재시작
+                    </button>
+                    <button onclick="jumpPlayer()" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/20 transition flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-up"></i> 점프 (Jump)
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">💡 팁: PC에서는 스페이스바, 모바일에서는 점프 버튼을 누르세요.</p>
+            </div>
+        </section>
+
+        <section id="tab-schedule" class="tab-content hidden space-y-4">
+            <div>
+                <h2 class="text-lg font-bold text-white">나의 일정 플래너</h2>
+                <p class="text-xs text-slate-400">중요한 할 일과 일정을 체크하세요.</p>
+            </div>
+
+            <!-- Add Schedule Form -->
+            <form onsubmit="addSchedule(event)" class="flex gap-2">
+                <input type="text" id="scheduleInput" placeholder="새로운 일정을 입력하세요..." required class="flex-1 bg-slate-900 border border-slate-800 focus:border-cyan-500 text-sm rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none transition">
+                <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition shadow-lg shadow-cyan-500/20 shrink-0">
+                    추가
+                </button>
+            </form>
+
+            <!-- Schedule Items Container -->
+            <div id="scheduleList" class="space-y-2">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <section id="tab-settings" class="tab-content hidden space-y-4">
+            <div>
+                <h2 class="text-lg font-bold text-white">웹앱 정보 및 관리</h2>
+                <p class="text-xs text-slate-400">나만의 디지털 허브 환경 설정</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                    <div>
+                        <div class="text-sm font-semibold text-slate-200">앱 버전</div>
+                        <div class="text-xs text-slate-400">Personal Hub v1.0.0</div>
+                    </div>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">정상 작동</span>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400">앱에 관하여</label>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        이 웹 앱은 홈 화면에 추가 기능을 지원합니다. 지속적으로 새로운 AI 게임 및 개인 포트폴리오 기능을 모듈 형태로 업데이트할 수 있습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-40 glassmorphism border-t border-slate-800 px-4 py-2">
+        <div class="max-w-md mx-auto flex justify-around items-center">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex flex-col items-center py-1 px-3 text-cyan-400 transition">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">홈</span>
+            </button>
+            <button onclick="switchTab('games')" id="nav-games" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-500 hover:text-slate-300 transition">
+                <i class="fa-solid fa-gamepad text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">AI게임</span>
+            </button>
+            <button onclick="switchTab('schedule')" id="nav-schedule" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-500 hover:text-slate-300 transition">
+                <i class="fa-solid fa-calendar-days text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">일정</span>
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn flex flex-col items-center py-1 px-3 text-slate-500 hover:text-slate-300 transition">
+                <i class="fa-solid fa-gear text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">설정</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // --- 1. Tab Navigation Logic ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-cyan-400');
+                btn.classList.add('text-slate-500');
+            });
+
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) {
+                activeNav.classList.remove('text-slate-500');
+                activeNav.classList.add('text-cyan-400');
+            }
+        }
+
+        // --- 2. Schedule / Planner Logic ---
+        let schedules = [
+            { id: 1, text: "AI 게임 모듈 업그레이드 테스트", completed: false },
+            { id: 2, text: "유튜브/인스타 채널 링크 점검", completed: true }
+        ];
+
+        function renderSchedules() {
+            const listEl = document.getElementById('scheduleList');
+            const countEl = document.getElementById('homeScheduleCount');
+            listEl.innerHTML = '';
+
+            if (schedules.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">등록된 일정이 없습니다.</div>`;
+            } else {
+                schedules.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = `flex items-center justify-between p-3.5 rounded-xl border transition ${item.completed ? 'bg-slate-900/40 border-slate-800/50 opacity-60' : 'bg-slate-900 border-slate-800'}`;
+                    div.innerHTML = `
+                        <div class="flex items-center space-x-3 cursor-pointer" onclick="toggleSchedule(${item.id})">
+                            <i class="fa-regular ${item.completed ? 'fa-square-check text-cyan-400' : 'fa-square text-slate-500'} text-base"></i>
+                            <span class="text-sm ${item.completed ? 'line-through text-slate-500' : 'text-slate-200'}">${item.text}</span>
+                        </div>
+                        <button onclick="deleteSchedule(${item.id})" class="text-slate-500 hover:text-red-400 p-1">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    `;
+                    listEl.appendChild(div);
+                });
+            }
+
+            const uncompleted = schedules.filter(s => !s.completed).length;
+            countEl.textContent = `${uncompleted}개의 남아있는 일정`;
+        }
+
+        function addSchedule(e) {
+            e.preventDefault();
+            const input = document.getElementById('scheduleInput');
+            const text = input.value.trim();
+            if (text) {
+                schedules.unshift({ id: Date.now(), text, completed: false });
+                input.value = '';
+                renderSchedules();
+            }
+        }
+
+        function toggleSchedule(id) {
+            schedules = schedules.map(item => item.id === id ? { ...item, completed: !item.completed } : item);
+            renderSchedules();
+        }
+
+        function deleteSchedule(id) {
+            schedules = schedules.filter(item => item.id !== id);
+            renderSchedules();
+        }
+
+        // --- 3. Simple AI Cyber Runner Mini Game Logic ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let gameRunning = false;
+        let score = 0;
+        let animationFrameId;
+
+        // Canvas sizing
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth - 32;
+            canvas.height = 180;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const player = {
+            x: 40,
+            y: 120,
+            width: 20,
+            height: 20,
+            velocityY: 0,
+            gravity: 0.6,
+            isJumping: false
+        };
+
+        let obstacles = [];
+        let gameSpeed = 3;
+
+        function jumpPlayer() {
+            if (!player.isJumping && gameRunning) {
+                player.velocityY = -10;
+                player.isJumping = true;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                jumpPlayer();
+            }
+        });
+
+        function toggleGame() {
+            if (gameRunning) {
+                cancelAnimationFrame(animationFrameId);
+                gameRunning = false;
+                document.getElementById('startBtn').innerText = '게임 재시작';
+            }
+            resetGame();
+            gameRunning = true;
+            document.getElementById('startBtn').innerText = '게임 일시정지';
+            gameLoop();
+        }
+
+        function resetGame() {
+            score = 0;
+            obstacles = [];
+            player.y = 120;
+            player.velocityY = 0;
+            player.isJumping = false;
+            document.getElementById('gameScore').innerText = `Score: ${score}`;
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Ground line
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 150);
+            ctx.lineTo(canvas.width, 150);
+            ctx.stroke();
+
+            // Player physics
+            player.velocityY += player.gravity;
+            player.y += player.velocityY;
+
+            if (player.y >= 130) {
+                player.y = 130;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+
+            // Draw Player
+            ctx.fillStyle = '#06b6d4';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Spawn obstacles
+            if (Math.random() < 0.02) {
+                obstacles.push({ x: canvas.width, y: 130, width: 15, height: 20 });
+            }
+
+            // Update & Draw obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                let obs = obstacles[i];
+                obs.x -= gameSpeed;
+
+                ctx.fillStyle = '#f43f5e';
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+                // Collision Detection
+                if (
+                    player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y
+                ) {
+                    gameRunning = false;
+                    alert(`게임 오버! 최종 점수: ${score}`);
+                    document.getElementById('startBtn').innerText = '게임 다시 시작';
+                    return;
+                }
+            }
+
+            // Filter passed obstacles
+            obstacles = obstacles.filter(obs => obs.x > -20);
+
+            score++;
+            document.getElementById('gameScore').innerText = `Score: ${Math.floor(score / 10)}`;
+
+            if (gameRunning) {
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // --- 4. PWA Installation Deferred Prompt ---
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        function showInstallPrompt() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the PWA install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        // Initialization
+        window.onload = function() {
+            renderSchedules();
+            const dateStr = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            document.getElementById('currentDate').textContent = dateStr;
+        };
+    </script>
+</body>
+</html>
