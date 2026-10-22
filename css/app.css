@@ -1,0 +1,18 @@
+/* 앱 공통 스타일 (Tailwind CDN으로 못 하는 것만) */
+html,body{margin:0;background:#020617;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+[hidden]{display:none!important}
+.shell{height:100vh;height:100dvh;display:flex;flex-direction:column}
+/* 탭: 각자 영역을 꽉 채우고, 보이는 탭만 표시 */
+.tab{display:none;position:absolute;inset:0;overflow-y:auto;padding:1rem}
+.tab.active{display:block}
+#tab-chat.active{display:flex;flex-direction:column;overflow:hidden}
+.col{max-width:28rem;margin:0 auto;width:100%}
+.chatcol{flex:1;min-height:0;display:flex;flex-direction:column}
+.hide-scrollbar::-webkit-scrollbar{display:none}
+.hide-scrollbar{scrollbar-width:none}
+/* 아이콘: 외부 라이브러리 없이 인라인 SVG */
+.ic{width:1.25rem;height:1.25rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ic-sm{width:1rem;height:1rem}
+.ic-lg{width:2rem;height:2rem}
+button,label{touch-action:manipulation}
