@@ -61,7 +61,7 @@
             const senderInput = document.getElementById('chatSender');
             const messageInput = document.getElementById('chatMessage');
             const sender = senderInput.value.trim() || '익명';
-            const text = customText || messageInput.value.trim();
+            const text = customText !== null ? customText : messageInput.value.trim();
 
             if (!text && !customImageUrl) return;
 
@@ -72,16 +72,15 @@
                     imageUrl: customImageUrl || null,
                     timestamp: serverTimestamp()
                 });
-                if (!customText && !customImageUrl) {
-                    messageInput.value = '';
-                }
+                // 전송 성공 시 입력창 초기화
+                messageInput.value = '';
             } catch (e) {
                 console.error("Error sending message: ", e);
                 alert("메시지 전송 실패. Firestore 규칙을 확인하세요.");
             }
         };
 
-        // Image Compression & Upload Handler (Storage 불필요!)
+        // Image Compression & Upload Handler
         window.handleImageUpload = function(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -95,7 +94,7 @@
                     
                     let width = img.width;
                     let height = img.height;
-                    const MAX_WIDTH = 800; // 최대 가로 크기 제한으로 용량 최적화
+                    const MAX_WIDTH = 800;
                     if (width > MAX_WIDTH) {
                         height *= MAX_WIDTH / width;
                         width = MAX_WIDTH;
@@ -104,7 +103,6 @@
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // 화질 70% 압축하여 전송
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
                     window.sendMessage("사진을 공유했습니다.", compressedDataUrl);
                 };
@@ -123,7 +121,8 @@
             
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                const isMe = data.sender === (document.getElementById('chatSender')?.value.trim() || '익명');
+                const currentSender = document.getElementById('chatSender')?.value.trim() || '익명';
+                const isMe = data.sender === currentSender;
                 const timeStr = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '방금';
 
                 const msgDiv = document.createElement('div');
@@ -328,70 +327,4 @@
                 li.className = 'flex items-center justify-between p-3 bg-slate-900 border border-slate-800 rounded-xl text-sm';
                 li.innerHTML = `
                     <span class="${todo.done ? 'line-through text-slate-500' : 'text-slate-200'} cursor-pointer" onclick="toggleTodo(${index})">${todo.text}</span>
-                    <button onclick="deleteTodo(${index})" class="text-slate-500 hover:text-red-400 text-xs">삭제</button>
-                `;
-                list.appendChild(li);
-            });
-        }
-        function addTodo() {
-            const input = document.getElementById('todoInput');
-            if(!input.value.trim()) return;
-            todos.push({ text: input.value.trim(), done: false });
-            localStorage.setItem('my_hub_todos', JSON.stringify(todos));
-            input.value = '';
-            renderTodos();
-        }
-        function toggleTodo(i) {
-            todos[i].done = !todos[i].done;
-            localStorage.setItem('my_hub_todos', JSON.stringify(todos));
-            renderTodos();
-        }
-        function deleteTodo(i) {
-            todos.splice(i, 1);
-            localStorage.setItem('my_hub_todos', JSON.stringify(todos));
-            renderTodos();
-        }
-        renderTodos();
-
-        // Runner Game Engine
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        let player = { x: 30, y: 120, size: 15, dy: 0, jumping: false };
-        let obstacle = { x: 320, size: 15, speed: 3 };
-        let score = 0;
-
-        function jumpGame() {
-            if(!player.jumping) { player.dy = -8; player.jumping = true; }
-        }
-        function updateGame() {
-            if(!ctx) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Ground
-            ctx.fillStyle = '#334155';
-            ctx.fillRect(0, 140, canvas.width, 20);
-
-            // Player
-            player.dy += 0.4;
-            player.y += player.dy;
-            if(player.y > 125) { player.y = 125; player.dy = 0; player.jumping = false; }
-            ctx.fillStyle = '#6366f1';
-            ctx.fillRect(player.x, player.y, player.size, player.size);
-
-            // Obstacle
-            obstacle.x -= obstacle.speed;
-            if(obstacle.x < -20) { obstacle.x = 320; score += 10; document.getElementById('scoreText').innerText = `Score: ${score}`; }
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(obstacle.x, 125, obstacle.size, obstacle.size);
-
-            // Collision
-            if(player.x < obstacle.x + obstacle.size && player.x + player.size > obstacle.x && player.y + player.size > 125) {
-                score = 0; obstacle.x = 320; document.getElementById('scoreText').innerText = `Score: ${score}`;
-            }
-
-            requestAnimationFrame(updateGame);
-        }
-        if(canvas) updateGame();
-    </script>
-</body>
-</html>
+                    <button onclick
