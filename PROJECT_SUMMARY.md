@@ -1,6 +1,6 @@
 # 📌 My Personal Hub — 프로젝트 정리 (Project Summary)
 
-- **현재 버전:** v1.7
+- **현재 버전:** v1.8
 - **마지막 업데이트:** 2026-10-22
 - **저장소:** `kslohg-lab/my-personal-hub` (branch: `main`)
 - **이 문서의 목적:** 새 대화방이나 다른 AI가 이 문서만 읽고도 프로젝트를 정확히 이해하고, 기존 기능을 깨뜨리지 않고 수정할 수 있게 하는 **단일 상태 문서**입니다. 수정할 때마다 맨 아래 "변경 이력"과 필요한 섹션을 함께 갱신하세요.
@@ -39,7 +39,7 @@ my-personal-hub/
 ### 하단 메뉴 (4개)
 | 탭 | 내용 |
 |---|---|
-| 홈 | 환영 카드, YouTube / Instagram 링크 카드 (현재 링크는 각 사이트 첫 화면 placeholder) |
+| 홈 | 환영 카드, **우리 가족 영상 카드**(Firestore `videos`, 앱 안에서 유튜브 링크 추가/삭제), YouTube / Instagram 링크 카드 (현재 링크는 각 사이트 첫 화면 placeholder) |
 | 가족채팅 | Firebase Firestore 실시간 채팅, 사진 전송 (보낸 사람 이름은 로그인 계정 기준) |
 | AI게임 | 게임 카드 목록 → 전체 화면 실행 |
 | 일정 | 가족이 함께 보는 일정 (Firestore `todos` 실시간 공유, 추가한 사람/완료한 사람 표시) |
@@ -80,6 +80,7 @@ my-personal-hub/
   | `imageUrl` | 사진(base64 data URL) 또는 `null` (옛 메시지에는 없음) |
   | `timestamp` | `serverTimestamp()` |
 - **Firestore 컬렉션:** `todos` — 필드: `text`, `done`(bool), `doneBy`(완료한 사람 이름 또는 빈 문자열), `by`(추가한 사람), `uid`, `createdAt`(serverTimestamp). 조회: `orderBy('createdAt','asc')` + `limitToLast(200)`, 화면에서 안 한 일정을 먼저 표시.
+- **Firestore 컬렉션:** `videos` — 필드: `videoId`(유튜브 11자리 ID), `title`, `by`, `uid`, `createdAt`. 조회: `orderBy('createdAt','desc')` + `limit(20)`. 최신 영상은 큰 카드, 나머지는 작은 줄. 썸네일은 `i.ytimg.com`에서 자동 로드, 카드를 누르면 YouTube로 열림. 영상은 **일부 공개**로 올리고 링크는 코드에 직접 적지 말고 앱에서만 추가할 것.
 - **조회(채팅):** `orderBy('timestamp','asc')` + `limitToLast(100)`.
 - **사진:** 브라우저에서 최대 800px JPEG로 줄여 Firestore 문서에 직접 저장 (문서 1MB 제한 때문에 용량 초과 시 전송 차단).
 - **연결 방식:** `initializeFirestore(..., { experimentalForceLongPolling: true })` — 일부 네트워크에서 연결이 멈추는 문제 방지.
@@ -105,6 +106,12 @@ service cloud.firestore {
       allow read: if isFamily();
       allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
       allow update: if isFamily() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done', 'doneBy']);
+      allow delete: if isFamily();
+    }
+    match /videos/{doc} {
+      allow read: if isFamily();
+      allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
       allow delete: if isFamily();
     }
   }
@@ -144,6 +151,7 @@ service cloud.firestore {
 - [ ] 하단 메뉴 4개 아이콘이 모두 보이고 탭 이동이 되는가
 - [ ] 채팅: 상태가 `● 연결됨`이고, 메시지 전송 후 입력창이 비워지는가, 다른 기기에서도 보이는가
 - [ ] 채팅: 사진 전송과 확대 보기가 되는가
+- [ ] 홈 화면의 가족 영상: 유튜브 링크를 추가하면 썸네일 카드가 보이고, 누르면 YouTube로 열리며, 삭제가 되는가
 - [ ] 일정을 추가하면 다른 기기에서도 바로 보이고, 완료 체크/삭제가 되는가
 - [ ] 게임 목록이 보이고, 각 게임이 전체 화면으로 열리며 `←`와 폰 뒤로가기로 돌아오는가
 - [ ] 동물 친구 달리기가 폰 세로 상태에서도 바로 가로로 시작되는가
@@ -197,3 +205,4 @@ service cloud.firestore {
 | v1.5 | 2026-10-22 | 이메일/비밀번호 로그인 도입(아빠·엄마·채아·지아), PIN 잠금 제거, 채팅 보낸 사람을 계정 기준으로 표시, 로그아웃 추가 (Firestore 규칙은 아직 열림) |
 | v1.6 | 2026-10-22 | PWA 설정: manifest.json, 앱 아이콘 4종, 홈 화면 추가 시 앱 이름/아이콘 적용 (service worker는 미적용) |
 | v1.7 | 2026-10-22 | Firestore 규칙 잠금 적용(가족 4명만), 일정을 가족 공유로 전환(`todos`), 옛 기기 저장 일정 이전 기능 |
+| v1.8 | 2026-10-22 | 홈 화면에 "우리 가족 영상" 카드 추가(앱 안에서 유튜브 링크 추가/삭제, `videos` 컬렉션) |
