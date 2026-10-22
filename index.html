@@ -140,12 +140,10 @@
         <div id="gameCards" class="space-y-3"></div>
       </div>
 
-      <div id="gamePlayer" class="absolute inset-0 flex flex-col bg-slate-950" hidden>
-        <div class="shrink-0 flex items-center gap-2 px-3 py-2 bg-slate-900 border-b border-slate-800">
-          <button id="gpBack" class="text-sm text-indigo-400 font-semibold px-2 py-1">← 목록</button>
-          <span id="gpTitle" class="text-sm font-bold text-slate-200 truncate"></span>
-        </div>
-        <iframe id="gpFrame" title="game" class="flex-1 min-h-0 w-full border-0 bg-white" allow="autoplay; fullscreen"></iframe>
+      <div id="gamePlayer" class="fixed inset-0 z-40 bg-black" hidden>
+        <iframe id="gpFrame" title="game" allow="autoplay; fullscreen" style="position:absolute;left:0;top:0;width:100%;height:100%;border:0;background:#fff;transform-origin:0 0"></iframe>
+        <button id="gpBack" aria-label="목록으로" class="fixed left-2 z-50 w-10 h-10 rounded-full bg-black/50 text-white text-lg font-bold backdrop-blur" style="top:calc(env(safe-area-inset-top) + 8px)">←</button>
+        <button id="gpFlip" aria-label="방향 뒤집기" class="fixed left-2 z-50 px-3 h-8 rounded-full bg-black/50 text-white text-xs font-semibold backdrop-blur" style="top:calc(env(safe-area-inset-top) + 56px)" hidden>↻ 방향</button>
       </div>
 
       <div id="runnerView" class="col space-y-3" hidden>
@@ -225,7 +223,7 @@ function switchTab(name) {
     b.classList.toggle('text-indigo-400', on);
     b.classList.toggle('text-slate-400', !on);
   });
-  if (name !== 'games') closeGame();
+  if (name !== 'games' && curGame) closeGame();
   if (name === 'chat') { const b = $('chatMessages'); b.scrollTop = b.scrollHeight; }
 }
 $('bottomNav').addEventListener('click', e => {
@@ -309,7 +307,7 @@ resetGame();
 const GAMES = [
   { id: 'math-monster',  title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요' },
   { id: 'speed-math',    title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결' },
-  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요' },
+  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true },
   { id: 'claw-machine',  title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요' },
   { id: 'travel-picker', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요' },
   { id: 'runner',        title: 'Cyber Runner',            desc: '점프로 장애물을 피하세요', builtin: true }
@@ -319,19 +317,48 @@ function showGameView(v) {
   $('gamePlayer').hidden = v !== 'player';
   $('runnerView').hidden = v !== 'runner';
 }
+let curGame = null, flip = store.get('hub_flip', '0') === '1';
+
+// 가로 전용 게임: 폰이 세로 상태면 게임 화면을 앱이 직접 90도 돌려서 채움
+function layoutPlayer() {
+  if (!curGame || curGame === 'runner') return;
+  const g = GAMES.find(x => x.id === curGame), f = $('gpFrame'), box = $('gamePlayer');
+  const W = box.clientWidth, H = box.clientHeight;
+  const rot = !!(g && g.landscape && H > W);
+  $('gpFlip').hidden = !rot;
+  if (rot) {
+    f.style.width = H + 'px'; f.style.height = W + 'px';
+    f.style.transform = flip ? 'translate(0,' + H + 'px) rotate(-90deg)' : 'translate(' + W + 'px,0) rotate(90deg)';
+  } else {
+    f.style.width = '100%'; f.style.height = '100%'; f.style.transform = 'none';
+  }
+}
 function openGame(id) {
   const g = GAMES.find(x => x.id === id);
   if (!g) return;
+  curGame = id;
+  try { history.pushState({ game: id }, ''); } catch {}   // 폰의 뒤로가기로 목록 복귀
   if (g.builtin) { resetGame(); showGameView('runner'); startGame(); return; }
-  $('gpTitle').textContent = g.title;
-  $('gpFrame').src = 'games/' + g.id + '/index.html';
   showGameView('player');
+  layoutPlayer();
+  $('gpFrame').src = 'games/' + id + '/index.html';
+  try { const el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); } catch {}
 }
-function closeGame() {
+function doClose() {
+  curGame = null;
   stopGame();
   $('gpFrame').src = 'about:blank';
+  try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch {}
   showGameView('list');
 }
+function closeGame() {
+  if (curGame && history.state && history.state.game) history.back();  // popstate에서 doClose 실행
+  else doClose();
+}
+addEventListener('popstate', () => { if (curGame) doClose(); });
+addEventListener('resize', layoutPlayer);
+addEventListener('orientationchange', () => setTimeout(layoutPlayer, 200));
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && curGame && curGame !== 'runner') closeGame(); });
 (function buildGameCards() {
   const box = $('gameCards');
   GAMES.forEach(g => {
@@ -356,6 +383,7 @@ function closeGame() {
   });
   $('gpBack').addEventListener('click', closeGame);
   $('rnBack').addEventListener('click', closeGame);
+  $('gpFlip').addEventListener('click', () => { flip = !flip; store.set('hub_flip', flip ? '1' : '0'); layoutPlayer(); });
 })();
 
 // 자동 로그인
