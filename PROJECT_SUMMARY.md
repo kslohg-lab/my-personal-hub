@@ -1,6 +1,6 @@
 # 📌 My Personal Hub — 프로젝트 정리 (Project Summary)
 
-- **현재 버전:** v1.10
+- **현재 버전:** v1.11
 - **마지막 업데이트:** 2026-10-22
 - **저장소:** `kslohg-lab/my-personal-hub` (branch: `main`)
 - **이 문서의 목적:** 새 대화방이나 다른 AI가 이 문서만 읽고도 프로젝트를 정확히 이해하고, 기존 기능을 깨뜨리지 않고 수정할 수 있게 하는 **단일 상태 문서**입니다. 수정할 때마다 맨 아래 "변경 이력"과 필요한 섹션을 함께 갱신하세요.
@@ -60,7 +60,7 @@ my-personal-hub/
 - **모듈(main.js 이하)이 Firebase 전담.** Firebase 주소(`https://www.gstatic.com/...`)는 `firebase-init.js`에서만 import하고, 다른 모듈은 `firebase-init.js`에서 가져다 씀. 모듈 간 공유 상태는 `state`(`state.me` 로그인한 사람, `state.db`, `state.auth`).
 - **기능 격리:** `main.js`가 chat/todos/videos를 각각 `import()`로 따로 불러오고, 하나가 실패하거나 오류를 내도 로그인과 나머지 기능은 계속 동작. 각 기능 모듈은 `start()` / `stop()`을 export하고, 로그인 시 시작·로그아웃 시 정지됨.
 - **새 기능(예: 점수판) 추가 순서:** ① `js/새기능.js`를 만들어 `start`/`stop` export ② `main.js`의 `['chat','todos','videos']` 목록(2곳)에 이름 추가 ③ 필요한 HTML을 `index.html`에, Firestore 규칙에 컬렉션 추가.
-- **캐시 버전(`?v=1.10`):** `index.html`과 모든 `js/*.js`의 import/script 주소 끝에 `?v=버전`이 붙어 있음. **파일을 수정해서 올릴 때는 모든 참조의 버전 문자열을 같은 값으로 함께 올릴 것.** (일부만 바꾸면 새 파일과 옛 파일이 섞여 로딩될 수 있음. 한 번에 모두 `grep -rn "?v="`로 확인.)
+- **캐시 버전(`?v=1.11`):** `index.html`과 모든 `js/*.js`의 import/script 주소 끝에 `?v=버전`이 붙어 있음. **파일을 수정해서 올릴 때는 모든 참조의 버전 문자열을 같은 값으로 함께 올릴 것.** (일부만 바꾸면 새 파일과 옛 파일이 섞여 로딩될 수 있음. 한 번에 모두 `grep -rn "?v="`로 확인.)
 - **아이콘:** 외부 라이브러리 없이 `index.html` 상단의 **인라인 SVG 스프라이트**(`#i-home` 등)를 `<use>`로 사용. (CDN 아이콘 라이브러리 사용 금지 — 아래 "문제 기록" 참고)
 - **레이아웃:** `header / main / nav`를 세로로 쌓은 구조(`.shell`, 높이 `100dvh`). 각 탭은 `.tab`(absolute, 보이는 탭만 `.active`). 하단 메뉴는 `fixed`가 아님.
 - **숨김 처리:** `hidden` 속성 + CSS `[hidden]{display:none!important}`(css/app.css) 사용.
@@ -226,3 +226,4 @@ service cloud.firestore {
 | v1.8 | 2026-10-22 | 홈 화면에 "우리 가족 영상" 카드 추가(앱 안에서 유튜브 링크 추가/삭제, `videos` 컬렉션) |
 | v1.9 | 2026-10-22 | `index.html`을 기능별 파일(css/, js/)로 분리, 기능 격리(chat/todos/videos 개별 로딩), 캐시 버전(`?v=`) 도입. 게임 뒤로가기 1번으로 복귀하도록 수정, Cyber Runner 카드 이미지 수정 |
 | v1.10 | 2026-10-22 | 채팅: 이모지만 1~3개 보내면 말풍선 없이 크게 표시 (`chat.js`, 글자가 섞이면 기존대로) |
+| v1.11 | 2026-10-22 | 동물 친구 달리기를 새 버전(저장 키 `animalRunV6`, V4/V5 저장 이어받기)으로 교체. 게임 주소에 `?v=게임번호` 추가(`GAMES`의 `v`) — 게임 파일을 바꿀 때 이 숫자를 올릴 것 |

@@ -1,6 +1,6 @@
 // 가족 영상 (Firestore videos 컬렉션, 유튜브 링크만 저장)
-import { $ } from './util.js?v=1.10';
-import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, deleteDoc } from './firebase-init.js?v=1.10';
+import { $ } from './util.js?v=1.11';
+import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, doc, deleteDoc } from './firebase-init.js?v=1.11';
 
 let videos = [], vUnsub = null;
 const vList = $('vidList');

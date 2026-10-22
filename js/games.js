@@ -38,10 +38,11 @@ document.addEventListener('keydown', e => {
 resetGame();
 
 // 게임 목록 (새 게임은 여기에 한 줄 추가 + games/폴더이름/ 에 index.html, thumb.svg 넣기)
+// v: 게임 파일을 새로 올릴 때마다 숫자를 올리면 폰이 옛 파일을 캐시에서 쓰지 않음
 const GAMES = [
   { id: 'math-monster',  title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요' },
   { id: 'speed-math',    title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결' },
-  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true },
+  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 6 },
   { id: 'claw-machine',  title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요' },
   { id: 'travel-picker', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요' },
   { id: 'cyber-runner',  title: 'Cyber Runner',           desc: '점프로 장애물을 피하세요', builtin: true }
@@ -84,7 +85,7 @@ function openGame(id) {
   showGameView('player');
   const f = freshFrame();
   layoutPlayer();
-  f.src = 'games/' + id + '/index.html';
+  f.src = 'games/' + id + '/index.html' + (g.v ? '?v=' + g.v : '');
   try { const el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); } catch {}
 }
 function doClose() {

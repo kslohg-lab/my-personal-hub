@@ -1,6 +1,6 @@
 // 로그인 화면: 이름 버튼 + 비밀번호
-import { $ } from './util.js?v=1.10';
-import { state, FAMILY, signInWithEmailAndPassword, signOut } from './firebase-init.js?v=1.10';
+import { $ } from './util.js?v=1.11';
+import { state, FAMILY, signInWithEmailAndPassword, signOut } from './firebase-init.js?v=1.11';
 
 let picked = null;
 FAMILY.forEach(f => {
