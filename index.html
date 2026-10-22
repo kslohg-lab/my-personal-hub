@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<link rel="stylesheet" href="css/app.css?v=1.12">
+<link rel="stylesheet" href="css/app.css?v=1.13">
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
 
@@ -81,6 +81,13 @@
           <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-500/30 px-2.5 py-1 rounded-full">🚀 Welcome Back!</span>
           <h2 class="text-xl font-bold text-slate-100 mt-3 mb-1">우리 가족 디지털 공간</h2>
           <p class="text-xs text-slate-400">가족 실시간 채팅, 사진 공유, 스케줄 관리를 한곳에서 즐겨보세요.</p>
+        </div>
+        <div id="homeUpcoming" hidden>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5"><svg class="ic ic-sm text-indigo-400"><use href="#i-cal"/></svg> 다가오는 일정</h3>
+            <button id="homeCal" class="text-xs text-indigo-400 font-semibold px-2 py-1">달력 보기</button>
+          </div>
+          <div id="homeEvents" class="space-y-2"></div>
         </div>
         <div id="videoSection">
           <div class="flex items-center justify-between mb-3">
@@ -172,17 +179,49 @@
     <!-- 4. 일정 -->
     <section id="tab-planner" class="tab">
       <div class="col space-y-4">
-        <div>
-          <h2 class="text-lg font-bold text-slate-100">가족 일정 보드</h2>
-          <p class="text-xs text-slate-400">가족이 함께 보는 보드예요. 받는 사람을 고르고, 글을 눌러 답글을 남겨요.</p>
-          <p id="todoCount" class="text-xs text-indigo-400 mt-1"></p>
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-lg font-bold text-slate-100">가족 일정</h2>
+          <div id="plannerSubs" class="flex bg-slate-900 border border-slate-800 rounded-xl p-0.5 text-xs font-semibold" hidden>
+            <button id="subCal" class="px-3 py-1 rounded-lg text-slate-400">📅 달력</button>
+            <button id="subBoard" class="px-3 py-1 rounded-lg text-slate-400">✅ 보드</button>
+          </div>
         </div>
-        <div class="flex gap-2">
-          <select id="todoTo" aria-label="받는 사람" class="shrink-0 w-[4.5rem] bg-slate-900 border border-slate-800 rounded-xl px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"></select>
-          <input type="text" id="todoInput" autocomplete="off" placeholder="새 일정 추가..." class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-          <button id="todoAdd" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl text-sm font-semibold transition-all">추가</button>
+
+        <!-- 달력 (js/calendar.js가 켜 줌) -->
+        <div id="calView" class="space-y-3" hidden>
+          <div class="flex items-center justify-between">
+            <button id="calPrev" aria-label="이전 달" class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-lg leading-none">‹</button>
+            <div id="calTitle" class="text-base font-bold text-slate-100"></div>
+            <div class="flex gap-1">
+              <button id="calToday" class="px-2 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs">오늘</button>
+              <button id="calNext" aria-label="다음 달" class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-lg leading-none">›</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-7 text-center text-[11px] text-slate-500">
+            <span class="text-rose-400">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="text-sky-400">토</span>
+          </div>
+          <div id="calGrid" class="grid grid-cols-7 gap-1"></div>
+          <div class="flex items-center justify-between pt-1">
+            <h3 id="calDayTitle" class="text-sm font-bold text-slate-200"></h3>
+            <button id="calAdd" class="text-xs text-indigo-400 font-semibold px-2 py-1">+ 일정 추가</button>
+          </div>
+          <div id="calForm" class="space-y-2 bg-slate-900 border border-slate-800 rounded-xl p-3" hidden></div>
+          <div id="calDayList" class="space-y-2"></div>
         </div>
-        <ul id="todoList" class="space-y-2"></ul>
+
+        <!-- 보드 (할 일/요청) -->
+        <div id="boardView" class="space-y-4">
+          <div>
+            <p class="text-xs text-slate-400">가족이 함께 보는 보드예요. 받는 사람을 고르고, 글을 눌러 답글을 남겨요.</p>
+            <p id="todoCount" class="text-xs text-indigo-400 mt-1"></p>
+          </div>
+          <div class="flex gap-2">
+            <select id="todoTo" aria-label="받는 사람" class="shrink-0 w-[4.5rem] bg-slate-900 border border-slate-800 rounded-xl px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"></select>
+            <input type="text" id="todoInput" autocomplete="off" placeholder="새 일정 추가..." class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            <button id="todoAdd" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl text-sm font-semibold transition-all">추가</button>
+          </div>
+          <ul id="todoList" class="space-y-2"></ul>
+        </div>
       </div>
     </section>
   </main>
@@ -198,10 +237,10 @@
 </div>
 
 <!-- ① 일반 스크립트: Firebase와 무관 (화면 전환, 탭, 게임). Firebase가 실패해도 항상 동작 -->
-<script src="js/core.js?v=1.12"></script>
-<script src="js/games.js?v=1.12"></script>
+<script src="js/core.js?v=1.13"></script>
+<script src="js/games.js?v=1.13"></script>
 
 <!-- ② 모듈 스크립트: Firebase 로그인/채팅/일정/영상. 진입점은 main.js -->
-<script type="module" src="js/main.js?v=1.12"></script>
+<script type="module" src="js/main.js?v=1.13"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # 📌 My Personal Hub — 프로젝트 정리 (Project Summary)
 
-- **현재 버전:** v1.12
+- **현재 버전:** v1.13
 - **마지막 업데이트:** 2026-10-22
 - **저장소:** `kslohg-lab/my-personal-hub` (branch: `main`)
 - **이 문서의 목적:** 새 대화방이나 다른 AI가 이 문서만 읽고도 프로젝트를 정확히 이해하고, 기존 기능을 깨뜨리지 않고 수정할 수 있게 하는 **단일 상태 문서**입니다. 수정할 때마다 맨 아래 "변경 이력"과 필요한 섹션을 함께 갱신하세요.
@@ -30,7 +30,8 @@ my-personal-hub/
 │  ├─ firebase-init.js     ← [모듈] firebaseConfig, FAMILY(가족 계정), Firebase 초기화, 공유 상태(state)
 │  ├─ login.js             ← [모듈] 이름 선택 + 비밀번호 로그인 화면, 로그아웃 버튼
 │  ├─ chat.js              ← [모듈] 가족 채팅, 사진, 연결 상태 표시
-│  ├─ todos.js             ← [모듈] 가족 일정 보드(받는 사람·답글·수정), 옛 기기 저장 일정 이전
+│  ├─ todos.js             ← [모듈] 가족 보드(받는 사람·답글·수정), 옛 기기 저장 일정 이전
+│  ├─ calendar.js          ← [모듈] 가족 달력(events), 일정 탭의 [달력|보드] 전환, 홈의 '다가오는 일정'
 │  ├─ videos.js            ← [모듈] 가족 영상 카드
 │  └─ util.js              ← [모듈] 공통 도구 `$`
 ├─ manifest.json           ← PWA 설정 (이름, 아이콘, 전체 화면 표시)
@@ -53,14 +54,15 @@ my-personal-hub/
 | 홈 | 환영 카드, **우리 가족 영상 카드**(Firestore `videos`, 앱 안에서 유튜브 링크 추가/삭제), YouTube / Instagram 링크 카드 (현재 링크는 각 사이트 첫 화면 placeholder) |
 | 가족채팅 | Firebase Firestore 실시간 채팅, 사진 전송 (보낸 사람 이름은 로그인 계정 기준) |
 | AI게임 | 게임 카드 목록 → 전체 화면 실행 |
+| 가족 달력 | 월간 달력(날짜별 색 점, 날짜를 누르면 그날 목록, 추가/수정/삭제), 시간·누구 일정·메모, **매년 반복**(생일·기념일). 홈에 오늘/30일 안 일정과 D-day 표시. Firestore `events` |
 | 일정(가족 보드) | 가족이 함께 보는 일정/요청 게시판 (Firestore `todos` 실시간 공유, 추가한 사람/완료한 사람 표시, **받는 사람 지정**, 글을 눌러 **답글**, 글쓴이 **수정**) |
 
 ### 코드 구조 — **이 구조를 유지할 것**
 - **일반 스크립트(core.js, games.js)는 Firebase와 무관**해야 함. Firebase가 실패해도 탭 전환, 게임은 항상 동작.
 - **모듈(main.js 이하)이 Firebase 전담.** Firebase 주소(`https://www.gstatic.com/...`)는 `firebase-init.js`에서만 import하고, 다른 모듈은 `firebase-init.js`에서 가져다 씀. 모듈 간 공유 상태는 `state`(`state.me` 로그인한 사람, `state.db`, `state.auth`).
-- **기능 격리:** `main.js`가 chat/todos/videos를 각각 `import()`로 따로 불러오고, 하나가 실패하거나 오류를 내도 로그인과 나머지 기능은 계속 동작. 각 기능 모듈은 `start()` / `stop()`을 export하고, 로그인 시 시작·로그아웃 시 정지됨.
-- **새 기능(예: 점수판) 추가 순서:** ① `js/새기능.js`를 만들어 `start`/`stop` export ② `main.js`의 `['chat','todos','videos']` 목록(2곳)에 이름 추가 ③ 필요한 HTML을 `index.html`에, Firestore 규칙에 컬렉션 추가.
-- **캐시 버전(`?v=1.12`):** `index.html`과 모든 `js/*.js`의 import/script 주소 끝에 `?v=버전`이 붙어 있음. **파일을 수정해서 올릴 때는 모든 참조의 버전 문자열을 같은 값으로 함께 올릴 것.** (일부만 바꾸면 새 파일과 옛 파일이 섞여 로딩될 수 있음. 한 번에 모두 `grep -rn "?v="`로 확인.)
+- **기능 격리:** `main.js`가 chat/todos/videos/calendar를 각각 `import()`로 따로 불러오고, 하나가 실패하거나 오류를 내도 로그인과 나머지 기능은 계속 동작. 각 기능 모듈은 `start()` / `stop()`을 export하고, 로그인 시 시작·로그아웃 시 정지됨.
+- **새 기능(예: 점수판) 추가 순서:** ① `js/새기능.js`를 만들어 `start`/`stop` export ② `main.js`의 `['chat','todos','videos','calendar']` 목록(2곳)에 이름 추가 ③ 필요한 HTML을 `index.html`에, Firestore 규칙에 컬렉션 추가.
+- **캐시 버전(`?v=1.13`):** `index.html`과 모든 `js/*.js`의 import/script 주소 끝에 `?v=버전`이 붙어 있음. **파일을 수정해서 올릴 때는 모든 참조의 버전 문자열을 같은 값으로 함께 올릴 것.** (일부만 바꾸면 새 파일과 옛 파일이 섞여 로딩될 수 있음. 한 번에 모두 `grep -rn "?v="`로 확인.)
 - **아이콘:** 외부 라이브러리 없이 `index.html` 상단의 **인라인 SVG 스프라이트**(`#i-home` 등)를 `<use>`로 사용. (CDN 아이콘 라이브러리 사용 금지 — 아래 "문제 기록" 참고)
 - **레이아웃:** `header / main / nav`를 세로로 쌓은 구조(`.shell`, 높이 `100dvh`). 각 탭은 `.tab`(absolute, 보이는 탭만 `.active`). 하단 메뉴는 `fixed`가 아님.
 - **숨김 처리:** `hidden` 속성 + CSS `[hidden]{display:none!important}`(css/app.css) 사용.
@@ -72,6 +74,7 @@ my-personal-hub/
 | `hub_flip` | 가로 전용 게임 방향 뒤집기 상태 |
 | `my_hub_todos` | (옛 기기 저장 일정 — 가족 일정으로 옮기기 위해서만 읽음) |
 | `hub_todos_migrated` | 옛 일정 이전 여부 (`1` 옮김, `no` 거절) |
+| `hub_plannerSub` | 일정 탭에서 마지막으로 본 화면 (`cal` 달력 / `board` 보드) |
 
 ---
 
@@ -94,6 +97,7 @@ my-personal-hub/
   | `imageUrl` | 사진(base64 data URL) 또는 `null` (옛 메시지에는 없음) |
   | `timestamp` | `serverTimestamp()` |
 - **Firestore 컬렉션:** `todos` — 필드: `text`, `done`(bool), `doneBy`(완료한 사람 이름 또는 빈 문자열), `by`(추가한 사람), `uid`, `createdAt`(serverTimestamp). 조회: `orderBy('createdAt','asc')` + `limitToLast(200)`, 화면에서 안 한 일정을 먼저 표시. **v1.12 추가 필드:** `to`(받는 사람 이름, 빈 문자열=전체), `rc`(답글 개수; 답글 추가/삭제 때 `increment`로 갱신). **답글**은 하위 컬렉션 `todos/{id}/replies` — 필드 `text`, `by`, `uid`, `createdAt`; 글을 펼쳤을 때만 구독(한 번에 하나). 옛 글에는 `to`/`rc`가 없어도 정상 동작(없으면 전체/0으로 취급). 목록은 항목별로 갱신해서 답글을 쓰는 중에 목록이 바뀌어도 입력이 지워지지 않음.
+- **Firestore 컬렉션:** `events` (가족 달력, v1.13) — 필드: `title`, `date`('YYYY-MM-DD', 매년 반복은 처음 날짜), `time`('HH:MM' 또는 빈 문자열=종일), `who`(가족 이름 또는 빈 문자열=모두), `repeat`('yearly' 또는 빈 문자열), `memo`, `by`, `uid`, `createdAt`. 화면에 보이는 6주 구간은 `where(date >= ..) + where(date <= ..) + orderBy(date)`로 구독(복합 색인 불필요), 매년 반복은 `where(repeat == 'yearly')`로 따로 구독, 홈은 오늘~30일 뒤 구간을 구독. 날짜 문자열은 기기의 현재 시간대 기준. 2/29 반복 일정은 평년에 2/28로 표시. 가족 누구나 수정/삭제 가능(소유자 `uid`는 바꿀 수 없음).
 - **Firestore 컬렉션:** `videos` — 필드: `videoId`(유튜브 11자리 ID), `title`, `by`, `uid`, `createdAt`. 조회: `orderBy('createdAt','desc')` + `limit(20)`. 최신 영상은 큰 카드, 나머지는 작은 줄. 썸네일은 `i.ytimg.com`에서 자동 로드, 카드를 누르면 YouTube로 열림. 영상은 **일부 공개**로 올리고 링크는 코드에 직접 적지 말고 앱에서만 추가할 것.
 - **조회(채팅):** `orderBy('timestamp','asc')` + `limitToLast(100)`.
 - **사진:** 브라우저에서 최대 800px JPEG로 줄여 Firestore 문서에 직접 저장 (문서 1MB 제한 때문에 용량 초과 시 전송 차단).
@@ -132,6 +136,14 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if isFamily() && resource.data.uid == request.auth.uid;
       }
+    }
+    match /events/{doc} {
+      allow read: if isFamily();
+      allow create: if isFamily() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 100;
+      allow update: if isFamily() && request.resource.data.uid == resource.data.uid
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 100;
+      allow delete: if isFamily();
     }
     match /videos/{doc} {
       allow read: if isFamily();
@@ -179,6 +191,7 @@ service cloud.firestore {
 - [ ] 채팅: 사진 전송과 확대 보기가 되는가
 - [ ] 홈 화면의 가족 영상: 유튜브 링크를 추가하면 썸네일 카드가 보이고, 누르면 YouTube로 열리며, 삭제가 되는가
 - [ ] 일정을 추가하면 다른 기기에서도 바로 보이고, 완료 체크/삭제가 되는가
+- [ ] 달력에서 일정을 추가하면 다른 기기에서도 보이고, 홈의 '다가오는 일정'에 오늘/D-day가 뜨는가 (안 뜨면 Firestore 규칙의 `events` 줄 확인)
 - [ ] 받는 사람을 고르면 `아빠 → 엄마`로 보이고, 받는 사람 본인 화면에는 `나에게` 표시가 뜨는가
 - [ ] 글을 눌러 답글을 달면 다른 기기에서도 보이고 💬 개수가 맞는가 (안 보이면 Firestore 규칙의 `replies` 줄 확인)
 - [ ] 게임 목록이 보이고, 각 게임이 전체 화면으로 열리며 `←`와 폰 뒤로가기(**한 번만 눌러도**)로 목록에 돌아오는가, 모든 게임 카드에 이미지가 보이는가
@@ -241,3 +254,4 @@ service cloud.firestore {
 | v1.10 | 2026-10-22 | 채팅: 이모지만 1~3개 보내면 말풍선 없이 크게 표시 (`chat.js`, 글자가 섞이면 기존대로) |
 | v1.11 | 2026-10-22 | 동물 친구 달리기를 새 버전(저장 키 `animalRunV6`, V4/V5 저장 이어받기)으로 교체. 게임 주소에 `?v=게임번호` 추가(`GAMES`의 `v`) — 게임 파일을 바꿀 때 이 숫자를 올릴 것 |
 | v1.12 | 2026-10-22 | 일정 탭을 가족 보드로 확장: 받는 사람 지정(`to`), 답글(`todos/{id}/replies`, 개수 `rc`), 글쓴이 수정. **Firestore 규칙 변경 필요**(위 규칙 블록). 일정 목록을 항목별 갱신으로 바꿔 입력 중 내용 보존 |
+| v1.13 | 2026-10-22 | 가족 달력 추가(`js/calendar.js`, `events` 컬렉션): 월간 달력, 일정 추가/수정/삭제, 매년 반복, 홈 '다가오는 일정'·D-day. 일정 탭에 [달력 \| 보드] 전환. **Firestore 규칙 변경 필요**(`events` 줄) |
