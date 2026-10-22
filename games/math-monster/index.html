@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>산수 몬스터 격파!</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#efe6ff;--panel:#fff;--ink:#3b2f63;--btn:#fff;--line:#cdbdf2;--accent:#ff7eb6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1f1a33;--panel:#2b2347;--ink:#f1eaff;--btn:#3a3060;--line:#150f28}}
+:root[data-theme="dark"]{--bg:#1f1a33;--panel:#2b2347;--ink:#f1eaff;--btn:#3a3060;--line:#150f28}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;display:flex;justify-content:center;overscroll-behavior:none;user-select:none;-webkit-user-select:none}
+#app{position:relative;width:100%;max-width:720px;height:100%;display:flex;flex-direction:column}
+.hud{display:grid;grid-template-columns:1fr 1.35fr .8fr 1fr;gap:6px;padding:6px 8px}
+.hud div{background:var(--panel);border-radius:12px;padding:3px 4px;text-align:center;line-height:1.15}
+.hud small{display:block;font-size:11px;opacity:.7}
+.hud b{font-size:clamp(15px,4.4vw,22px)}
+#stage{position:relative;flex:1;min-height:0;margin:0 8px;border-radius:16px;overflow:hidden;border:3px solid var(--panel)}
+canvas{width:100%;height:100%;display:block}
+#combo{position:absolute;left:10px;top:6px;font-size:clamp(24px,7vw,40px);font-weight:900;color:#fff;text-shadow:0 3px 0 #ff7eb6,0 0 14px #fff;pointer-events:none;transition:transform .15s}
+#combo.pop{transform:scale(1.3)}
+#toast{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(.8);background:#fff;color:#3b2f63;border:4px solid #ff7eb6;border-radius:18px;padding:8px 18px;font-size:clamp(24px,7vw,40px);font-weight:900;opacity:0;pointer-events:none;transition:.2s;text-align:center;white-space:nowrap}
+#toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#ans{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);min-width:130px;background:#fff;color:#3b2f63;border:3px solid #b79cff;border-radius:14px;font-size:clamp(26px,7vw,34px);font-weight:900;text-align:center;padding:0 16px;height:1.4em;line-height:1.4em}
+#lvl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:clamp(40px,13vw,80px);font-weight:900;color:#fff;text-shadow:0 5px 0 #ff7eb6,0 0 24px #ffe066;pointer-events:none;opacity:0}
+#lvl.go{animation:lv 1.6s ease-out}
+#lvl small{font-size:.4em}
+@keyframes lv{0%{opacity:0;transform:scale(.3) rotate(-8deg)}20%{opacity:1;transform:scale(1.15)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.4)}}
+#mute{position:absolute;right:6px;top:6px;width:40px;height:40px;font-size:20px;border-radius:50%}
+.pad{padding:8px;display:grid;gap:6px}
+.nums{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.row3{display:grid;grid-template-columns:1fr 1.6fr 1.3fr;gap:6px}
+button{font:inherit;border:0;border-radius:14px;background:var(--btn);color:var(--ink);font-size:clamp(22px,6.5vw,32px);font-weight:900;height:clamp(50px,8.5vh,66px);box-shadow:0 4px 0 var(--line);touch-action:manipulation;cursor:pointer;padding:0}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.ok{background:#7be0a4;color:#134d2c}.bomb{background:#ffb067;color:#5a2b00}.bomb:disabled{opacity:.4}
+.ov{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(50,35,100,.78);padding:10px}
+.ov.hide{display:none}
+.card{background:var(--panel);border-radius:22px;padding:18px;width:min(440px,100%);max-height:100%;overflow:auto;text-align:center}
+.card h1{margin:0 0 4px;font-size:clamp(28px,8vw,38px)}
+.card p{margin:6px 0;font-size:15px;opacity:.85;line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
+.chip{height:44px;padding:0 12px;font-size:18px}
+.chip.on{background:var(--accent);color:#fff}
+.go-btn{width:100%;margin-top:8px;background:#7be0a4;color:#134d2c}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+.stats div{background:rgba(150,120,255,.15);border-radius:12px;padding:6px;font-size:14px}
+.stats b{display:block;font-size:22px}
+.wl{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-height:110px;overflow:auto;margin:6px 0}
+.wl span{background:#ffe3ea;color:#8a1f3d;border-radius:10px;padding:3px 9px;font-size:15px;font-weight:700}
+</style></head>
+<body>
+<div id="app">
+  <div class="hud">
+    <div><small>점수</small><b id="sc">0</b></div>
+    <div><small>하트</small><b id="hp"></b></div>
+    <div><small>레벨</small><b id="lv">1</b></div>
+    <div><small>최고 점수</small><b id="bs">0</b></div>
+  </div>
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="combo"></div>
+    <div id="toast"></div>
+    <div id="lvl"></div>
+    <div id="ans"></div>
+    <button id="mute" title="소리">🔊</button>
+  </div>
+  <div class="pad">
+    <div class="nums" id="nums"></div>
+    <div class="row3">
+      <button id="bk">지우기</button>
+      <button id="okb" class="ok">확인</button>
+      <button id="bomb" class="bomb" disabled>💣 0</button>
+    </div>
+  </div>
+
+  <div class="ov" id="start"><div class="card">
+    <h1>👾 산수 몬스터 격파!</h1>
+    <p>내려오는 몬스터의 문제를 풀어서 물리치세요.<br>정답을 누르고 <b>확인</b>! 5연속 정답마다 💣 폭탄을 얻어요.</p>
+    <p><b>연산 종류 선택</b></p>
+    <div class="chips" id="chips"></div>
+    <p id="bestTxt"></p>
+    <button class="go-btn" id="goBtn">🚀 게임 시작!</button>
+    <p style="font-size:13px">키보드: 숫자 · Enter 확인 · Backspace 지우기 · B 폭탄</p>
+  </div></div>
+
+  <div class="ov hide" id="over"><div class="card">
+    <h1>😵 게임 오버</h1>
+    <p id="newRec" style="font-weight:900;color:#e0457b"></p>
+    <div class="stats">
+      <div>점수<b id="oSc">0</b></div><div>도달 레벨<b id="oLv">1</b></div>
+      <div>정확도<b id="oAcc">-</b></div><div>가장 빠른 풀이<b id="oFast">-</b></div>
+    </div>
+    <p><b>틀린 문제 복습</b></p>
+    <div class="wl" id="oWr"></div>
+    <button class="go-btn" id="retry">🔁 다시 하기</button>
+    <button class="go-btn" id="home" style="background:var(--btn);color:var(--ink)">🏠 처음으로</button>
+  </div></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'),cx=cv.getContext('2d');
+let W=300,H=300,dpr=1,T=0,state='menu',S=null,muted=false;
+function resize(){const r=cv.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0)}
+window.addEventListener('resize',resize);
+if(window.ResizeObserver)new ResizeObserver(resize).observe($('stage'));
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+
+/* ---------- 저장 ---------- */
+let best=0;try{best=+localStorage.getItem('mmBest')||0}catch(e){}
+function saveBest(){try{localStorage.setItem('mmBest',String(best))}catch(e){}}
+
+/* ---------- 소리 ---------- */
+let AC=null;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,d,type,v,t0,f2){const a=ac();if(!a||muted)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+(t0||0);o.type=type||'sine';o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v||.12,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.02)}
+function noise(d,v){const a=ac();if(!a||muted)return;const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource(),g=a.createGain();s.buffer=b;g.gain.value=v;s.connect(g);g.connect(a.destination);s.start()}
+const SFX={
+ key:()=>tone(650,.04,'square',.05),
+ kill:()=>{tone(520,.12,'square',.09,0,900);tone(800,.15,'triangle',.12,.07)},
+ gold:()=>[784,988,1175,1568].forEach((f,i)=>tone(f,.15,'triangle',.12,i*.07)),
+ ice:()=>tone(1500,.4,'sine',.12,0,300),
+ boom:()=>{noise(.4,.3);tone(130,.4,'sawtooth',.2,0,40)},
+ wrong:()=>{tone(260,.3,'sawtooth',.13,0,110);tone(200,.3,'square',.07,.12,90)},
+ lose:()=>tone(160,.35,'sawtooth',.15,0,60),
+ lvl:()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.2,'triangle',.13,i*.09)),
+ item:()=>{tone(900,.1,'sine',.12);tone(1350,.15,'sine',.12,.08)}
+};
+
+/* ---------- 문제 생성 ---------- */
+const G={
+ add1:()=>{const a=rnd(1,9),b=rnd(1,9);return[`${a} + ${b}`,a+b]},
+ sub1:()=>{const a=rnd(1,9),b=rnd(1,a);return[`${a} − ${b}`,a-b]},
+ add21:()=>{const a=rnd(10,99),b=rnd(1,9);return[`${a} + ${b}`,a+b]},
+ sub21:()=>{const a=rnd(10,99),b=rnd(1,9);return[`${a} − ${b}`,a-b]},
+ add22:()=>{const a=rnd(10,99),b=rnd(10,99);return[`${a} + ${b}`,a+b]},
+ sub22:()=>{const a=rnd(20,99),b=rnd(10,a);return[`${a} − ${b}`,a-b]},
+ mul5:()=>{const a=rnd(2,5),b=rnd(2,9);return Math.random()<.5?[`${a} × ${b}`,a*b]:[`${b} × ${a}`,a*b]},
+ mul9:()=>{const a=rnd(2,9),b=rnd(2,9);return[`${a} × ${b}`,a*b]},
+ mul21:()=>{const a=rnd(11,30),b=rnd(2,9);return[`${a} × ${b}`,a*b]},
+ div5:()=>{const b=rnd(2,5),q=rnd(2,9);return[`${b*q} ÷ ${b}`,q]},
+ div9:()=>{const b=rnd(2,9),q=rnd(2,9);return[`${b*q} ÷ ${b}`,q]},
+ mix3:()=>{const k=rnd(0,2);
+  if(k===0){const a=rnd(1,20),b=rnd(2,9),c=rnd(2,9);return[`${a} + ${b} × ${c}`,a+b*c]}
+  if(k===1){const b=rnd(2,9),c=rnd(2,9),d=rnd(1,b*c);return[`${b} × ${c} − ${d}`,b*c-d]}
+  const a=rnd(10,50),b=rnd(1,30),c=rnd(1,a+b);return[`${a} + ${b} − ${c}`,a+b-c]}
+};
+const ALL=['add','sub','mul','div'];
+let selOps=new Set(ALL);
+function pool(){const L=S.level;
+ if(selOps.size===4){
+  if(L===1)return['add1','sub1'];if(L===2)return['add21','sub21'];if(L===3)return['mul5'];
+  if(L===4)return['mul9','mul9','add22','sub22'];
+  return['div5','div9','mul21','mix3','mul9','add22','sub22']}
+ const t=L<=1?0:L===2?1:L===3?2:3,p=[];
+ if(selOps.has('add'))p.push(['add1','add21','add21','add22'][t]);
+ if(selOps.has('sub'))p.push(['sub1','sub21','sub21','sub22'][t]);
+ if(selOps.has('mul')){if(L<=3)p.push('mul5');else if(L===4)p.push('mul9');else p.push('mul9','mul21')}
+ if(selOps.has('div'))p.push(L<=3?'div5':'div9');
+ return p}
+function makeProblem(){let p;
+ for(let i=0;i<8;i++){
+  if(i===0&&S.redo.length&&Math.random()<.3){const r=S.redo.shift();p=[r.t,r.a]}
+  else{const pl=pool();p=G[pl[rnd(0,pl.length-1)]]()}
+  if(!S.mons.some(m=>m.t===p[0]))break}
+ return p}
+
+/* ---------- 게임 상태 ---------- */
+const MON=['👾','👻','🐙','🦖','🐸','👽','🤖','🦑','🐲','🐝'];
+const stars=Array.from({length:45},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.8+.5,p:Math.random()*6}));
+function newGame(){
+ S={score:0,hearts:5,level:1,kills:0,combo:0,maxCombo:0,bombs:0,mons:[],parts:[],floats:[],redo:[],wrongs:new Map(),att:0,cor:0,fast:null,spawnT:0,freeze:0,shake:0,flash:'',fa:0,input:'',t:0};
+ ui();updAns();
+}
+const mult=()=>Math.min(5,1+Math.floor(S.combo/4));
+function spawn(boss){
+ const p=makeProblem();let type='n',emoji=MON[rnd(0,MON.length-1)];
+ if(!boss){const r=Math.random();if(r<.07){type='g';emoji='🤩'}else if(r<.15){type='i';emoji='🥶'}}
+ const lanes=Math.max(2,Math.floor(W/130)),used=new Set(S.mons.filter(m=>m.y<150).map(m=>m.lane));
+ const free=[];for(let i=0;i<lanes;i++)if(!used.has(i))free.push(i);
+ if(!boss&&!free.length)return false;
+ const lane=boss?-1:free[rnd(0,free.length-1)],s=boss?Math.min(100,W/4):Math.min(50,W/8);
+ S.mons.push({lane,x:boss?W/2:(lane+.5)*W/lanes+rnd(-8,8),y:-s,s,type,emoji:boss?'👹':emoji,t:p[0],a:p[1],born:S.t,boss:!!boss,hp:boss?3:1});
+ return true}
+function addWrong(m){S.wrongs.set(m.t,m.a);if(!S.redo.some(r=>r.t===m.t)&&S.redo.length<8)S.redo.push({t:m.t,a:m.a})}
+function lose(n){S.hearts=Math.max(0,S.hearts-n);S.flash='255,70,100';S.fa=.45;S.shake=.6;SFX.lose();ui();if(S.hearts<=0)gameOver()}
+function burst(x,y,n,cols){for(let i=0;i<n;i++){const a=Math.random()*6.28,v=80+Math.random()*220;S.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,l:.7+Math.random()*.5,m:1.2,c:cols[rnd(0,cols.length-1)],r:3+Math.random()*5})}}
+function fl(x,y,t,c){S.floats.push({x,y,t,c:c||'#fff',l:1.1})}
+function addKill(){S.kills++;if(S.kills%10===0)levelUp()}
+function levelUp(){S.level++;SFX.lvl();const e=$('lvl');e.innerHTML=`LEVEL UP!<small>레벨 ${S.level}</small>`;e.classList.remove('go');void e.offsetWidth;e.classList.add('go');
+ if(S.level%10===0){spawn(true);toast('👹 보스 등장! 연속 3문제!',2200)}ui()}
+function bossHit(m,bomb){m.hp--;burst(m.x,m.y,16,['#ff7eb6','#ffe066','#fff']);
+ if(m.hp<=0){S.mons=S.mons.filter(x=>x!==m);const pts=10*(bomb?1:mult());S.score+=pts;fl(m.x,m.y,'+'+pts,'#ffe066');burst(m.x,m.y,50,['#ff7eb6','#ffe066','#7be0a4','#8fd3ff']);SFX.boom();addKill()}
+ else{const p=makeProblem();m.t=p[0];m.a=p[1];m.born=S.t;SFX.kill()}}
+function hit(m){
+ const t=S.t-m.born;
+ S.combo++;S.maxCombo=Math.max(S.maxCombo,S.combo);
+ if(S.fast===null||t<S.fast.t)S.fast={t,q:`${m.t} = ${m.a}`};
+ if(S.combo%5===0){S.bombs++;SFX.item();toast('💣 폭탄 획득!',1200)}
+ if(m.boss){bossHit(m,false);ui();bump();return}
+ const base=m.type==='g'?5:1,bonus=t<3?3:t<5?2:t<8?1:0,pts=(base+bonus)*mult();
+ S.score+=pts;S.mons=S.mons.filter(x=>x!==m);
+ burst(m.x,m.y,m.type==='g'?40:22,m.type==='g'?['#ffe066','#ffb067','#fff']:['#ff7eb6','#8fd3ff','#ffe066','#7be0a4']);
+ fl(m.x,m.y-m.s,'+'+pts+(bonus?' ⚡':''),m.type==='g'?'#ffe066':'#fff');
+ if(m.type==='i'){S.freeze=3;SFX.ice();toast('❄️ 3초 정지!',1200)}else if(m.type==='g')SFX.gold();else SFX.kill();
+ addKill();ui();bump()}
+function wrong(){
+ S.att;const low=S.mons.slice().sort((a,b)=>b.y-a.y)[0];
+ if(low){toast(`${low.t} = ${low.a}`,2000);addWrong(low);if(low.boss)low.hp=3}
+ S.combo=0;SFX.wrong();lose(1)}
+function submit(){
+ if(!S||S.input==='')return;const v=+S.input;S.input='';updAns();S.att++;
+ const c=S.mons.filter(m=>m.a===v).sort((a,b)=>b.y-a.y)[0];
+ if(c){S.cor++;hit(c)}else wrong()}
+function bomb(){
+ if(state!=='play'||S.bombs<=0)return;S.bombs--;SFX.boom();S.shake=.8;S.flash='255,255,255';S.fa=.8;
+ for(const m of S.mons.slice()){
+  if(m.boss){bossHit(m,true);continue}
+  S.mons=S.mons.filter(x=>x!==m);const pts=m.type==='g'?5:1;S.score+=pts;
+  burst(m.x,m.y,18,['#ffb067','#ffe066','#ff7eb6']);fl(m.x,m.y,'+'+pts,'#fff');addKill()}
+ ui()}
+function gameOver(){
+ state='over';const rec=S.score>best;if(rec){best=S.score;saveBest()}
+ $('newRec').textContent=rec?'🏆 새로운 최고 점수!':'';
+ $('oSc').textContent=S.score;$('oLv').textContent=S.level;
+ $('oAcc').textContent=S.att?Math.round(S.cor/S.att*100)+'%':'-';
+ $('oFast').textContent=S.fast?S.fast.t.toFixed(1)+'초':'-';
+ const w=$('oWr');w.innerHTML='';
+ if(!S.wrongs.size)w.innerHTML='<span style="background:#dff8e8;color:#14683a">틀린 문제가 없어요! 🎉</span>';
+ S.wrongs.forEach((a,t)=>{const s=document.createElement('span');s.textContent=`${t} = ${a}`;w.appendChild(s)});
+ if(S.fast)$('oFast').title=S.fast.q;
+ ui();setTimeout(()=>$('over').classList.remove('hide'),900)}
+
+/* ---------- UI ---------- */
+let toastTm;
+function toast(t,ms){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(()=>e.classList.remove('show'),ms||1500)}
+function bump(){const e=$('combo');e.classList.add('pop');setTimeout(()=>e.classList.remove('pop'),150)}
+function ui(){
+ $('bs').textContent=Math.max(best,S?S.score:0);
+ if(!S)return;
+ $('sc').textContent=S.score;$('lv').textContent=S.level;
+ $('hp').textContent='❤️'.repeat(S.hearts)+'🖤'.repeat(5-S.hearts);
+ $('combo').textContent=S.combo>=2?`🔥 ${S.combo} 콤보 ×${mult()}`:'';
+ const b=$('bomb');b.textContent='💣 '+S.bombs;b.disabled=S.bombs<=0}
+function updAns(){$('ans').textContent=S?S.input:''}
+function press(k){
+ if(state!=='play')return;
+ if(k==='ok')submit();
+ else if(k==='bk'){S.input=S.input.slice(0,-1);updAns()}
+ else if(k==='bomb')bomb();
+ else if(S.input.length<3){S.input+=k;updAns();SFX.key()}}
+const nums=$('nums');
+'1234567890'.split('').forEach(k=>{const b=document.createElement('button');b.textContent=k;b.onclick=()=>press(k);nums.appendChild(b)});
+$('bk').onclick=()=>press('bk');$('okb').onclick=()=>press('ok');$('bomb').onclick=()=>press('bomb');
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊'};
+document.addEventListener('keydown',e=>{
+ if(state!=='play')return;
+ if(/^[0-9]$/.test(e.key))press(e.key);
+ else if(e.key==='Backspace'){e.preventDefault();press('bk')}
+ else if(e.key==='Enter'){e.preventDefault();press('ok')}
+ else if(e.key==='b'||e.key==='B'||e.key===' '){e.preventDefault();press('bomb')}});
+
+const CH=[['all','🌈 전체'],['add','➕ 덧셈'],['sub','➖ 뺄셈'],['mul','✖️ 곱셈'],['div','➗ 나눗셈']];
+function renderChips(){const c=$('chips');c.innerHTML='';
+ CH.forEach(([k,l])=>{const b=document.createElement('button');b.className='chip'+((k==='all'?selOps.size===4:selOps.has(k))?' on':'');b.textContent=l;
+  b.onclick=()=>{if(k==='all')selOps=new Set(ALL);else if(selOps.has(k)){if(selOps.size>1)selOps.delete(k)}else selOps.add(k);renderChips()};c.appendChild(b)})}
+function showStart(){$('over').classList.add('hide');$('start').classList.remove('hide');$('bestTxt').textContent=best?`🏆 최고 점수: ${best}점`:'';renderChips();state='menu';S=null;$('combo').textContent='';updAns();ui()}
+function startGame(){ac();$('start').classList.add('hide');$('over').classList.add('hide');newGame();state='play';spawn(false);S.spawnT=2}
+$('goBtn').onclick=startGame;$('retry').onclick=startGame;$('home').onclick=showStart;
+
+/* ---------- 루프 ---------- */
+function updFx(dt){
+ S.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;p.l-=dt});S.parts=S.parts.filter(p=>p.l>0);
+ S.floats.forEach(f=>{f.y-=40*dt;f.l-=dt});S.floats=S.floats.filter(f=>f.l>0);
+ S.shake=Math.max(0,S.shake-dt*1.8);S.fa=Math.max(0,S.fa-dt*1.5)}
+function update(dt){
+ S.t+=dt;
+ if(S.freeze>0)S.freeze-=dt;
+ else{
+  const sp=H*Math.min(.14,.036+.0045*(S.level-1));
+  S.mons.forEach(m=>m.y+=sp*dt*(m.boss?.6:1));
+  S.spawnT-=dt;
+  const max=Math.min(6,2+Math.floor((S.level-1)/2));
+  if(S.spawnT<=0&&S.mons.filter(m=>!m.boss).length<max)S.spawnT=spawn(false)?Math.max(1.2,3-.15*S.level):.5}
+ const gone=S.mons.filter(m=>m.y+m.s*.6+38>=H-8);
+ if(gone.length){S.mons=S.mons.filter(m=>!gone.includes(m));S.combo=0;
+  gone.forEach(m=>{addWrong(m);burst(m.x,H-12,10,['#ff9aa8','#fff']);toast(`${m.t} = ${m.a}`,2000)});
+  lose(gone.length)}
+ updFx(dt)}
+
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+const EF='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+function draw(){
+ cx.save();
+ if(S&&S.shake>0)cx.translate((Math.random()-.5)*20*S.shake,(Math.random()-.5)*20*S.shake);
+ const g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#b9a8f5');g.addColorStop(.55,'#f6c6ea');g.addColorStop(1,'#bde4ff');
+ cx.fillStyle=g;cx.fillRect(-20,-20,W+40,H+40);
+ stars.forEach(s=>{cx.globalAlpha=.5+.5*Math.sin(T*2+s.p);cx.fillStyle='#fff';cx.beginPath();cx.arc(s.x*W,s.y*H,s.r,0,6.28);cx.fill()});
+ cx.globalAlpha=.65;cx.textAlign='center';cx.textBaseline='middle';cx.font=`40px ${EF}`;cx.fillText('🪐',W*.86,H*.18);cx.fillText('🌙',W*.1,H*.42);cx.font=`26px ${EF}`;cx.fillText('⭐',W*.5,H*.1);cx.globalAlpha=1;
+ cx.fillStyle='#a8e6c3';cx.fillRect(-20,H-8,W+40,30);cx.fillStyle='#8fd3b0';cx.fillRect(-20,H-8,W+40,3);
+ if(S){
+  const fs=Math.round(Math.min(30,Math.max(18,W/16)));
+  S.mons.forEach(m=>{
+   const x=m.x,y=m.y+Math.sin(T*3+m.x)*3;
+   if(m.type!=='n'||m.boss){cx.fillStyle=m.boss?'rgba(255,90,120,.4)':m.type==='g'?'rgba(255,215,0,.5)':'rgba(120,200,255,.55)';cx.beginPath();cx.arc(x,y,m.s*.8,0,6.28);cx.fill()}
+   cx.font=`${m.s}px ${EF}`;cx.fillText(m.emoji,x,y);
+   const f=Math.round(fs*(m.boss?1.2:1));cx.font=`900 ${f}px sans-serif`;
+   const tw=cx.measureText(m.t).width,pw=tw+20,ph=f+10,px=Math.min(W-pw-2,Math.max(2,x-pw/2)),py=y+m.s*.6;
+   cx.fillStyle=m.boss?'#ffe0e0':m.type==='g'?'#fff3b0':m.type==='i'?'#d9f1ff':'#fff';rr(px,py,pw,ph,ph/2);cx.fill();
+   cx.lineWidth=3;cx.strokeStyle=m.boss?'#ff5a78':m.type==='g'?'#f5b800':m.type==='i'?'#5ab8f5':'#b79cff';cx.stroke();
+   cx.fillStyle='#3b2f63';cx.fillText(m.t,px+pw/2,py+ph/2+1);
+   if(m.boss){cx.font=`20px ${EF}`;cx.fillText('❤️'.repeat(m.hp)+'🖤'.repeat(3-m.hp),x,y-m.s*.75)}
+  });
+  S.parts.forEach(p=>{cx.globalAlpha=Math.max(0,p.l/p.m);cx.fillStyle=p.c;cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.28);cx.fill()});cx.globalAlpha=1;
+  cx.font=`900 24px sans-serif`;cx.lineWidth=4;cx.strokeStyle='#7b5cc4';
+  S.floats.forEach(f=>{cx.globalAlpha=Math.min(1,f.l*1.5);cx.strokeText(f.t,f.x,f.y);cx.fillStyle=f.c;cx.fillText(f.t,f.x,f.y)});cx.globalAlpha=1;
+  if(S.freeze>0){cx.fillStyle='rgba(150,210,255,.3)';cx.fillRect(-20,-20,W+40,H+40);cx.font=`900 26px sans-serif`;cx.fillStyle='#fff';cx.strokeStyle='#4aa3e8';cx.strokeText(`❄️ 얼음! ${S.freeze.toFixed(1)}`,W/2,H*.12);cx.fillText(`❄️ 얼음! ${S.freeze.toFixed(1)}`,W/2,H*.12)}
+  if(S.fa>0){cx.fillStyle=`rgba(${S.flash},${S.fa})`;cx.fillRect(-20,-20,W+40,H+40)}
+ }
+ cx.restore()}
+let last=0;
+function loop(ts){requestAnimationFrame(loop);T=ts/1000;const dt=Math.min(.05,(ts-last)/1000||0);last=ts;
+ if(S){if(state==='play')update(dt);else updFx(dt)}
+ draw()}
+resize();showStart();requestAnimationFrame(loop);
+</script>
+</body></html>

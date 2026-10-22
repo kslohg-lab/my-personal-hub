@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>말랑말랑 인형뽑기 (Claw Machine)</title>
+    <style>
+        :root {
+            --bg-color: #fce4ec;
+            --arcade-pink: #ff80ab;
+            --arcade-dark-pink: #c51162;
+            --arcade-purple: #ea80fc;
+            --arcade-yellow: #ffd54f;
+            --arcade-cyan: #80deea;
+            --cabinet-border: #424242;
+            --text-color: #424242;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        /* Mobile Container Simulation */
+        .game-wrapper {
+            width: 100%;
+            max-width: 440px;
+            height: 100vh;
+            max-height: 900px;
+            background: linear-gradient(135deg, #f8bbd0, #e1bee7);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 60px;
+            background-color: var(--arcade-pink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            border-bottom: 4px solid var(--arcade-dark-pink);
+            z-index: 10;
+        }
+
+        .stat-badge {
+            background: #fff;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        .btn-mini {
+            background: var(--arcade-yellow);
+            border: 2px solid #ffa000;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #ffa000;
+            transition: transform 0.05s;
+        }
+
+        .btn-mini:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #ffa000;
+        }
+
+        /* Arcade Cabinet & Canvas Container */
+        .cabinet-frame {
+            flex: 1;
+            position: relative;
+            margin: 10px;
+            background: #ffffff;
+            border: 6px solid var(--arcade-pink);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.15), 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .glass-header {
+            background: rgba(255,255,255,0.8);
+            text-align: center;
+            padding: 6px;
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--arcade-dark-pink);
+            border-bottom: 2px dashed var(--arcade-pink);
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: linear-gradient(to bottom, #e0f7fa 0%, #fff9c4 100%);
+        }
+
+        /* Control Panel */
+        .control-panel {
+            height: 160px;
+            background: var(--arcade-pink);
+            border-top: 4px solid var(--arcade-dark-pink);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .joystick-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-arrow {
+            width: 65px;
+            height: 65px;
+            background: #fff;
+            border: 4px solid #d81b60;
+            border-radius: 50%;
+            font-size: 28px;
+            font-weight: bold;
+            color: #d81b60;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #ad1457;
+            transition: all 0.05s;
+        }
+
+        .btn-arrow:active, .btn-arrow.active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #ad1457;
+            background: #f8bbd0;
+        }
+
+        .btn-drop {
+            width: 110px;
+            height: 75px;
+            background: linear-gradient(to bottom, #ffeb3b, #fbc02d);
+            border: 4px solid #f57f17;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 900;
+            color: #3e2723;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #f57f17;
+            transition: all 0.05s;
+        }
+
+        .btn-drop:active, .btn-drop.active {
+            transform: translateY(5px);
+            box-shadow: 0 3px 0 #f57f17;
+        }
+
+        /* Modal / Collection Book */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            width: 85%;
+            max-height: 80%;
+            background: #fff;
+            border-radius: 20px;
+            border: 4px solid var(--arcade-pink);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            animation: popIn 0.2s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--arcade-dark-pink);
+        }
+
+        .btn-close {
+            background: #e0e0e0;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .book-item {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .book-item.locked {
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+
+        .book-icon {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+
+        .book-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .book-count {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: var(--arcade-pink);
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* Floating Toast Message */
+        .toast {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-wrapper">
+        <!-- Top Info Bar -->
+        <div class="top-bar">
+            <div class="stat-badge" id="coin-badge">🪙 코인: <span id="coin-count">5</span></div>
+            <div class="stat-badge" id="caught-badge">🧸 획득: <span id="caught-count">0</span></div>
+            <button class="btn-mini" id="btn-recharge">+ 코인</button>
+            <button class="btn-mini" id="btn-book">📖 도감</button>
+        </div>
+
+        <!-- Arcade Canvas Cabinet -->
+        <div class="cabinet-frame">
+            <div class="glass-header">✨ MALANG CLAW MACHINE ✨</div>
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Touch Arcade Control Panel -->
+        <div class="control-panel">
+            <div class="joystick-group">
+                <button class="btn-arrow" id="btn-left">◀</button>
+                <button class="btn-arrow" id="btn-right">▶</button>
+            </div>
+            <button class="btn-drop" id="btn-drop">
+                <span>잡기</span>
+                <span style="font-size: 11px; font-weight: normal; margin-top:2px;">DROP</span>
+            </button>
+        </div>
+
+        <!-- Toast Notification -->
+        <div class="toast" id="toast">인형을 잡았습니다!</div>
+
+        <!-- Collection Book Modal -->
+        <div class="modal-overlay" id="modal-book">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🧸 인형 수집 도감</div>
+                    <button class="btn-close" id="btn-close-modal">✕</button>
+                </div>
+                <div class="book-grid" id="book-grid">
+                    <!-- Populated dynamically via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===================================================
+           AUDIO SYNTHESIZER (Web Audio API - No External Files)
+           =================================================== */
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioCtx();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'move') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'drop') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                } else if (type === 'catch') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.setValueAtTime(400, now + 0.08);
+                    osc.frequency.setValueAtTime(500, now + 0.16);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'slip') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.25);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'win') {
+                    // Quick victory fanfare sequence
+                    [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
+                        const noteOsc = audioCtx.createOscillator();
+                        const noteGain = audioCtx.createGain();
+                        noteOsc.type = 'triangle';
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        noteGain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                        noteGain.gain.linearRampToValueAtTime(0, now + idx * 0.08 + 0.15);
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(audioCtx.destination);
+                        noteOsc.start(now + idx * 0.08);
+                        noteOsc.stop(now + idx * 0.08 + 0.15);
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        /* ===================================================
+           GAME CONFIGURATION & TYPES
+           =================================================== */
+        const PLUSHIE_TYPES = [
+            { id: 'bunny', name: '분홍 토끼', color: '#ffb74d', bodyColor: '#ff80ab', emoji: '🐰' },
+            { id: 'duck', name: '노랑 오리', color: '#fff176', bodyColor: '#ffd54f', emoji: '🐥' },
+            { id: 'dino', name: '초록 공룡', color: '#aed581', bodyColor: '#81c784', emoji: '🦖' },
+            { id: 'bear', name: '파랑 곰돌이', color: '#4dd0e1', bodyColor: '#64b5f6', emoji: '🐻' },
+            { id: 'cat', name: '보라 고양이', color: '#b39ddb', bodyColor: '#ba68c8', emoji: '🐱' },
+            { id: 'monster', name: '빨강 몬스터', color: '#ff8a80', bodyColor: '#e57373', emoji: '👾' }
+        ];
+
+        let state = {
+            coins: 5,
+            totalCaught: 0,
+            collection: { bunny: 0, duck: 0, dino: 0, bear: 0, cat: 0, monster: 0 }
+        };
+
+        /* Canvas Setup */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = 0;
+        let height = 0;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height - 30; // height offset for cabinet title
+            width = canvas.width;
+            height = canvas.height;
+        }
+
+        /* ===================================================
+           CLAW MACHINE & PLUSHIE PHYSICS
+           =================================================== */
+        const CHUTE_WIDTH = 75;
+        const CHUTE_HEIGHT = 90;
+
+        class Claw {
+            constructor() {
+                this.x = 150;
+                this.y = 40;
+                this.minY = 40;
+                this.maxY = 0;
+                this.speed = 2.5;
+                this.state = 'IDLE'; // IDLE, MOVING_DOWN, CLOSING, MOVING_UP, RETURNING, RELEASING
+                this.grabbedPlushie = null;
+                this.armAngle = 0.3; // Angle of claw arms
+                this.dropSlipped = false;
+            }
+
+            reset() {
+                this.state = 'IDLE';
+                this.grabbedPlushie = null;
+                this.armAngle = 0.3;
+                this.dropSlipped = false;
+            }
+
+            update(plushies, particles) {
+                this.maxY = height - CHUTE_HEIGHT - 25;
+
+                // State Machine Logic
+                if (this.state === 'MOVING_DOWN') {
+                    this.y += this.speed * 1.5;
+                    this.armAngle = Math.min(0.6, this.armAngle + 0.02);
+
+                    // Check for plushie collisions or bottom reached
+                    let touched = false;
+                    for (let p of plushies) {
+                        let dist = Math.hypot(this.x - p.x, this.y + 25 - p.y);
+                        if (dist < p.radius + 10) {
+                            touched = true;
+                            this.grabbedPlushie = p;
+                            break;
+                        }
+                    }
+
+                    if (touched || this.y >= this.maxY) {
+                        this.state = 'CLOSING';
+                        playSound('drop');
+                    }
+
+                } else if (this.state === 'CLOSING') {
+                    this.armAngle -= 0.03;
+                    if (this.armAngle <= 0.1) {
+                        this.armAngle = 0.1;
+                        this.state = 'MOVING_UP';
+                        if (this.grabbedPlushie) {
+                            playSound('catch');
+                            // Determine slip chance (35% probability)
+                            this.dropSlipped = Math.random() < 0.35;
+                        }
+                    }
+
+                } else if (this.state === 'MOVING_UP') {
+                    this.y -= this.speed;
+
+                    if (this.grabbedPlushie) {
+                        this.grabbedPlushie.x = this.x;
+                        this.grabbedPlushie.y = this.y + 35;
+
+                        // Check slip probability at halfway mark
+                        if (this.dropSlipped && this.y < (this.maxY + this.minY) / 2) {
+                            playSound('slip');
+                            showToast('앗! 놓쳤어요! 😢');
+                            this.grabbedPlushie.isGrabbed = false;
+                            this.grabbedPlushie.vy = 2; // drop physics
+                            this.grabbedPlushie = null;
+                            this.dropSlipped = false;
+                            this.armAngle = 0.4; // Open claw on slip
+                        }
+                    }
+
+                    if (this.y <= this.minY) {
+                        this.y = this.minY;
+                        this.state = 'RETURNING';
+                    }
+
+                } else if (this.state === 'RETURNING') {
+                    // Move claw left towards chute
+                    const targetX = CHUTE_WIDTH / 2;
+                    if (this.x > targetX) {
+                        this.x -= this.speed;
+                        if (this.grabbedPlushie) {
+                            this.grabbedPlushie.x = this.x;
+                            this.grabbedPlushie.y = this.y + 35;
+                        }
+                    } else {
+                        this.x = targetX;
+                        this.state = 'RELEASING';
+                    }
+
+                } else if (this.state === 'RELEASING') {
+                    this.armAngle += 0.03;
+                    if (this.armAngle >= 0.5) {
+                        if (this.grabbedPlushie) {
+                            // Drop plushie into chute
+                            this.grabbedPlushie.inChute = true;
+                            this.grabbedPlushie.isGrabbed = false;
+                            processSuccessCatch(this.grabbedPlushie, particles);
+                            this.grabbedPlushie = null;
+                        }
+                        this.reset();
+                    }
+                }
+            }
+
+            draw() {
+                // Top rail
+                ctx.fillStyle = '#757575';
+                ctx.fillRect(0, 0, width, 12);
+
+                // Claw Cable
+                ctx.strokeStyle = '#424242';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(this.x, 12);
+                ctx.lineTo(this.x, this.y);
+                ctx.stroke();
+
+                // Claw Base
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                ctx.fillStyle = '#ff4081';
+                ctx.beginPath();
+                ctx.arc(0, 0, 14, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#c51162';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Left Arm
+                ctx.save();
+                ctx.rotate(-this.armAngle);
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-6, 10);
+                ctx.lineTo(-18, 25);
+                ctx.lineTo(-8, 38);
+                ctx.stroke();
+                ctx.restore();
+
+                // Right Arm
+                ctx.save();
+                ctx.rotate(this.armAngle);
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(6, 10);
+                ctx.lineTo(18, 25);
+                ctx.lineTo(8, 38);
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.restore();
+            }
+        }
+
+        class Plushie {
+            constructor(type, x, y) {
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.radius = 22;
+                this.vy = 0;
+                this.isGrabbed = false;
+                this.inChute = false;
+                this.settled = false;
+            }
+
+            update() {
+                if (this.isGrabbed || this.inChute) return;
+
+                // Simple gravity and ground collision
+                const groundY = height - CHUTE_HEIGHT - this.radius;
+                if (this.y < groundY) {
+                    this.vy += 0.3; // Gravity
+                    this.y += this.vy;
+                } else {
+                    this.y = groundY;
+                    this.vy = 0;
+                    this.settled = true;
+                }
+            }
+
+            draw() {
+                if (this.inChute) return; // Hidden once caught
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+
+                // Body Circle
+                ctx.fillStyle = this.type.bodyColor;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Emoji Face Overlay
+                ctx.font = '22px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.type.emoji, 0, 1);
+
+                ctx.restore();
+            }
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 6;
+                this.vy = (Math.random() - 0.8) * 6;
+                this.size = Math.random() * 6 + 4;
+                this.color = ['#ff4081', '#ffd54f', '#7c4dff', '#64b5f6', '#b9f6ca'][Math.floor(Math.random() * 5)];
+                this.alpha = 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2; // Gravity
+                this.alpha -= 0.02;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        /* Game Variables */
+        let claw = new Claw();
+        let plushies = [];
+        let particles = [];
+        let leftPressed = false;
+        let rightPressed = false;
+
+        function spawnPlushies() {
+            plushies = [];
+            const startX = CHUTE_WIDTH + 30;
+            const availableWidth = width - startX - 30;
+            
+            // Generate stack of plushies
+            for (let i = 0; i < 12; i++) {
+                const type = PLUSHIE_TYPES[i % PLUSHIE_TYPES.length];
+                const x = startX + Math.random() * availableWidth;
+                const y = height - CHUTE_HEIGHT - 30 - Math.random() * 50;
+                plushies.push(new Plushie(type, x, y));
+            }
+        }
+
+        function processSuccessCatch(plushie, particles) {
+            playSound('win');
+            state.totalCaught++;
+            state.collection[plushie.type.id]++;
+            updateUI();
+
+            showToast(`축하합니다! [${plushie.type.name}] 획득! 🎉`);
+
+            // Trigger Confetti / Particles
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle(CHUTE_WIDTH / 2, height - CHUTE_HEIGHT + 20));
+            }
+
+            // Respawn plushie after delay to keep machine full
+            setTimeout(() => {
+                const startX = CHUTE_WIDTH + 30;
+                const newX = startX + Math.random() * (width - startX - 40);
+                plushies.push(new Plushie(plushie.type, newX, 50));
+            }, 1200);
+        }
+
+        /* Draw Chute & Environment */
+        function drawChute() {
+            // Chute Hole Box (Left Bottom)
+            ctx.fillStyle = '#37474f';
+            ctx.fillRect(0, height - CHUTE_HEIGHT, CHUTE_WIDTH, CHUTE_HEIGHT);
+
+            ctx.fillStyle = '#263238';
+            ctx.fillRect(5, height - CHUTE_HEIGHT + 5, CHUTE_WIDTH - 10, CHUTE_HEIGHT - 5);
+
+            // Chute Wall / Guard
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.fillRect(CHUTE_WIDTH - 6, height - CHUTE_HEIGHT - 30, 6, CHUTE_HEIGHT + 30);
+            ctx.strokeStyle = '#b0bec5';
+            ctx.strokeRect(CHUTE_WIDTH - 6, height - CHUTE_HEIGHT - 30, 6, CHUTE_HEIGHT + 30);
+
+            // Exit Label
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('출구 🎁', CHUTE_WIDTH / 2, height - 20);
+        }
+
+        /* Game Loop */
+        function gameLoop() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Left / Right Movement Input Handling
+            if (claw.state === 'IDLE') {
+                if (leftPressed) {
+                    claw.x = Math.max(CHUTE_WIDTH / 2 + 10, claw.x - claw.speed);
+                    playSound('move');
+                } else if (rightPressed) {
+                    claw.x = Math.min(width - 25, claw.x + claw.speed);
+                    playSound('move');
+                }
+            }
+
+            // Update & Draw Chute
+            drawChute();
+
+            // Update & Draw Plushies
+            for (let i = plushies.length - 1; i >= 0; i--) {
+                const p = plushies[i];
+                p.update();
+                p.draw();
+            }
+
+            // Update & Draw Claw
+            claw.update(plushies, particles);
+            claw.draw();
+
+            // Update & Draw Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i];
+                pt.update();
+                pt.draw();
+                if (pt.alpha <= 0) particles.splice(i, 1);
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        /* ===================================================
+           UI & TOUCH EVENT HANDLING
+           =================================================== */
+        const coinCountEl = document.getElementById('coin-count');
+        const caughtCountEl = document.getElementById('caught-count');
+        const toastEl = document.getElementById('toast');
+        const bookGridEl = document.getElementById('book-grid');
+        const modalBook = document.getElementById('modal-book');
+
+        function updateUI() {
+            coinCountEl.textContent = state.coins;
+            caughtCountEl.textContent = state.totalCaught;
+        }
+
+        function showToast(msg) {
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            setTimeout(() => {
+                toastEl.classList.remove('show');
+            }, 2000);
+        }
+
+        function renderCollectionBook() {
+            bookGridEl.innerHTML = '';
+            PLUSHIE_TYPES.forEach(type => {
+                const count = state.collection[type.id] || 0;
+                const isLocked = count === 0;
+
+                const item = document.createElement('div');
+                item.className = `book-item ${isLocked ? 'locked' : ''}`;
+                item.innerHTML = `
+                    <span class="book-count">${count}개</span>
+                    <div class="book-icon">${type.emoji}</div>
+                    <div class="book-name">${type.name}</div>
+                `;
+                bookGridEl.appendChild(item);
+            });
+        }
+
+        /* Helper for Binding Button Touch/Mouse Events */
+        function bindButtonEvents(btnId, onPress, onRelease) {
+            const btn = document.getElementById(btnId);
+
+            const start = (e) => {
+                e.preventDefault();
+                initAudio();
+                btn.classList.add('active');
+                if (onPress) onPress();
+            };
+
+            const end = (e) => {
+                e.preventDefault();
+                btn.classList.remove('active');
+                if (onRelease) onRelease();
+            };
+
+            btn.addEventListener('touchstart', start, { passive: false });
+            btn.addEventListener('touchend', end, { passive: false });
+            btn.addEventListener('mousedown', start);
+            btn.addEventListener('mouseup', end);
+            btn.addEventListener('mouseleave', end);
+        }
+
+        // Left Arrow
+        bindButtonEvents('btn-left', () => { leftPressed = true; }, () => { leftPressed = false; });
+
+        // Right Arrow
+        bindButtonEvents('btn-right', () => { rightPressed = true; }, () => { rightPressed = false; });
+
+        // DROP Button
+        bindButtonEvents('btn-drop', () => {
+            if (claw.state === 'IDLE') {
+                if (state.coins > 0) {
+                    state.coins--;
+                    updateUI();
+                    claw.state = 'MOVING_DOWN';
+                } else {
+                    showToast('코인이 부족합니다! +코인 버튼을 누르세요.');
+                }
+            }
+        });
+
+        // Top Bar Buttons
+        document.getElementById('btn-recharge').addEventListener('click', () => {
+            initAudio();
+            state.coins += 5;
+            updateUI();
+            playSound('win');
+            showToast('코인 5개가 충전되었습니다! 🪙');
+        });
+
+        document.getElementById('btn-book').addEventListener('click', () => {
+            initAudio();
+            renderCollectionBook();
+            modalBook.classList.add('active');
+        });
+
+        document.getElementById('btn-close-modal').addEventListener('click', () => {
+            modalBook.classList.remove('active');
+        });
+
+        /* Window Resizing & Initialization */
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+
+        window.onload = () => {
+            resizeCanvas();
+            spawnPlushies();
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        };
+    </script>
+</body>
+</html>

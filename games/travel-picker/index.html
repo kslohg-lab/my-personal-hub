@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리 가족 해외여행 선택 보드</title>
+<style>
+:root{--ink:#202a35;--muted:#687582;--line:#e4e9ee;--bg:#f5f7fa;--blue:#2457d6;--blue2:#eaf0ff;--green:#18794e;--amber:#a65c00;--card:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+header{background:linear-gradient(125deg,#172b4d,#2457d6);color:white;padding:30px max(20px,calc((100vw - 1280px)/2)) 26px}
+header h1{margin:0 0 8px;font-size:clamp(26px,3vw,38px);letter-spacing:-.04em}header p{margin:0;opacity:.9;max-width:800px}
+.wrap{max-width:1280px;margin:auto;padding:22px 20px 48px}.notice{font-size:13px;color:var(--muted);margin:12px 0 20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 20px}.kpi{background:white;border:1px solid var(--line);border-radius:14px;padding:14px 16px}.kpi b{display:block;font-size:22px}.kpi span{font-size:12px;color:var(--muted)}
+.controls{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.field label{display:block;font-size:12px;font-weight:750;color:#4f5d6a;margin-bottom:6px}.field select,.field input[type=search]{width:100%;padding:10px 11px;border:1px solid #d6dde5;border-radius:10px;background:#fff;color:var(--ink);font:inherit}
+.budgetline{display:flex;justify-content:space-between;gap:8px;font-size:13px;margin-bottom:6px}.field input[type=range]{width:100%;accent-color:var(--blue)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0}.results{font-size:14px;color:var(--muted)}.buttons{display:flex;gap:8px;flex-wrap:wrap}
+button{border:1px solid #cbd5e1;background:white;color:var(--ink);border-radius:10px;padding:9px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}button:hover{border-color:var(--blue);color:var(--blue)}button.primary{background:var(--blue);color:white;border-color:var(--blue)}button:disabled{opacity:.4;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:0;box-shadow:0 2px 8px #1e293b08;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #1e293b12}.photo{height:174px;position:relative;background:#dbe5f2;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.photo .rank{position:absolute;top:12px;left:12px;background:#fffef1eF;color:#7c4a03;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:800}.photo .flight{position:absolute;bottom:10px;left:10px;background:#172b4ddd;color:white;padding:5px 9px;border-radius:8px;font-size:12px}
+.cardbody{padding:15px;display:flex;flex-direction:column;gap:10px;flex:1}.topline{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.topline h2{font-size:19px;letter-spacing:-.03em;margin:0}.grade{font-weight:850;font-size:12px;border-radius:7px;padding:4px 7px;background:#e8f6ee;color:#18794e;white-space:nowrap}.grade.a{background:#edf2ff;color:#3556a6}.grade.am{background:#f1f3f5;color:#586574}
+.price{font-size:20px;font-weight:850;letter-spacing:-.03em}.price small{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0}.stars{font-size:12px;color:#9a6500;letter-spacing:.02em}.desc{font-size:13px;color:#536170;min-height:40px}.tags{display:flex;gap:5px;flex-wrap:wrap}.tag{background:#f0f3f7;border-radius:6px;padding:4px 7px;font-size:11px;color:#475569}.scoregrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:12px}.score{display:flex;justify-content:space-between;gap:8px}.score span:first-child{color:var(--muted)}.score strong{font-size:11px;letter-spacing:.02em;color:#44536a}
+.places{font-size:12px;color:#465565}.places b{color:#26384c}.proscons{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px}.pros,.cons{border-radius:9px;padding:8px}.pros{background:#eff9f3;color:#226346}.cons{background:#fff6e9;color:#8a520d}.pros b,.cons b{display:block;margin-bottom:3px}.pros ul,.cons ul{padding-left:15px;margin:0}.pros li,.cons li{margin:2px 0}
+.cardfoot{border-top:1px solid #eef1f5;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;gap:8px}.comparelabel{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;cursor:pointer}.comparelabel input{accent-color:var(--blue);width:16px;height:16px}.detailsbtn{padding:7px 9px;font-size:12px}
+.comparepanel{display:none;background:#fff;border:2px solid #bfd0ff;border-radius:16px;padding:16px;margin:18px 0}.comparepanel.show{display:block}.comparepanel h2{margin:0 0 10px;font-size:20px}.comparetable{overflow-x:auto}.comparetable table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}.comparetable th,.comparetable td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}.comparetable th{background:#f5f7ff}
+.modalback{display:none;position:fixed;inset:0;background:#11182799;z-index:10;padding:20px;align-items:center;justify-content:center}.modalback.open{display:flex}.modal{background:white;border-radius:18px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:22px;position:relative}.modal h2{margin:0 40px 4px 0}.close{position:absolute;right:15px;top:15px}.modal img{width:100%;max-height:270px;object-fit:cover;border-radius:12px;margin:14px 0}.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modalbox{background:#f6f8fb;border-radius:12px;padding:12px;font-size:13px}.empty{padding:40px;text-align:center;background:white;border-radius:16px;color:var(--muted);grid-column:1/-1}
+footer{font-size:12px;color:var(--muted);margin-top:24px;line-height:1.7}
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.controls{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){header{padding:24px 18px}.wrap{padding:16px 12px 34px}.kpis{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.photo{height:200px}.modalgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>우리 가족 해외여행 선택 보드 ✈️</h1>
+  <p>7~10세 자녀와 함께 가는 여행지를 예산·비행시간·즐길 거리로 비교하고, 마음에 드는 후보를 골라 보세요.</p>
+</header>
+<main class="wrap">
+  <div class="kpis">
+    <div class="kpi"><b id="totalCount">20곳</b><span>전체 후보 여행지</span></div>
+    <div class="kpi"><b>7시간 이내</b><span>인천 출발 직항 기준 목표</span></div>
+    <div class="kpi"><b>4인 가족</b><span>성인 2명 + 자녀 2명</span></div>
+    <div class="kpi"><b id="selectedCount">0 / 3</b><span>비교 목록에 담은 여행지</span></div>
+  </div>
+
+  <section class="controls" aria-label="여행지 필터">
+    <div class="field"><label for="search">여행지 검색</label><input id="search" type="search" placeholder="예: 디즈니, 바다, 쇼핑, 일본"></div>
+    <div class="field"><label for="budget">예산 상한</label><div class="budgetline"><span>4인 가족 총액 기준</span><strong id="budgetLabel">250만 원</strong></div><input id="budget" type="range" min="100" max="450" step="10" value="250"></div>
+    <div class="field"><label for="flight">최대 비행시간</label><select id="flight"><option value="7">7시간 이내</option><option value="5">5시간 이내</option><option value="4">4시간 이내</option><option value="3">3시간 이내</option><option value="2">2시간 이내</option></select></div>
+    <div class="field"><label for="style">여행 스타일</label><select id="style"><option value="all">전체</option><option value="theme">테마파크·체험</option><option value="rest">휴양·수영장</option><option value="shop">쇼핑·도시</option><option value="food">먹거리</option><option value="nature">자연·동물</option></select></div>
+    <div class="field"><label for="sort">정렬 기준</label><select id="sort"><option value="grade">추천 등급순</option><option value="price">예산 낮은 순</option><option value="flight">비행시간 짧은 순</option><option value="kid">아이 체험 점수순</option><option value="rest">휴양 점수순</option></select></div>
+    <div class="field"><label for="gradeFilter">최소 추천 등급</label><select id="gradeFilter"><option value="all">전체 등급</option><option value="S">S급 이상</option><option value="A+">A+급 이상</option><option value="A">A급 이상</option></select></div>
+    <div class="field"><label for="duration">여행 기간 가정</label><select id="duration"><option value="3">3박 4일</option><option value="4">4박 5일</option><option value="2">2박 3일</option></select></div>
+    <div class="field"><label>사용 방법</label><div style="font-size:12px;color:#687582;padding:7px 0">카드 하단의 체크박스로 최대 3곳을 골라 비교하세요.</div></div>
+  </section>
+
+  <div class="toolbar">
+    <div class="results" id="resultText">전체 여행지 20곳</div>
+    <div class="buttons"><button id="reset">필터 초기화</button><button id="compareBtn" class="primary">선택한 여행지 비교</button><button id="printBtn">인쇄 / PDF 저장</button></div>
+  </div>
+
+  <section class="comparepanel" id="comparePanel">
+    <h2>선택한 여행지 비교</h2>
+    <p style="font-size:13px;color:#687582;margin-top:0">가족회의 때 이 표를 기준으로 장단점과 예산을 함께 살펴보세요.</p>
+    <div class="comparetable" id="compareTable"></div>
+  </section>
+  <section class="grid" id="cards"></section>
+  <footer>
+    <b>예산·비행시간 안내</b><br>
+    • 비용은 성인 2명 + 자녀 2명, 일반적인 숙소와 식사, 현지 교통, 주요 관광을 포함한 대략적인 계획용 추정치입니다. 항공권 시즌·수하물·호텔 등급·테마파크 티켓에 따라 크게 달라질 수 있습니다.<br>
+    • 비행시간은 인천 출발 직항 편도 기준의 대략적인 값입니다. 실제 직항 운항 여부와 소요시간은 날짜별 항공편에서 확인해야 합니다. 경유편은 필터의 비행시간과 별개로 총 이동시간이 길어질 수 있습니다.<br>
+    • 사진은 외부 이미지 서비스에서 불러옵니다. 인터넷 연결이 필요하며, 일부 사진은 대표 이미지로 실제 방문 장소와 다를 수 있습니다. 이 도구는 예약 가격을 실시간 조회하지 않습니다.
+  </footer>
+</main>
+<div class="modalback" id="modalback" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal"><button class="close" id="closeModal" aria-label="닫기">닫기 ✕</button><div id="modalContent"></div></div>
+</div>
+<script>
+const destinations = [
+{id:1,name:"오키나와",country:"일본",flight:2.5,min:160,max:260,grade:"S",rating:4.9,kid:5,shop:3,food:4,rest:5,theme:["rest","nature","theme"],desc:"짧은 비행, 대형 수족관, 해변과 리조트를 고루 즐기는 균형형 여행.",places:["추라우미 수족관","아메리칸빌리지","만좌모","류큐무라"],pros:["비행시간이 짧아 아이 체력 부담이 적음","수족관·해변·리조트를 한 여행에 구성"],cons:["렌터카가 있으면 이동이 편리함","여름 성수기 숙박·항공료 상승"],img:"photo-1493976040374-85c8e12f0c0e",alt:"일본 전통 거리"},
+{id:2,name:"오사카",country:"일본",flight:2,min:170,max:280,grade:"S",rating:4.8,kid:5,shop:5,food:5,rest:2,theme:["theme","shop","food"],desc:"테마파크와 캐릭터 상품, 맛집을 좋아하는 가족에게 강력 추천.",places:["유니버설 스튜디오 재팬","가이유칸 수족관","오사카성","도톤보리"],pros:["아이들이 좋아할 테마파크와 체험이 풍부","먹거리와 쇼핑 선택지가 많음"],cons:["테마파크 티켓·식비가 추가될 수 있음","걷는 시간이 길어 휴식 일정 필요"],img:"photo-1503899036084-c55cdd92da26",alt:"일본 도시 풍경"},
+{id:3,name:"싱가포르",country:"싱가포르",flight:6.5,min:300,max:450,grade:"S",rating:4.7,kid:5,shop:5,food:4,rest:3,theme:["theme","shop","nature"],desc:"동물원·정원·테마파크가 잘 정돈되어 있어 도시형 가족여행에 적합.",places:["유니버설 스튜디오 싱가포르","가든스 바이 더 베이","싱가포르 동물원","센토사섬"],pros:["교통과 관광 인프라가 편리함","아이 연령대에 맞는 체험이 다양함"],cons:["항공·숙박비가 상대적으로 높음","비행시간이 6시간 이상"],img:"photo-1525625293386-3f8f99389edd",alt:"싱가포르 도심"},
+{id:4,name:"다낭",country:"베트남",flight:4.5,min:150,max:240,grade:"S",rating:4.8,kid:4,shop:3,food:4,rest:5,theme:["rest","nature","food"],desc:"수영장과 해변에서 쉬면서 하루 정도 테마형 관광을 넣기 좋은 여행.",places:["바나힐 골든브리지","미케해변","호이안 구시가지","한시장"],pros:["리조트 대비 비용이 합리적인 편","휴양과 관광의 균형을 맞추기 쉬움"],cons:["낮 더위와 습도 고려 필요","관광지 이동 때 차량 이동이 필요"],img:"photo-1559592413-7cec4d0cae2b",alt:"베트남 여행 풍경"},
+{id:5,name:"도쿄",country:"일본",flight:2.5,min:180,max:300,grade:"S",rating:4.8,kid:5,shop:5,food:5,rest:2,theme:["theme","shop","food"],desc:"디즈니와 캐릭터 쇼핑, 과학관·동물원 등 선택지가 풍부한 대도시 여행.",places:["도쿄디즈니랜드","도쿄디즈니씨","팀랩 플래닛","우에노 동물원"],pros:["연령과 취향에 맞는 체험 선택 폭이 넓음","대중교통으로 이동 가능"],cons:["도시 규모가 커 이동 계획이 중요","인기 명소 대기와 비용 부담"],img:"photo-1540959733332-eab4de9377e6",alt:"도쿄 도시"},
+{id:6,name:"후쿠오카",country:"일본",flight:1.5,min:120,max:200,grade:"A+",rating:4.6,kid:4,shop:4,food:5,rest:3,theme:["food","shop","nature"],desc:"비행시간이 짧고 맛집과 쇼핑, 근교 체험을 가볍게 묶기 좋음.",places:["마린월드 우미노나카미치","캐널시티 하카타","다자이후","팀랩 포레스트"],pros:["짧은 비행으로 이동 피로가 적음","예산을 비교적 낮게 관리 가능"],cons:["대형 테마파크 중심 여행은 아님","근교 방문 시 일정 조율 필요"],img:"photo-1493976040374-85c8e12f0c0e",alt:"일본 전통 거리"},
+{id:7,name:"타이베이",country:"대만",flight:2.5,min:140,max:220,grade:"A+",rating:4.6,kid:4,shop:4,food:5,rest:3,theme:["food","nature","shop"],desc:"동물원과 곤돌라, 야시장, 근교 온천을 한 일정에 조합하기 좋음.",places:["타이베이 동물원","마오콩 곤돌라","타이베이 101","스린 야시장"],pros:["먹거리와 교통비 부담이 비교적 적음","도시 관광과 근교 체험을 결합 가능"],cons:["여름 더위와 습도·비 고려 필요","야시장 혼잡 시간대 주의"],img:"photo-1470004914212-05527e49370b",alt:"대만 거리"},
+{id:8,name:"괌",country:"미국령 괌",flight:4.5,min:250,max:400,grade:"A+",rating:4.6,kid:4,shop:4,food:3,rest:5,theme:["rest","nature","shop"],desc:"해변과 수영장, 쇼핑을 중심으로 일정을 느슨하게 운영하기 좋음.",places:["투몬비치","언더워터월드","사랑의 절벽","괌 프리미어 아울렛"],pros:["가족형 리조트와 해변 휴양에 적합","관광지를 많이 돌지 않아도 만족 가능"],cons:["식비와 숙박비가 높은 편","한낮 햇볕과 렌터카 여부 고려"],img:"photo-1507525428034-b723cf961d3e",alt:"열대 해변"},
+{id:9,name:"삿포로·홋카이도",country:"일본",flight:2.5,min:180,max:300,grade:"A+",rating:4.6,kid:4,shop:3,food:5,rest:4,theme:["nature","food","rest"],desc:"계절 풍경과 동물원, 과자 체험, 온천을 좋아하는 가족에게 적합.",places:["시로이 코이비토 파크","오타루 운하","아사히야마 동물원","노보리베츠 온천"],pros:["자연과 먹거리, 체험이 다양함","여름은 비교적 선선한 편"],cons:["지역 간 이동시간이 길 수 있음","겨울에는 추위·눈길 대비 필요"],img:"photo-1493976040374-85c8e12f0c0e",alt:"일본 여행 풍경"},
+{id:10,name:"세부",country:"필리핀",flight:4.5,min:160,max:250,grade:"A+",rating:4.5,kid:4,shop:2,food:3,rest:5,theme:["rest","nature"],desc:"리조트 수영장과 스노클링, 섬 투어 중심의 해양 휴양 여행.",places:["막탄 리조트","세부 오션파크","날루수안섬","산페드로 요새"],pros:["수영과 바다 활동을 충분히 즐길 수 있음","리조트 중심으로 일정 조절 가능"],cons:["해양 투어는 날씨 영향을 받음","투어 안전·이동업체를 신중히 선택"],img:"photo-1500375592092-40eb2168fd21",alt:"푸른 바다"},
+{id:11,name:"나트랑",country:"베트남",flight:5,min:150,max:250,grade:"A+",rating:4.5,kid:4,shop:3,food:4,rest:5,theme:["rest","nature","theme"],desc:"해변 리조트와 워터파크, 섬 체험을 조합하기 좋은 휴양지.",places:["빈원더스","혼쩨섬","포나가르 사원","해변 리조트"],pros:["리조트 휴양 대비 비용이 합리적","물놀이와 놀이시설을 함께 즐김"],cons:["계절별 파도·비 확인 필요","시내와 리조트 위치에 따라 이동 차이"],img:"photo-1500375592092-40eb2168fd21",alt:"바다 풍경"},
+{id:12,name:"방콕",country:"태국",flight:5.5,min:160,max:250,grade:"A",rating:4.4,kid:4,shop:5,food:5,rest:3,theme:["shop","food","theme"],desc:"대형 쇼핑몰과 수족관, 실내 체험을 섞어 더위를 피하며 여행 가능.",places:["씨라이프 방콕","아이콘시암","사파리 월드","아시아티크"],pros:["쇼핑과 먹거리 선택지가 매우 많음","실내 관광을 일정에 넣기 좋음"],cons:["교통체증과 더위가 큰 변수","관광지 이동 시간을 넉넉히 잡아야 함"],img:"photo-1508009603885-50cf7c579365",alt:"방콕 도시 풍경"},
+{id:13,name:"가오슝",country:"대만",flight:3,min:130,max:210,grade:"A",rating:4.3,kid:3,shop:3,food:5,rest:3,theme:["food","nature","shop"],desc:"타이베이보다 한결 여유로운 도시 산책과 야시장 중심 여행.",places:["보얼예술특구","아이허","시즈완","류허 야시장"],pros:["먹거리와 도시 산책을 즐기기 좋음","여행 속도를 느긋하게 조절 가능"],cons:["대형 테마파크 선택지는 제한적","계절별 더위 확인 필요"],img:"photo-1470004914212-05527e49370b",alt:"대만 풍경"},
+{id:14,name:"상하이",country:"중국",flight:2,min:150,max:260,grade:"A",rating:4.4,kid:5,shop:5,food:5,rest:2,theme:["theme","shop","food"],desc:"디즈니랜드와 도심 야경, 쇼핑을 함께 즐기는 도시형 여행.",places:["상하이 디즈니랜드","와이탄","예원","상하이 자연박물관"],pros:["디즈니랜드가 큰 여행 목적이 될 수 있음","도시 관광과 쇼핑 선택지가 풍부"],cons:["입국·결제·지도 앱 등 사전 준비 필요","디즈니 일정은 체력과 예산 소모 큼"],img:"photo-1519501025264-65ba15a82390",alt:"상하이 도시"},
+{id:15,name:"홍콩",country:"중국 특별행정구",flight:3.5,min:200,max:320,grade:"A",rating:4.4,kid:5,shop:5,food:5,rest:2,theme:["theme","shop","food"],desc:"디즈니랜드, 케이블카, 전망대와 먹거리를 압축해 즐기기 좋음.",places:["홍콩 디즈니랜드","오션파크","옹핑 360","빅토리아 피크"],pros:["아이들이 좋아하는 명소가 많음","대중교통으로 이동하기 편리"],cons:["숙박 공간 대비 가격이 높을 수 있음","언덕·계단과 혼잡에 대비"],img:"photo-1508009603885-50cf7c579365",alt:"도시 야경"},
+{id:16,name:"마카오",country:"중국 특별행정구",flight:4,min:180,max:300,grade:"A-",rating:4.0,kid:3,shop:4,food:4,rest:3,theme:["shop","food","theme"],desc:"대형 호텔의 실내 시설과 유럽풍 거리 풍경을 경험하는 여행.",places:["스튜디오 시티","베네시안 마카오","마카오 과학관","세나도 광장"],pros:["호텔 안에서 즐길 거리가 많음","홍콩과 묶는 일정도 가능"],cons:["아이 중심 야외 체험은 상대적으로 적음","호텔·리조트 가격 변동이 큼"],img:"photo-1519501025264-65ba15a82390",alt:"도시 여행"},
+{id:17,name:"나고야",country:"일본",flight:2,min:130,max:220,grade:"A-",rating:4.2,kid:5,shop:4,food:4,rest:3,theme:["theme","nature","shop"],desc:"레고와 철도, 수족관을 좋아하는 아이에게 특히 매력적인 도시.",places:["레고랜드 재팬","나고야항 수족관","SCMAGLEV 철도관","오스 상점가"],pros:["아이 취향에 맞춘 테마 체험이 확실함","도쿄·오사카보다 다른 분위기"],cons:["관광지를 고르는 사전 계획이 필요","명소 간 이동을 고려해야 함"],img:"photo-1503899036084-c55cdd92da26",alt:"일본 도시"},
+{id:18,name:"푸꾸옥",country:"베트남",flight:5.5,min:180,max:280,grade:"A-",rating:4.3,kid:4,shop:2,food:3,rest:5,theme:["rest","nature","theme"],desc:"리조트와 워터파크, 사파리를 묶어 느긋하게 쉬는 섬 여행.",places:["빈원더스","빈펄 사파리","혼똔섬 케이블카","즈엉동 야시장"],pros:["물놀이·동물 체험을 함께 구성","리조트에서 쉬는 시간 확보 가능"],cons:["항공편 운항일과 직항 여부 확인 필요","섬 안에서도 이동시간이 생김"],img:"photo-1500375592092-40eb2168fd21",alt:"열대 섬"},
+{id:19,name:"칭다오",country:"중국",flight:1.5,min:110,max:190,grade:"A-",rating:4.0,kid:3,shop:3,food:4,rest:3,theme:["food","nature"],desc:"짧은 비행으로 해변과 해양 시설, 현지 음식을 경험하는 실속 여행.",places:["칭다오 극지해양공원","5·4 광장","잔교","칭다오 맥주박물관"],pros:["비행시간이 매우 짧은 편","예산을 비교적 낮게 잡을 수 있음"],cons:["아이 취향에 따라 체험 매력이 다름","입국·결제 관련 준비 필요"],img:"photo-1507525428034-b723cf961d3e",alt:"바닷가 풍경"},
+{id:20,name:"베이징",country:"중국",flight:2,min:140,max:240,grade:"A-",rating:4.0,kid:4,shop:4,food:4,rest:2,theme:["theme","nature","food"],desc:"만리장성 등 역사 체험과 대형 테마파크를 함께 즐길 수 있음.",places:["유니버설 베이징 리조트","자금성","천단공원","만리장성"],pros:["역사·문화 교육과 놀이를 결합","유니버설 리조트 선택 가능"],cons:["관광지 간 이동이 길 수 있음","입국 조건·대기·날씨 확인 필요"],img:"photo-150 sang",alt:"도시 풍경"}
+];
+const imageIds = {
+  "오키나와":"photo-1507525428034-b723cf961d3e","오사카":"photo-1493976040374-85c8e12f0c0e","싱가포르":"photo-1525625293386-3f8f99389edd","다낭":"photo-1559592413-7cec4d0cae2b","도쿄":"photo-1540959733332-eab4de9377e6","후쿠오카":"photo-1493976040374-85c8e12f0c0e","타이베이":"photo-1470004914212-05527e49370b","괌":"photo-1507525428034-b723cf961d3e","삿포로·홋카이도":"photo-1493976040374-85c8e12f0c0e","세부":"photo-1500375592092-40eb2168fd21","나트랑":"photo-1500375592092-40eb2168fd21","방콕":"photo-1508009603885-50cf7c579365","가오슝":"photo-1470004914212-05527e49370b","상하이":"photo-1519501025264-65ba15a82390","홍콩":"photo-1519501025264-65ba15a82390","마카오":"photo-1519501025264-65ba15a82390","나고야":"photo-1503899036084-c55cdd92da26","푸꾸옥":"photo-1500375592092-40eb2168fd21","칭다오":"photo-1507525428034-b723cf961d3e","베이징":"photo-1519501025264-65ba15a82390"
+};
+const selected = new Set();
+const $ = id => document.getElementById(id);
+const money = n => `${n}만 원`;
+const stars = n => "★".repeat(n)+"☆".repeat(5-n);
+const gradeRank = g => ({S:5,"A+":4,A:3,"A-":2}[g]||1);
+const gradeClass = g => g==="S"?"":g==="A+"?"a":"am";
+const themeNames = {theme:"테마파크·체험",rest:"휴양·수영장",shop:"쇼핑·도시",food:"먹거리",nature:"자연·동물"};
+function cost(d){const days=+$("duration").value;const factor=days===2?.78:days===4?1.22:1;return {min:Math.round(d.min*factor),max:Math.round(d.max*factor)}}
+function imgUrl(d){return `https://images.unsplash.com/${imageIds[d.name]||"photo-1507525428034-b723cf961d3e"}?auto=format&fit=crop&w=900&q=80`}
+function card(d){
+ return `<article class="card">
+ <div class="photo"><img loading="lazy" src="${imgUrl(d)}" alt="${d.name} 여행 대표 사진" onerror="this.style.display='none';this.parentElement.style.background='linear-gradient(135deg,#dbeafe,#c7d2fe)'"><span class="rank">${d.grade} 등급</span><span class="flight">✈ 약 ${d.flight}시간</span></div>
+ <div class="cardbody">
+ <div class="topline"><h2>${d.name}</h2><span class="grade ${gradeClass(d.grade)}">${d.grade}급</span></div>
+ <div><div class="price">${money(cost(d).min)}~${money(cost(d).max)} <small>/ 가족 4인</small></div><div class="stars">${stars(Math.round(d.rating))} <span style="color:#687582"> ${d.rating.toFixed(1)} / 5</span></div></div>
+ <div class="desc">${d.desc}</div>
+ <div class="tags">${d.theme.map(t=>`<span class="tag">${themeNames[t]}</span>`).join("")}</div>
+ <div class="scoregrid">
+ <div class="score"><span>아이 체험</span><strong>${stars(d.kid)}</strong></div>
+ <div class="score"><span>쇼핑</span><strong>${stars(d.shop)}</strong></div>
+ <div class="score"><span>먹거리</span><strong>${stars(d.food)}</strong></div>
+ <div class="score"><span>휴양</span><strong>${stars(d.rest)}</strong></div>
+ </div>
+ <div class="places"><b>추천 장소</b><br>${d.places.join(" · ")}</div>
+ <div class="proscons"><div class="pros"><b>✓ 장점</b><ul>${d.pros.map(x=>`<li>${x}</li>`).join("")}</ul></div><div class="cons"><b>! 고려할 점</b><ul>${d.cons.map(x=>`<li>${x}</li>`).join("")}</ul></div></div>
+ </div>
+ <div class="cardfoot"><label class="comparelabel"><input type="checkbox" ${selected.has(d.id)?"checked":""} onchange="toggleCompare(${d.id},this.checked)"> 비교 목록에 담기</label><button class="detailsbtn" onclick="showDetails(${d.id})">상세 보기 ↗</button></div>
+ </article>`;
+}
+function filtered(){
+ const q=$("search").value.trim().toLowerCase(), b=+$("budget").value, f=+$("flight").value, st=$("style").value, gf=$("gradeFilter").value;
+ let list=destinations.filter(d=>(!q||[d.name,d.country,d.desc,...d.places,...d.pros,...d.cons].join(" ").toLowerCase().includes(q))&&cost(d).max<=b&&d.flight<=f&&(st==="all"||d.theme.includes(st))&&(gf==="all"||gradeRank(d.grade)>=gradeRank(gf)));
+ const sort=$("sort").value;
+ list.sort((a,b)=>sort==="price"?a.min-b.min:sort==="flight"?a.flight-b.flight:sort==="kid"?b.kid-a.kid:sort==="rest"?b.rest-a.rest:gradeRank(b.grade)-gradeRank(a.grade)||b.rating-a.rating);
+ return list;
+}
+function render(){
+ const list=filtered(); $("cards").innerHTML=list.length?list.map(card).join(""):`<div class="empty">조건에 맞는 여행지가 없습니다.<br>예산 상한이나 필터를 조금 넓혀 보세요.</div>`;
+ $("resultText").textContent=`조건에 맞는 여행지 ${list.length}곳 · 전체 ${destinations.length}곳`;
+ $("budgetLabel").textContent=money(+$("budget").value); $("selectedCount").textContent=`${selected.size} / 3`;
+ $("compareBtn").textContent=selected.size?`선택한 ${selected.size}곳 비교`:"선택한 여행지 비교";
+}
+function toggleCompare(id,checked){
+ if(checked){if(selected.size>=3){alert("한 번에 최대 3곳까지 비교할 수 있습니다.");render();return}selected.add(id)}else selected.delete(id);
+ render(); if(selected.size)renderCompare();
+}
+function renderCompare(){
+ const list=[...selected].map(id=>destinations.find(d=>d.id===id)); if(!list.length){$("comparePanel").classList.remove("show");return}
+ const rows=[["예상 총경비",d=>`${money(cost(d).min)}~${money(cost(d).max)}`],["직항 비행시간",d=>`약 ${d.flight}시간`],["추천 등급",d=>d.grade],["종합 별점",d=>`${d.rating.toFixed(1)} / 5`],["아이 체험",d=>stars(d.kid)],["쇼핑",d=>stars(d.shop)],["먹거리",d=>stars(d.food)],["휴양",d=>stars(d.rest)],["추천 장소",d=>d.places.join(" · ")],["장점",d=>d.pros.join(" / ")],["고려할 점",d=>d.cons.join(" / ")]];
+ $("compareTable").innerHTML=`<table><thead><tr><th>비교 항목</th>${list.map(d=>`<th>${d.name}</th>`).join("")}</tr></thead><tbody>${rows.map(([label,fn])=>`<tr><th>${label}</th>${list.map(d=>`<td>${fn(d)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+ $("comparePanel").classList.add("show");
+}
+function showDetails(id){
+ const d=destinations.find(x=>x.id===id);
+ $("modalContent").innerHTML=`<h2 id="modalTitle">${d.name} 가족여행</h2><p style="margin:0;color:#687582">${d.country} · 추천 등급 ${d.grade} · 종합 별점 ${d.rating.toFixed(1)}/5</p><img src="${imgUrl(d)}" alt="${d.name} 대표 이미지"><div class="modalgrid"><div class="modalbox"><b>예상 경비</b><p>${money(d.min)}~${money(d.max)} / 4인 가족</p><b>비행시간</b><p>직항 편도 약 ${d.flight}시간</p><b>추천 장소</b><p>${d.places.join(" · ")}</p></div><div class="modalbox"><b>장점</b><ul>${d.pros.map(x=>`<li>${x}</li>`).join("")}</ul><b>고려할 점</b><ul>${d.cons.map(x=>`<li>${x}</li>`).join("")}</ul></div></div><p style="font-size:13px;color:#687582">예산은 실시간 견적이 아닌 계획용 추정치입니다. 예약 전 항공편·숙소·입장권을 확인해 주세요.</p><button class="primary" onclick="toggleFromModal(${d.id})">${selected.has(d.id)?"비교 목록에서 빼기":"비교 목록에 담기"}</button>`;
+ $("modalback").classList.add("open");
+}
+function toggleFromModal(id){toggleCompare(id,!selected.has(id));showDetails(id)}
+["search","budget","flight","style","sort","gradeFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));
+$("duration").addEventListener("change",render);
+$("reset").addEventListener("click",()=>{$("search").value="";$("budget").value=250;$("flight").value=7;$("style").value="all";$("sort").value="grade";$("gradeFilter").value="all";selected.clear();$("duration").value=3;render();$("comparePanel").classList.remove("show")});
+$("compareBtn").addEventListener("click",()=>{if(!selected.size){alert("비교할 여행지 카드의 체크박스를 먼저 선택해 주세요.");return}renderCompare();$("comparePanel").scrollIntoView({behavior:"smooth",block:"start"})});
+$("printBtn").addEventListener("click",()=>window.print());
+$("closeModal").addEventListener("click",()=>$("modalback").classList.remove("open"));
+$("modalback").addEventListener("click",e=>{if(e.target===$("modalback"))$("modalback").classList.remove("open")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("modalback").classList.remove("open")});
+render();
+</script>
+</body>
+</html>
