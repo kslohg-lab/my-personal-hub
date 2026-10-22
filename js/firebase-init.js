@@ -1,10 +1,10 @@
 // Firebase 초기화 전용. 설정값(firebaseConfig)과 가족 계정 목록(FAMILY)은 여기에만 둔다.
 // 다른 모듈은 Firebase 주소를 직접 import하지 않고 이 파일에서 가져다 쓴다.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { initializeFirestore, collection, addDoc, query, orderBy, limit, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeFirestore, collection, addDoc, query, orderBy, limit, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-export { collection, addDoc, query, orderBy, limit, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc };
+export { collection, addDoc, query, orderBy, limit, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, increment };
 export { signInWithEmailAndPassword, onAuthStateChanged, signOut };
 
 // core.js의 "연결 모듈을 불러오지 못했어요" 안내를 끄는 표시

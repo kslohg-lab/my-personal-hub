@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<link rel="stylesheet" href="css/app.css?v=1.11">
+<link rel="stylesheet" href="css/app.css?v=1.12">
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
 
@@ -173,11 +173,12 @@
     <section id="tab-planner" class="tab">
       <div class="col space-y-4">
         <div>
-          <h2 class="text-lg font-bold text-slate-100">나의 일정 플래너</h2>
-          <p class="text-xs text-slate-400">가족이 함께 보는 일정이에요. 누가 추가했는지도 보여요.</p>
+          <h2 class="text-lg font-bold text-slate-100">가족 일정 보드</h2>
+          <p class="text-xs text-slate-400">가족이 함께 보는 보드예요. 받는 사람을 고르고, 글을 눌러 답글을 남겨요.</p>
           <p id="todoCount" class="text-xs text-indigo-400 mt-1"></p>
         </div>
         <div class="flex gap-2">
+          <select id="todoTo" aria-label="받는 사람" class="shrink-0 w-[4.5rem] bg-slate-900 border border-slate-800 rounded-xl px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"></select>
           <input type="text" id="todoInput" autocomplete="off" placeholder="새 일정 추가..." class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
           <button id="todoAdd" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl text-sm font-semibold transition-all">추가</button>
         </div>
@@ -197,10 +198,10 @@
 </div>
 
 <!-- ① 일반 스크립트: Firebase와 무관 (화면 전환, 탭, 게임). Firebase가 실패해도 항상 동작 -->
-<script src="js/core.js?v=1.11"></script>
-<script src="js/games.js?v=1.11"></script>
+<script src="js/core.js?v=1.12"></script>
+<script src="js/games.js?v=1.12"></script>
 
 <!-- ② 모듈 스크립트: Firebase 로그인/채팅/일정/영상. 진입점은 main.js -->
-<script type="module" src="js/main.js?v=1.11"></script>
+<script type="module" src="js/main.js?v=1.12"></script>
 </body>
 </html>
