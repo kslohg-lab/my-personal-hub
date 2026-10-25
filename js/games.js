@@ -43,7 +43,7 @@ resetGame();
 const GAMES = [
   { id: 'math-monster',  title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요', cost: 1 },
   { id: 'speed-math',    title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결', cost: 1 },
-  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 7, cost: 1 },
+  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 8, cost: 1 },
   { id: 'claw-machine',  title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요', cost: 1 },
   { id: 'travel-picker', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요', cost: 1 },
   { id: 'cyber-runner',  title: 'Cyber Runner',           desc: '점프로 장애물을 피하세요', builtin: true, cost: 1 }
@@ -168,7 +168,20 @@ function closeGame() {
 addEventListener('popstate', () => { if (curGame) doClose(); });
 addEventListener('resize', layoutPlayer);
 addEventListener('orientationchange', () => setTimeout(layoutPlayer, 200));
-document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && curGame && curGame !== 'cyber-runner') closeGame(); });
+// 폰의 홈 버튼으로 앱이 백그라운드로 가면 브라우저가 전체화면을 풀면서 fullscreenchange가 온다.
+// 그걸 '게임 종료'로 착각하면 게임이 닫혀서 처음부터 다시 시작하게 되므로, 백그라운드 직후의 전체화면 해제는 무시한다.
+// (사용자가 직접 전체화면을 끝낸 경우 = 앱이 보이는 상태에서만 게임을 닫는다)
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenAt = Date.now(); });
+addEventListener('pagehide', () => { hiddenAt = Date.now(); });
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement || !curGame || curGame === 'cyber-runner') return;
+  setTimeout(() => {
+    if (document.fullscreenElement || !curGame) return;
+    if (document.hidden || Date.now() - hiddenAt < 2500) return;   // 백그라운드로 간 것 → 게임 유지
+    closeGame();
+  }, 700);
+});
 (function buildGameCards() {
   const box = $('gameCards');
   GAMES.forEach(g => {

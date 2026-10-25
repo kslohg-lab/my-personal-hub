@@ -141,12 +141,27 @@ function renderMenu(){
   b.onclick=()=>{au();if(u){if(c.pet)save.pet=save.pet===i?-1:i;else save.sel=i}else if(save.coins>=c.p){save.coins-=c.p;save.un.push(i);if(c.pet)save.pet=i;else save.sel=i;toast(c.n+' 친구가 함께해요! 🎉');snd('pow')}else{toast('코인이 부족해요! ('+c.p+'🪙 필요)');return}store();renderMenu()};cs.appendChild(b)});
  const c=CH[save.sel];$('ci').innerHTML=`<b>${c.n}</b><br>${c.d}${c.sk?'<br>⚡ '+SK[c.sk].n+': '+SK[c.sk].d:''}`;{const q=goal(),o=GL[q.i];$('gl').textContent=(q.ok?'✅ ':'🎯 ')+o.t+' ('+Math.min(q.p,o.n)+'/'+o.n+')'+(q.ok?' 완료!':' 보상 '+o.r+'🪙')+'   ⭐ '+stT()+'/30   🎚️ '+DFN[save.df]}
  const ss=$('sts');ss.innerHTML='';
- {const b1=document.createElement('button');b1.className='big';b1.textContent='▶️ 처음부터 달리기';b1.onclick=()=>{au();startGame('stage',1)};ss.appendChild(b1);
- if(save.reach>=2){const b2=document.createElement('button');b2.className='big';b2.style.background='#9be0ff';b2.textContent='⏩ 이어서 ('+save.reach+'단계부터)';b2.onclick=()=>{au();startGame('stage',save.reach)};ss.appendChild(b2)}}
+ {const rr=getRun();if(rr){const o=rr.g,b0=document.createElement('button');b0.className='big';b0.style.background='#ffd76a';b0.textContent='▶️ 이어서 하기 ('+(o.mode==='inf'?'무한 모드 '+Math.floor(o.dist)+'m':o.stage+'단계')+' · 🪙'+(o.coins||0)+')';b0.onclick=()=>{au();resumeRun()};ss.appendChild(b0)}
+ const b1=document.createElement('button');b1.className='big';b1.textContent='▶️ 처음부터 달리기';b1.onclick=()=>{au();startGame('stage',1)};ss.appendChild(b1);
+ if(save.reach>=2){const b2=document.createElement('button');b2.className='big';b2.style.background='#9be0ff';b2.textContent='⏩ '+save.reach+'단계부터 새로 시작';b2.onclick=()=>{au();startGame('stage',save.reach)};ss.appendChild(b2)}}
  const o=save.cleared>=10,f=$('inf');f.textContent=o?'♾️ 무한 모드 (최고 '+save.best+'m)':'🔒 무한 모드 (10단계 클리어 후)';f.onclick=()=>{au();o?startGame('inf',10):toast('10단계를 모두 클리어하면 열려요!')};
 }
-function toMenu(){if(scr==='game'&&g){save.coins+=g.coins;if(g.mode==='inf')save.best=Math.max(save.best,Math.floor(g.dist));store()}scr='menu';renderMenu();show('menu')}
-function pauseGame(){if(scr!=='game'||!g||paused||g.ph==='pick')return;paused=true;ptr={};rptr={};keys={};down=false;$('pause').style.display='block'}
+function toMenu(){if(scr==='game'&&g){save.coins+=g.coins;if(g.mode==='inf')save.best=Math.max(save.best,Math.floor(g.dist));store()}clrRun();scr='menu';renderMenu();show('menu')}
+function pauseGame(){if(scr!=='game'||!g||paused||g.ph==='pick')return;snapRun();paused=true;ptr={};rptr={};keys={};down=false;$('pause').style.display='block'}
+/* ---------- 중단 저장 / 이어서 하기 (허브 추가) ----------
+   판 도중 상태를 localStorage('animalRunV6run')에 저장 → 앱을 껐다 켜도 '이어서 하기'로 그 자리에서 계속.
+   저장 시점: 2초마다 / 일시정지 / 앱이 백그라운드로 갈 때. 판이 끝나거나 '메뉴로'를 누르면 삭제. */
+const RKEY='animalRunV6run';let rsT=0;
+function clrRun(){try{localStorage.removeItem(RKEY)}catch(e){}}
+function snapRun(){
+ if(scr!=='game'||!g)return;
+ if(g.ph==='dead'||g.ph==='win'){clrRun();return}
+ try{const o=Object.assign({},g);delete o.pa;o.c=CH.indexOf(g.c);o.pt=g.pt?CH.indexOf(g.pt):-1;localStorage.setItem(RKEY,JSON.stringify({v:1,at:Date.now(),g:o}))}catch(e){}}
+function getRun(){try{const r=JSON.parse(localStorage.getItem(RKEY));if(!r||r.v!==1||!r.g)return null;const o=r.g;if(!CH[o.c]||!o.p||typeof o.stage!=='number'||(o.mode!=='stage'&&o.mode!=='inf'))return null;return r}catch(e){return null}}
+function bankRun(){const r=getRun();if(r){save.coins+=r.g.coins||0;if(r.g.mode==='inf')save.best=Math.max(save.best,Math.floor(r.g.dist||0));store()}clrRun()}
+function resumeRun(){const r=getRun();if(!r)return;const o=r.g;o.c=CH[o.c];o.pt=o.pt>=0?CH[o.pt]:null;o.pa=[];g=o;bt=0;bs=0;scr='game';down=false;ptr={};rptr={};keys={};show('none');
+ if(g.ph==='pick'){paused=false;$('pause').style.display='none';openPick()}else{paused=true;$('pause').style.display='block'}}
+addEventListener('pagehide',snapRun);
 function resumeGame(){if(!paused)return;paused=false;$('pause').style.display='none';last=0}
 $('home').onclick=pauseGame;$('pc1').onclick=resumeGame;$('pc2').onclick=()=>{paused=false;$('pause').style.display='none';toMenu()};$('r3').onclick=toMenu;
 const setR=()=>{$('sn').textContent=save.snd?'🔊 소리 켜짐':'🔇 소리 꺼짐';[0,1,2].forEach(i=>{const b=$('d'+i);b.textContent=DFN[i];b.style.outline=save.df===i?'4px solid #ff9ec4':'none'});$('dd').textContent=DFD[save.df];let h='';for(let i=1;i<=10;i++){const a=save.ds[i]||0,b=save.dbs[i]||0;h+='<div style="background:'+(a?'#ffe1ea':'#f4eefa')+';border-radius:10px;padding:3px 0;font-size:13px;line-height:1.25">'+i+'단계<br>💀'+a+(b?' ⚔️'+b:'')+'</div>'}$('dst').innerHTML=h};
@@ -157,6 +172,7 @@ $('sc').onclick=()=>{$('set').style.display='none'};
 $('rs').onclick=()=>{if($('rs').dataset.s!=='1'){$('rs').dataset.s='1';$('rs').textContent='⚠️ 정말 지울까요? 한 번 더!';setTimeout(()=>{$('rs').dataset.s='0';$('rs').textContent='🗑️ 저장 데이터 지우기'},3000)}else{save=DEF();store();$('rs').dataset.s='0';$('rs').textContent='🗑️ 저장 데이터 지우기';renderMenu();setR();toast('모두 지웠어요')}};
 
 function startGame(mode,stage){
+ bankRun();
  g={mode,stage,c:CH[save.sel],pt:save.pet>=0?CH[save.pet]:null,t:0,dist:0,coins:0,hp:100,inv:0,ph:'run',ob:[],it:[],pa:[],pw:{boost:0,mag:0,giant:0},p:{x:110,y:G,vy:0,j:0,sl:false,fly:0},boss:null,bgx:0,len:14+stage,seg:0,ban:2.2,spawnT:1.2,appleT:8,powT:22,shake:0,spd:300,endT:0,wt:0,zapT:1,fz:0,rf:0,ht:0,fl:0,sa:5,star:0,skc:4,skm:4,dash:0,vac:0,shield:0,glide:0,fire:0,skl:0,pk:{},psh:0,slT:0,tp:null,zw:null,zt:0,dk:1,light:0,fireT:5,az:null,noOb:false,wind:false,ice:false,dark:false,sticky:0,sandA:0,zones:[]};bt=0;bs=0;setupStage(g);
  scr='game';paused=false;down=false;ptr={};rptr={};keys={};show('none');
 }
@@ -317,7 +333,7 @@ function bgm(dt){const s=g;if(!AC||AC.state!=='running'||!save.snd||(s.ph!=='run
  else{const root=CPR[th][bar],d=PAT[th%3][k];if(d>=0)tone(261.63*Math.pow(2,(root+SCM[d%5]+12*(d/5|0))/12),.2,'triangle',.05);if(k%4===0)tone(130.81*Math.pow(2,root/12),.34,'sine',.07)}}
 function nextSt(){const s=g;s.stage++;save.reach=Math.max(save.reach,s.stage);prog('stage',s.stage);store();s.star=0;s.seg=0;setupStage(s);s.psh=s.pk.sh?1:0;s.fireT=5;s.light=0;s.dk=1;s.vac=0;s.dash=0;s.glide=0;s.skl=0;s.ph='run';s.boss=null;s.ob=[];s.it=[];s.hp=Math.min(100,s.hp+35+(s.pt&&s.pt.bh||0));s.ban=2.2;s.spawnT=1.5;s.inv=1.5;snd('win');ft('체력 +35',110,G-90,'#ff6b8a')}
 function fin(win){
- const s=g;scr='result';if(!win&&s.mode==='stage'){save.ds[s.stage]=(save.ds[s.stage]||0)+1;if(s.pph==='boss')save.dbs[s.stage]=(save.dbs[s.stage]||0)+1}save.coins+=s.coins;if(s.mode==='stage')save.bs=Math.max(save.bs||1,s.stage);let first=false;
+ const s=g;clrRun();scr='result';if(!win&&s.mode==='stage'){save.ds[s.stage]=(save.ds[s.stage]||0)+1;if(s.pph==='boss')save.dbs[s.stage]=(save.dbs[s.stage]||0)+1}save.coins+=s.coins;if(s.mode==='stage')save.bs=Math.max(save.bs||1,s.stage);let first=false;
  if(s.mode==='stage'&&win&&s.stage>save.cleared){first=s.stage===10;save.cleared=s.stage}
  const d=Math.floor(s.dist);let nb='';if(s.mode==='inf'&&d>save.best){save.best=d;nb=' 🎉 신기록!'}
  store();
@@ -495,12 +511,12 @@ function draw(){
 }
 let last=0,fc=0;const chk=()=>{$('rot').style.display=innerWidth>innerHeight?'none':'flex'};
 function loop(ts){const dt=Math.min(.033,(ts-last)/1000||0);last=ts;if(++fc%20===0)chk();
- if(g&&scr==='game'&&!paused&&innerWidth>innerHeight){upd(dt);bgm(dt)}
+ if(g&&scr==='game'&&!paused&&innerWidth>innerHeight){upd(dt);bgm(dt);if((rsT+=dt)>2){rsT=0;snapRun()}}
  if(g&&(scr==='game'||scr==='result'))draw();
  requestAnimationFrame(loop)}
 function fit(){chk();const b=document.body,s=Math.min(b.clientWidth/W,b.clientHeight/H);$('box').style.transform=`translate(${(b.clientWidth-W*s)/2}px,${(b.clientHeight-H*s)/2}px) scale(${s})`}
 addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));
-document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();if(AC){if(document.hidden)AC.suspend();else AC.resume()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();snapRun()}if(AC){if(document.hidden)AC.suspend();else AC.resume()}});
 fit();renderMenu();show('menu');requestAnimationFrame(loop);
 })();
 </script></body></html>
