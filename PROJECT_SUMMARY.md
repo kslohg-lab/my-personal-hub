@@ -1,6 +1,6 @@
 # 📌 My Personal Hub — 프로젝트 정리 (Project Summary)
 
-- **현재 버전:** v1.20
+- **현재 버전:** v1.21
 - **마지막 업데이트:** 2026-10-25
 - **저장소:** `kslohg-lab/my-personal-hub` (branch: `main`)
 - **이 문서의 목적:** 새 대화방이나 다른 AI가 이 문서만 읽고도 프로젝트를 정확히 이해하고, 기존 기능을 깨뜨리지 않고 수정할 수 있게 하는 **단일 상태 문서**입니다. 수정할 때마다 맨 아래 "변경 이력"과 필요한 섹션을 함께 갱신하세요.
@@ -34,6 +34,8 @@ my-personal-hub/
 │  ├─ tickets.js           ← [모듈] 게임 티켓(wallets): 부모 지급/회수, 아이 입장 결제, 내역
 │  ├─ calendar.js          ← [모듈] 가족 달력(events), 일정 탭의 [달력|보드] 전환, 홈의 '다가오는 일정'
 │  ├─ videos.js            ← [모듈] 가족 영상 카드
+│  ├─ scores.js            ← [모듈] 게임 점수판(scores): 게임이 저장한 이 기기 최고 기록을 읽어 올리고 가족 순위 표시
+│  ├─ holidays.js          ← [데이터] 대한민국 공휴일 표(2026~2030, 대체공휴일 포함) — 달력 빨간 날
 │  └─ util.js              ← [모듈] 공통 도구 `$`
 ├─ manifest.json           ← PWA 설정 (이름, 아이콘, 전체 화면 표시)
 ├─ icons/                  ← 앱 아이콘 (icon-192, icon-512, icon-maskable-512, apple-touch-icon)
@@ -64,7 +66,7 @@ my-personal-hub/
 - **일반 스크립트(core.js, games.js)는 Firebase와 무관**해야 함. Firebase가 실패해도 탭 전환, 게임은 항상 동작.
 - **모듈(main.js 이하)이 Firebase 전담.** Firebase 주소(`https://www.gstatic.com/...`)는 `firebase-init.js`에서만 import하고, 다른 모듈은 `firebase-init.js`에서 가져다 씀. 모듈 간 공유 상태는 `state`(`state.me` 로그인한 사람, `state.db`, `state.auth`).
 - **기능 격리:** `main.js`가 chat/todos/videos/calendar를 각각 `import()`로 따로 불러오고, 하나가 실패하거나 오류를 내도 로그인과 나머지 기능은 계속 동작. 각 기능 모듈은 `start()` / `stop()`을 export하고, 로그인 시 시작·로그아웃 시 정지됨.
-- **새 기능(예: 점수판) 추가 순서:** ① `js/새기능.js`를 만들어 `start`/`stop` export ② `main.js`의 `['chat','todos','videos','calendar','tickets']` 목록(2곳)에 이름 추가 ③ 필요한 HTML을 `index.html`에, Firestore 규칙에 컬렉션 추가.
+- **새 기능(예: 점수판) 추가 순서:** ① `js/새기능.js`를 만들어 `start`/`stop` export ② `main.js`의 `['chat','todos','videos','calendar','tickets','scores']` 목록(2곳)에 이름 추가 ③ 필요한 HTML을 `index.html`에, Firestore 규칙에 컬렉션 추가.
 - **캐시 버전(`?v=1.15`):** `index.html`과 모든 `js/*.js`의 import/script 주소 끝에 `?v=버전`이 붙어 있음. **공유 파일(`firebase-init.js`, `util.js`)을 고칠 때는 모든 참조의 버전 문자열을 같은 값으로 함께 올릴 것.** 기능 파일 하나(`videos.js` 등)만 고칠 때는 `main.js`의 `FVER`에 그 파일 번호만 따로 올리면 됨(v1.19부터), `games.js`는 `index.html`의 script 태그 번호만 올리면 됨. (일부만 바꾸면 새 파일과 옛 파일이 섞여 로딩될 수 있음. 한 번에 모두 `grep -rn "?v="`로 확인.)
 - **아이콘:** 외부 라이브러리 없이 `index.html` 상단의 **인라인 SVG 스프라이트**(`#i-home` 등)를 `<use>`로 사용. (CDN 아이콘 라이브러리 사용 금지 — 아래 "문제 기록" 참고)
 - **레이아웃:** `header / main / nav`를 세로로 쌓은 구조(`.shell`, 높이 `100dvh`). 각 탭은 `.tab`(absolute, 보이는 탭만 `.active`). 하단 메뉴는 `fixed`가 아님.
@@ -103,6 +105,8 @@ my-personal-hub/
 - **Firestore 컬렉션:** `events` (가족 달력, v1.13) — 필드: `title`, `date`('YYYY-MM-DD', 매년 반복은 처음 날짜), `time`('HH:MM' 또는 빈 문자열=종일), `who`(가족 이름 또는 빈 문자열=모두), `repeat`('yearly' 또는 빈 문자열), `memo`, `by`, `uid`, `createdAt`. 화면에 보이는 6주 구간은 `where(date >= ..) + where(date <= ..) + orderBy(date)`로 구독(복합 색인 불필요), 매년 반복은 `where(repeat == 'yearly')`로 따로 구독, 홈은 오늘~30일 뒤 구간을 구독. 날짜 문자열은 기기의 현재 시간대 기준. 2/29 반복 일정은 평년에 2/28로 표시. 가족 누구나 수정/삭제 가능(소유자 `uid`는 바꿀 수 없음).
 - **Firestore 컬렉션:** `wallets/{id}` (게임 티켓, v1.15) — `id`는 이메일 앞부분(`chaea`, `jia`). 필드 `name`, `balance`(정수, 0 이상). 하위 `log/{자동id}` — `amount`(+/-), `kind`(`grant` 지급 / `revoke` 회수 / `spend` 입장), `reason`, `game`(입장일 때 게임 id), `by`, `uid`, `createdAt`. 잔액 변경은 `writeBatch`로 잔액(`increment`)과 내역을 한 번에 기록. **규칙:** 부모(아빠·엄마)만 만들고 아무 값으로 올릴 수 있음, 아이는 자기 지갑을 줄이는 것(최대 5장씩)만 가능하고 올릴 수 없음(서버가 잔액 0 미만도 거부). 부모 이메일은 규칙의 `isParent()`와 `firebase-init.js`의 `FAMILY`(`parent: true`) 두 곳에서 같아야 함. **한계:** 게임 파일 주소로 직접 들어가는 것까지는 막을 수 없는 가족 규칙용 장치(허브 안에서의 입장만 관리). `tickets.js`가 없거나 고장 나면 게임은 무료로 열림.
 - **Firestore 컬렉션:** `reads/{id}` (채팅 읽음 표시, v1.20) — `id`는 이메일 앞부분(`dad`,`mom`,`chaea`,`jia`). 필드 `name`, `uid`, `at`(serverTimestamp = 그 사람이 채팅을 마지막으로 본 시각). 각자 자기 문서만 쓸 수 있고(규칙: 이메일이 `id@family-hub.app`) 가족은 모두 읽을 수 있음. 채팅 탭이 열려 있고 앱이 화면에 보이는 동안 새 메시지가 오면 1.5초 간격으로 갱신. **표시 규칙:** 메시지 시각 > 상대의 `at`이면 '안 읽음'. 배지/새 메시지 선의 기준은 내 `at`(읽음 정보가 없으면 기기 `localStorage['hub_chatSeen']`로 대체). **2026-10-25 이전 메시지에는 읽음 글자를 표시하지 않음**(`RECEIPT_FROM`). `reads` 규칙이 없거나 실패하면 읽음 글자만 숨겨지고 채팅·배지는 계속 동작. 채팅 모듈이 바뀌어 `main.js`의 `FVER`에 `chat: '?v=1.20'`.
+- **Firestore 컬렉션:** `scores/{게임id}__{사람id}` (게임 점수판, v1.21) — 필드 `game`, `name`, `uid`, `score`(정수), `at`(serverTimestamp). 사람id = 이메일 앞부분. **게임 파일은 고치지 않음:** 게임은 자기 최고 기록을 localStorage에 저장하고(허브와 같은 주소라 허브가 읽을 수 있음) `scores.js`가 읽어서, 서버의 내 기록보다 높을 때만 올림(앱 시작 · 게임 닫을 때 `hub:gameclosed` 이벤트 · 앱으로 돌아올 때). 읽는 키: 산수 몬스터 `mmBest`, 스피드 매쓰 `mb2_best`, 동물 달리기 `animalRunV6`의 `best`(무한 모드 거리, m). **새 게임을 점수판에 넣으려면** `scores.js`의 `BOARD`에 한 줄(id·제목·단위·읽는 방법)만 추가하면 됨(규칙은 `게임id__이름` 형태면 그대로 통과). 규칙: 각자 자기 문서만, 점수는 올라가기만 함(내려가는 쓰기 거부), 삭제 불가. **한계:** 기록은 '이 기기'의 최고 기록이라 한 기기를 여러 명이 쓰면 로그인한 사람 이름으로 올라감. 규칙이 없으면 점수판 패널에 안내가 뜨고 나머지는 정상.
+- **공휴일(v1.21):** `js/holidays.js`의 고정 표(2026~2030). 달력 칸에 빨간 숫자 + 작은 이름(긴 이름은 줄여 표시), 날짜를 누르면 `🎌 이름 (공휴일)`. 2026·2027·2028년은 공개 목록과 대조 확인, 2029·2030년은 같은 규칙(설날·추석·부처님오신날은 음력 변환, 겹치면 대체공휴일)으로 계산한 값. 2026년부터 **노동절(5/1)·제헌절(7/17)이 공휴일**. 2030년 이후와 2030년 선거일은 아직 없음 → 2030년이 되기 전에 추가. 임시공휴일은 이 파일에 한 줄 추가.
 - **Firestore 컬렉션:** `videos` — 필드: `videoId`(유튜브 11자리 ID), `title`, `by`, `uid`, `createdAt`. 조회: `orderBy('createdAt','desc')` + `limit(20)`. 최신 영상은 큰 카드, 나머지는 작은 줄. 썸네일은 `i.ytimg.com`에서 자동 로드, 카드를 누르면 그 자리에서 재생(v1.19, `youtube-nocookie.com/embed`). 영상마다 유튜브 스튜디오의 **'퍼가기 허용'**이 켜져 있어야 재생됨(꺼져 있으면 "동영상을 재생할 수 없음"이 뜨고 'YouTube ↗' 링크로만 볼 수 있음). 영상은 **일부 공개**로 올리고 링크는 코드에 직접 적지 말고 앱에서만 추가할 것.
 - **조회(채팅):** `orderBy('timestamp','asc')` + `limitToLast(100)`.
 - **사진:** 브라우저에서 최대 800px JPEG로 줄여 Firestore 문서에 직접 저장 (문서 1MB 제한 때문에 용량 초과 시 전송 차단).
@@ -184,6 +188,22 @@ service cloud.firestore {
         && request.resource.data.at is timestamp;
       allow delete: if false;
     }
+    match /scores/{id} {   // 게임 최고 기록: 문서 id = 게임id__이메일앞부분, 각자 자기 것만 쓰고 점수는 올라가기만 함
+      function okScore(sid) {
+        return isFamily()
+          && sid.matches('[a-z0-9-]+__[a-z]+')
+          && request.auth.token.email == sid.split('__')[1] + '@family-hub.app'
+          && request.resource.data.game == sid.split('__')[0]
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.score is int
+          && request.resource.data.score > 0 && request.resource.data.score <= 10000000
+          && request.resource.data.at is timestamp;
+      }
+      allow read: if isFamily();
+      allow create: if okScore(id);
+      allow update: if okScore(id) && request.resource.data.score >= resource.data.score;
+      allow delete: if false;
+    }
     match /videos/{doc} {
       allow read: if isFamily();
       allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
@@ -230,6 +250,8 @@ service cloud.firestore {
 - [ ] 하단 메뉴 4개 아이콘이 모두 보이고 탭 이동이 되는가
 - [ ] 채팅: 상태가 `● 연결됨`이고, 메시지 전송 후 입력창이 비워지는가, 다른 기기에서도 보이는가
 - [ ] 채팅: 사진 전송과 확대 보기가 되는가
+- [ ] 점수판: 게임·도구 탭의 '🏆 가족 최고 기록' [보기]에 가족 순위가 뜨고, 게임을 하고 나오면 내 기록이 올라가는가 (안 되면 Firestore 규칙의 `scores` 줄 확인)
+- [ ] 달력: 공휴일이 빨간 날로 표시되고, 누르면 `🎌 …(공휴일)`이 뜨는가
 - [ ] 채팅 읽음: 다른 탭에 있을 때 상대가 보내면 '가족채팅'에 빨간 숫자가 뜨고, 열면 '여기부터 새 메시지' 선이 보이며 숫자가 사라지는가 / 내가 보낸 글 옆에 상대가 읽으면 `읽음 ✓`로 바뀌는가 (안 되면 Firestore 규칙의 `reads` 줄 확인)
 - [ ] 홈 화면의 가족 영상: 유튜브 링크를 추가하면 썸네일 카드가 보이고, 누르면 새 창 없이 그 자리에서 재생되며, 다른 탭으로 가면 멈추고, 삭제가 되는가 (안 나오면 그 영상의 '퍼가기 허용' 확인)
 - [ ] 동물 친구 달리기: 판 도중 홈 버튼을 눌렀다 돌아오면 같은 자리에서 일시정지로 유지되고, 앱을 완전히 종료했다 다시 열어도 메뉴에 '이어서 하기'가 뜨는가
@@ -276,10 +298,12 @@ service cloud.firestore {
 2. ~~보안 강화~~ → 로그인(v1.5)과 Firestore 규칙 잠금 완료. (남은 선택 사항: Authentication의 가입 허용 끄기)
 3. ~~일정 가족 공유~~ → 완료(v1.7)
 4. ~~`index.html` 파일 분리~~ → 완료(v1.9)
-**남은 할 일 / 아이디어 (v1.20 기준)**
-- ⚠️ **먼저 확인:** Firestore 규칙(`firestore.rules.txt`)이 Firebase 콘솔에 붙여 넣어져 있는지(일정·티켓·답글·**채팅 읽음(`reads`)** 기능에 필요), v1.12~v1.20 파일이 모두 GitHub에 올라갔는지.
+**남은 할 일 / 아이디어 (v1.21 기준)**
+- ⚠️ **먼저 확인:** Firestore 규칙(`firestore.rules.txt`)이 Firebase 콘솔에 붙여 넣어져 있는지(일정·티켓·답글·**채팅 읽음(`reads`)·점수판(`scores`)** 기능에 필요), v1.12~v1.21 파일이 모두 GitHub에 올라갔는지.
 - ~~채팅 읽음 표시~~ → 완료(v1.20). 폰 실제 확인 필요.
-- **게임 점수판**: `js/scores.js` + Firestore 컬렉션. 점수가 있는 게임 1~2개부터.
+- ~~게임 점수판~~ → 완료(v1.21, 산수 몬스터·스피드 매쓰·동물 달리기). 붕어빵(최고 콤보)·2인용 게임 등은 `BOARD`에 한 줄씩 추가.
+- ~~공휴일 표시~~ → 완료(v1.21). 2030년이 되기 전에 `holidays.js`에 2031년 이후 추가.
+- **2인용 게임**: 게임방에서 만든 뒤 가져오면 허브 호환 검토 후 등록(요청문은 대화에서 안내).
 - **붕어빵 타이쿤 보완**: 초반(2~7일차) 목표 완화, 별 기준 완화, 35일차 이후 코인 쓸 곳, 하루 도중 이어서 하기.
 - **입장 티켓 유예 시간**: 지금은 같은 게임 5분 안 재입장만 무료. '이어서 하기' 때문에 늘릴지 결정 필요.
 - **홈의 YouTube / Instagram 카드**에 실제 채널 주소 연결(주소 필요).
@@ -315,6 +339,7 @@ service cloud.firestore {
 | v1.18 | 2026-10-25 | **Cyber Runner 삭제**(허브 안 내장 코드·화면·`games/cyber-runner/` 폴더 제거). **분류 신설**: 게임·도구 탭을 `🎮 AI 미니 게임` / `🧭 가족 도구`로 나누고(`CATS`, 항목의 `cat`), 해외여행 선택 보드를 도구로 이동 + **H1 골프맵 추가**. 도구는 제목 줄이 있는 화면, 티켓 없이 무료, 전체화면 안 씀. **붕어빵 타이쿤 추가**(게임, 티켓 1장, `v`: 1). 하단 메뉴 이름 `AI게임` → `게임·도구`. `games.js` 태그 `?v=1.18` |
 | v1.19 | 2026-10-25 | **우리 가족 영상: 새 창 없이 그 자리에서 바로 재생.** 큰 카드를 누르면 썸네일이 유튜브 플레이어(`youtube-nocookie.com/embed`, 자동재생)로 바뀜. 지난 영상 줄을 누르면 큰 카드로 올라와 재생(동시에 1개만). 재생 중 새 영상이 추가돼도 끊기지 않음(큰 카드와 목록을 따로 그림). `닫기` 버튼, 다른 탭으로 가면 자동 정지, `YouTube ↗` 링크(퍼가기가 막힌 영상용). `js/videos.js`만 번호를 올림(`main.js`의 `FVER`) — 공유 파일(`firebase-init`, `util`)은 `?v=1.15` 그대로 |
 | v1.20 | 2026-10-25 | **채팅 읽음 표시.** 하단 '가족채팅'에 안 읽은 개수 배지(99+), 채팅을 열면 '여기부터 새 메시지' 선으로 스크롤, 내 메시지 옆에 `읽음 ✓` / `엄마·지아 안 읽음`. `reads` 컬렉션 신설(각자 자기 문서만 쓰기) — **Firestore 규칙 변경 필요**. 앱이 백그라운드일 때 온 글은 읽음 처리 안 함. 읽음 정보를 못 불러오면 글자만 숨기고 배지는 기기 기준으로 동작. `chat.js`(`FVER chat '?v=1.20'`), `index.html`(배지, `main.js?v=1.20`) |
+| v1.21 | 2026-10-25 | **게임 점수판 + 달력 공휴일.** ① `js/scores.js`(신규): 게임·도구 탭에 `🏆 가족 최고 기록` 줄(보기/닫기) — 게임 3개(산수 몬스터·스피드 매쓰·동물 달리기 무한 모드)별 4명 순위(🥇🥈🥉). 게임이 localStorage에 저장한 최고 기록을 읽어 올림(게임 파일 수정 없음), 기록은 올라가기만 함. `games.js`가 게임을 닫을 때 `hub:gameclosed` 이벤트를 보냄. `scores` 컬렉션 신설 — **Firestore 규칙 변경 필요**. ② `js/holidays.js`(신규) + `calendar.js`: 2026~2030 공휴일(대체공휴일 포함)을 빨간 날로 표시, 날짜를 누르면 이름 안내. `main.js`(`FVER`: calendar·scores `?v=1.21`, 목록에 scores), `index.html`(점수판 줄, `main.js?v=1.21`, `games.js?v=1.21`) |
 
 
 ## 부록: 동물 달리기 '이어서 하기' 주의 (게임 개발방에 새 버전 요청할 때)

@@ -1,13 +1,17 @@
-// 가족 달력 (Firestore events 컬렉션) + 홈 화면 "다가오는 일정"
+// 가족 달력 (Firestore events 컬렉션) — 공휴일은 holidays.js의 고정 표(빨간 날) + 홈 화면 "다가오는 일정"
 //  - 일정: { title, date:'YYYY-MM-DD', time:'' | 'HH:MM', who:'' | 가족이름, repeat:'' | 'yearly', memo, by, uid, createdAt }
 //  - 달력은 화면에 보이는 6주 구간만 구독, 매년 반복(생일·기념일)은 따로 구독
 //  - 일정 탭 위의 [달력 | 보드] 전환 버튼도 이 파일이 켜 준다 (이 파일이 고장 나도 보드는 기본으로 보임)
 import { $ } from './util.js?v=1.15';
+import { HOLIDAYS } from './holidays.js?v=1.21';
 import { state, myName, FAMILY, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from './firebase-init.js?v=1.15';
 
 const NAMES = FAMILY.map(f => f.name);
 const COLORS = { '': '#a78bfa', '아빠': '#60a5fa', '엄마': '#f472b6', '채아': '#fbbf24', '지아': '#34d399' };
 const colorOf = w => COLORS[w] || COLORS[''];
+const holidayOf = ds => HOLIDAYS[ds] || '';
+const SHORT = { '부처님오신날': '석탄일', '국회의원선거일': '총선일', '지방선거일': '선거일' };   // 칸이 좁아서 긴 이름은 줄여서 표시 (날짜를 누르면 전체 이름)
+const shortHol = h => h.replace(/부처님오신날|국회의원선거일|지방선거일/, m => SHORT[m]);
 const DOW = ['일', '월', '화', '수', '목', '금', '토'];
 
 /* ---------- 날짜 도구 (모두 이 기기의 현재 시간대 기준) ---------- */
@@ -133,15 +137,16 @@ function renderCal() {
   const grid = $('calGrid'), t = todayStr(), s = gridStart(view.y, view.m);
   grid.replaceChildren();
   for (let i = 0; i < 42; i++) {
-    const d = addDays(s, i), ds = ymd(d), inMonth = d.getMonth() === view.m, dow = d.getDay(), evs = eventsOn(ds);
+    const d = addDays(s, i), ds = ymd(d), inMonth = d.getMonth() === view.m, dow = d.getDay(), evs = eventsOn(ds), hol = holidayOf(ds);
     const b = mk('button', 'h-12 rounded-lg flex flex-col items-center pt-1 text-sm '
-      + (inMonth ? (dow === 0 ? 'text-rose-400' : dow === 6 ? 'text-sky-400' : 'text-slate-200') : 'text-slate-600')
+      + (inMonth ? (dow === 0 || hol ? 'text-rose-400' : dow === 6 ? 'text-sky-400' : 'text-slate-200') : (hol ? 'text-rose-900' : 'text-slate-600'))
       + (ds === sel ? ' bg-indigo-600/30' : ' bg-slate-900/60')
       + (ds === t ? ' ring-1 ring-indigo-400' : ''));
     b.dataset.date = ds;
-    b.setAttribute('aria-label', mdLabel(ds) + (evs.length ? ' 일정 ' + evs.length + '개' : ''));
+    b.setAttribute('aria-label', mdLabel(ds) + (hol ? ' ' + hol : '') + (evs.length ? ' 일정 ' + evs.length + '개' : ''));
     b.append(mk('span', '', String(d.getDate())));
-    const dots = mk('span', 'flex gap-0.5 mt-1');
+    if (hol) { const hn = mk('span', 'block w-full px-0.5 text-center leading-none truncate ' + (inMonth ? 'text-rose-300' : 'text-rose-900'), shortHol(hol)); hn.style.fontSize = '8px'; b.append(hn); }
+    const dots = mk('span', 'flex gap-0.5 ' + (hol ? 'mt-0.5' : 'mt-1'));
     evs.slice(0, 3).forEach(e => { const dot = mk('span', 'block rounded-full'); dot.style.cssText = 'width:6px;height:6px;background:' + colorOf(e.who); dots.append(dot); });
     b.append(dots);
     b.addEventListener('click', () => goToDate(ds));
@@ -155,6 +160,7 @@ function renderDay() {
   const d = parse(sel);
   $('calDayTitle').textContent = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + DOW[d.getDay()] + ')' + (sel === t ? ' · 오늘' : '');
   box.replaceChildren();
+  if (holidayOf(sel)) box.append(mk('div', 'text-sm font-semibold text-rose-300 bg-rose-950/40 border border-rose-900/60 rounded-xl px-3 py-2', '🎌 ' + holidayOf(sel) + ' (공휴일)'));
   if (calError) { box.append(mk('div', 'text-xs text-red-400', calError)); return; }
   if (!evs.length) { box.append(mk('div', 'text-center text-slate-500 text-xs py-4', '이 날은 일정이 없어요')); return; }
   evs.forEach(e => {

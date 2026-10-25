@@ -132,6 +132,7 @@ function doClose() {
   freshFrame();
   try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch {}
   showGameView('list');
+  document.dispatchEvent(new Event('hub:gameclosed'));   // 점수판(scores.js)이 새 기록을 확인
 }
 function closeGame() {
   if (curGame && history.state && history.state.game) history.back();  // popstate에서 doClose 실행

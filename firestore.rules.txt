@@ -72,6 +72,22 @@ service cloud.firestore {
         && request.resource.data.at is timestamp;
       allow delete: if false;
     }
+    match /scores/{id} {   // 게임 최고 기록: 문서 id = 게임id__이메일앞부분, 각자 자기 것만 쓰고 점수는 올라가기만 함
+      function okScore(sid) {
+        return isFamily()
+          && sid.matches('[a-z0-9-]+__[a-z]+')
+          && request.auth.token.email == sid.split('__')[1] + '@family-hub.app'
+          && request.resource.data.game == sid.split('__')[0]
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.score is int
+          && request.resource.data.score > 0 && request.resource.data.score <= 10000000
+          && request.resource.data.at is timestamp;
+      }
+      allow read: if isFamily();
+      allow create: if okScore(id);
+      allow update: if okScore(id) && request.resource.data.score >= resource.data.score;
+      allow delete: if false;
+    }
     match /videos/{doc} {
       allow read: if isFamily();
       allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
