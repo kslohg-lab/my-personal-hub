@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isFamily() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'dad@family-hub.app', 'mom@family-hub.app',
+          'chaea@family-hub.app', 'jia@family-hub.app'
+        ];
+    }
+    function isParent() {
+      return request.auth != null
+        && request.auth.token.email in ['dad@family-hub.app', 'mom@family-hub.app'];
+    }
+    match /chats/{doc} {
+      allow read: if isFamily();
+      allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+    match /todos/{doc} {
+      allow read: if isFamily();
+      allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
+      allow update: if isFamily() && (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['done', 'doneBy'])
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rc'])
+        || (resource.data.uid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'to']))
+      );
+      allow delete: if isFamily();
+      match /replies/{rid} {
+        allow read: if isFamily();
+        allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
+        allow update: if false;
+        allow delete: if isFamily() && resource.data.uid == request.auth.uid;
+      }
+    }
+    match /events/{doc} {
+      allow read: if isFamily();
+      allow create: if isFamily() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 100;
+      allow update: if isFamily() && request.resource.data.uid == resource.data.uid
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 100;
+      allow delete: if isFamily();
+    }
+    match /wallets/{id} {
+      allow read: if isFamily();
+      allow create: if isParent()
+        && request.resource.data.balance is int && request.resource.data.balance >= 0;
+      allow update: if isFamily()
+        && request.resource.data.balance is int && request.resource.data.balance >= 0
+        && (isParent()
+            || (request.auth.token.email == id + '@family-hub.app'
+                && request.resource.data.balance < resource.data.balance
+                && request.resource.data.balance >= resource.data.balance - 5));
+      allow delete: if false;
+      match /log/{lid} {
+        allow read: if isFamily();
+        allow create: if isFamily() && request.resource.data.uid == request.auth.uid
+          && request.resource.data.amount is int
+          && (isParent()
+              || (request.auth.token.email == id + '@family-hub.app'
+                  && request.resource.data.kind == 'spend'
+                  && request.resource.data.amount < 0));
+        allow update, delete: if false;
+      }
+    }
+    match /reads/{id} {   // 채팅 읽음 표시: 각자 자기 문서(id = 이메일 앞부분)만 쓸 수 있음
+      allow read: if isFamily();
+      allow create, update: if isFamily()
+        && request.auth.token.email == id + '@family-hub.app'
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.at is timestamp;
+      allow delete: if false;
+    }
+    match /videos/{doc} {
+      allow read: if isFamily();
+      allow create: if isFamily() && request.resource.data.uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if isFamily();
+    }
+  }
+}

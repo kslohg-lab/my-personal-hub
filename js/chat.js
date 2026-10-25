@@ -1,9 +1,80 @@
-// 가족 채팅 (Firestore chats 컬렉션) + 연결 상태 표시 + 사진 확대
+// 가족 채팅 (Firestore chats 컬렉션) + 연결 상태 표시 + 사진 확대 + 읽음 표시(reads 컬렉션)
 import { $ } from './util.js?v=1.15';
-import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp } from './firebase-init.js?v=1.15';
+import { state, myName, firebaseConfig, FAMILY, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp, doc, setDoc } from './firebase-init.js?v=1.15';
 
 const box = $('chatMessages'), input = $('chatMessage');
 let unsub = null, docs = [];
+
+// ---------------- 읽음 표시 ----------------
+// reads/{내 id}: 내가 채팅을 마지막으로 읽은 시각(at). 가족 4명 문서만 구독(아주 가벼움).
+//  - 하단 '가족채팅' 탭에 안 읽은 메시지 개수 배지
+//  - 채팅을 열면 '여기부터 새 메시지' 선
+//  - 내가 보낸 메시지 옆에 '엄마·채아 안 읽음' / '읽음 ✓'
+// 읽음 정보를 못 불러오면(규칙 미적용 등) 배지는 이 기기에 저장한 시각으로 대신하고, 읽음 표시는 숨김.
+const RECEIPT_FROM = Date.parse('2026-10-25T00:00:00+09:00');   // 이 날짜 이전 메시지에는 읽음 표시/배지를 쓰지 않음
+const MEMBERS = FAMILY.map(f => ({ id: f.email.split('@')[0], name: f.name }));
+let reads = {}, readsOk = false, readsFailed = false, rUnsub = null;
+let divAt = null;                 // 채팅을 연 시점의 '내 마지막 읽음' (이후의 남의 메시지 앞에 새 메시지 선)
+let lastMark = 0, markTimer = 0;
+const SEEN_KEY = 'hub_chatSeen';
+const localSeen = () => { try { return +localStorage.getItem(SEEN_KEY) || 0; } catch { return 0; } };
+const meId = () => (state.me && state.me.id) || '';
+const isMine = d => (state.me && d.uid === state.me.uid) || d.sender === myName();
+const myRead = () => readsOk ? (reads[meId()] || 0) : localSeen();
+const chatActive = () => { const t = $('tab-chat'); return !!t && t.classList.contains('active'); };
+const chatVisible = () => chatActive() && !document.hidden && !$('mainApp').hidden;
+function unreadCount() {
+  const r = myRead();
+  return docs.filter(d => !isMine(d) && d.ts >= RECEIPT_FROM && d.ts > r).length;
+}
+function updateBadge() {
+  const b = $('chatBadge');
+  if (!b) return;
+  const n = chatActive() ? 0 : unreadCount();
+  b.hidden = n === 0;
+  b.textContent = n > 99 ? '99+' : String(n);
+}
+function markRead() {
+  if (!state.db || !state.me || !chatVisible() || !(readsOk || readsFailed)) return;
+  let newest = 0;
+  docs.forEach(d => { if (!isMine(d) && d.ts >= RECEIPT_FROM && d.ts > newest) newest = d.ts; });
+  if (!newest || newest <= myRead()) return;
+  if (Date.now() - lastMark < 1500) { clearTimeout(markTimer); markTimer = setTimeout(markRead, 1600); return; }   // 너무 자주 쓰지 않게
+  lastMark = Date.now();
+  if (readsOk) {
+    reads[meId()] = newest;   // 화면은 바로 반영 (서버 시각이 오면 그 값으로 바뀜)
+    setDoc(doc(state.db, 'reads', meId()), { name: myName(), uid: state.me.uid, at: serverTimestamp() }).catch(e => { console.error(e); });
+  } else {
+    try { localStorage.setItem(SEEN_KEY, String(newest)); } catch {}
+  }
+  updateBadge();
+}
+function startReads() {
+  if (rUnsub || !state.db) return;
+  rUnsub = onSnapshot(collection(state.db, 'reads'), snap => {
+    const m = {};
+    snap.docs.forEach(s => { const d = s.data({ serverTimestamps: 'estimate' }); m[s.id] = d.at && d.at.toDate ? d.at.toDate().getTime() : 0; });
+    reads = m; readsOk = true; readsFailed = false;
+    render(); updateBadge(); markRead();
+  }, err => { console.error(err); readsOk = false; readsFailed = true; reads = {}; render(); updateBadge(); markRead(); });
+}
+function stopReads() {
+  if (rUnsub) { rUnsub(); rUnsub = null; }
+  clearTimeout(markTimer);
+  reads = {}; readsOk = false; readsFailed = false; divAt = null;
+  updateBadge();
+}
+// 채팅을 열었을 때: 새 메시지 선 위치를 정하고 거기로 스크롤, 그리고 읽음 처리
+function enterChat() {
+  divAt = unreadCount() ? myRead() : null;
+  render();
+  const nl = $('chatNewLine');
+  if (nl) nl.scrollIntoView({ block: 'center' });
+  updateBadge(); markRead();
+}
+function leaveChat() { divAt = null; updateBadge(); }
+try { new MutationObserver(() => { if (!state.me) return; if (chatActive()) enterChat(); else leaveChat(); }).observe($('tab-chat'), { attributes: true, attributeFilter: ['class'] }); } catch {}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.me && chatActive()) enterChat(); });
 
 function setStatus(ok, err, n) {
   const s = $('chatStatus');
@@ -58,8 +129,20 @@ function render() {
     box.append(e);
     return;
   }
+  let lineDone = divAt === null;
   docs.forEach(d => {
-    const isMe = (state.me && d.uid === state.me.uid) || d.sender === myName();
+    const isMe = isMine(d);
+    if (!lineDone && !isMe && d.ts >= RECEIPT_FROM && d.ts > divAt) {   // 여기부터 새 메시지
+      lineDone = true;
+      const nl = document.createElement('div');
+      nl.id = 'chatNewLine';
+      nl.className = 'flex items-center gap-2 my-3 text-[10px] text-indigo-300';
+      const l1 = document.createElement('div'), l2 = document.createElement('div'), tx = document.createElement('span');
+      l1.className = l2.className = 'flex-1 h-px bg-indigo-500/40';
+      tx.textContent = '여기부터 새 메시지';
+      nl.append(l1, tx, l2);
+      box.append(nl);
+    }
     const row = document.createElement('div');
     row.className = 'flex flex-col mb-3 ' + (isMe ? 'items-end' : 'items-start');
     const nm = document.createElement('span');
@@ -89,6 +172,13 @@ function render() {
     const tm = document.createElement('span');
     tm.className = 'text-[10px] text-slate-500 mt-1 px-1';
     tm.textContent = d.time;
+    if (isMe && readsOk && d.ts >= RECEIPT_FROM) {   // 내가 보낸 메시지: 누가 아직 안 읽었는지
+      const un = MEMBERS.filter(m => m.id !== meId() && (reads[m.id] || 0) < d.ts);
+      const rc = document.createElement('span');
+      rc.className = un.length ? 'text-amber-400' : 'text-slate-500';
+      rc.textContent = un.length ? un.map(m => m.name).join('·') + ' 안 읽음' : '읽음 ✓';
+      tm.prepend(rc, document.createTextNode(d.time ? ' · ' : ''));
+    }
     row.append(nm, bub, tm);
     box.append(row);
   });
@@ -98,20 +188,22 @@ function render() {
 // 채팅 구독은 로그인한 뒤에만 시작
 function startChat() {
   if (unsub || !state.db) return;
+  startReads();
   const q = query(collection(state.db, 'chats'), orderBy('timestamp', 'asc'), limitToLast(100));
   unsub = onSnapshot(q, snap => {
     docs = snap.docs.map(s => {
       const d = s.data({ serverTimestamps: 'estimate' });
       const t = d.timestamp && d.timestamp.toDate ? d.timestamp.toDate() : null;
-      return { ...d, time: t ? t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' };
+      return { ...d, ts: t ? t.getTime() : Date.now(), time: t ? t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' };
     });
     if (snap.metadata.fromCache) setStatus(false, { message: '서버와 연결되지 않았어요 (오프라인)' });
     else setStatus(true, null, docs.length);
-    render();
+    render(); updateBadge(); markRead();
   }, err => { console.error(err); setStatus(false, err); });
 }
 function stopChat() {
   if (unsub) { unsub(); unsub = null; }
+  stopReads();
   docs = [];
   box.replaceChildren();
 }
