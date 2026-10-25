@@ -29,7 +29,7 @@ button:active{transform:translateY(3px);box-shadow:0 1px 0 #d9c3e6}
 .cc.sel{outline:4px solid #ff9ec4}
 .cc.lk,.sb.lk{background:#ece4f2;color:#a898b8}
 .sb{height:68px;font-size:24px}
-.big{width:100%;height:60px;font-size:22px;margin-top:12px;background:#ffd76a;box-shadow:0 4px 0 #e0b040}
+.big{width:100%;height:52px;font-size:22px;margin-top:8px;background:#ffd76a;box-shadow:0 4px 0 #e0b040}
 #ci{margin:0 0 8px;font-size:17px;line-height:1.3}
 #res,#set{background:rgba(70,40,100,.5)}
 .card{position:absolute;left:130px;top:34px;width:540px;height:332px;box-sizing:border-box;padding:16px;background:#fff;border-radius:28px;text-align:center}
@@ -56,6 +56,7 @@ button:active{transform:translateY(3px);box-shadow:0 1px 0 #d9c3e6}
  <div id="res" class="ov"><div class="card"><h2 id="rt"></h2><div id="rbd"></div><div class="row"><button id="r4" class="bt" style="background:#ffd1e8">💖 부활 100🪙</button><button id="r1" class="bt">🔁 다시 도전</button><button id="r2" class="bt">▶️ 다음 단계</button><button id="r3" class="bt">🏠 처음으로</button></div></div></div>
  <div id="set" class="ov"><div class="card" style="padding:12px"><h2 style="margin:0 0 6px;font-size:26px">⚙️ 설정</h2><div class="row" style="margin-top:4px"><button id="d0" class="bt"></button><button id="d1" class="bt"></button><button id="d2" class="bt"></button></div><p id="dd" style="margin:8px 0 4px;font-size:14px"></p><p style="margin:2px 0 4px;font-size:13px;color:#8a6a9a">💀 단계별 도전 실패 (⚔️ 그중 보스전)</p><div id="dst" class="grid5" style="gap:4px"></div><div class="row" style="margin-top:10px"><button id="sn" class="bt"></button><button id="rs" class="bt">🗑️ 저장 데이터 지우기</button><button id="sc" class="bt">닫기</button></div></div></div>
  <div id="pick" class="ov" style="background:rgba(70,40,100,.55)"><div class="card"><h2>🎁 하나 골라요!</h2><div id="pcs" class="row"></div></div></div>
+ <div id="pause" class="ov" style="background:rgba(70,40,100,.55)"><div class="card" style="height:230px;top:85px"><h2>⏸️ 잠깐 멈췄어요</h2><div class="row"><button id="pc1" class="bt" style="background:#ffd76a">▶ 계속하기</button><button id="pc2" class="bt">🏠 메뉴로</button></div><p style="font-size:15px;margin:14px 0 0">메뉴로 가면 이번 판이 끝나요</p></div></div>
  <div id="toast"></div>
 </div>
 <div id="rot"><b>📱</b>화면을 가로로 돌려주세요</div>
@@ -130,8 +131,8 @@ let DK=null;function dk(){if(!DK){DK=document.createElement('canvas');DK.width=W
 let SDc=null;function sd(){if(!SDc){SDc=document.createElement('canvas');SDc.width=W;SDc.height=H;const x=SDc.getContext('2d'),gr=x.createLinearGradient(0,0,W,0);gr.addColorStop(0,'rgba(214,176,110,0)');gr.addColorStop(.26,'rgba(214,176,110,0)');gr.addColorStop(.52,'rgba(214,176,110,.9)');gr.addColorStop(1,'rgba(214,176,110,.93)');x.fillStyle=gr;x.fillRect(0,0,W,H)}return SDc}
 
 /* ---------- state ---------- */
-let tab=0,g=null,scr='menu',down=false,keys={},ptr={},rptr={};
-const show=n=>{['menu','res','set','pick'].forEach(i=>$(i).style.display=i===n?'block':'none');$('home').style.display=scr==='game'?'block':'none'};
+let paused=false,tab=0,g=null,scr='menu',down=false,keys={},ptr={},rptr={};
+const show=n=>{['menu','res','set','pick','pause'].forEach(i=>$(i).style.display=i===n?'block':'none');$('home').style.display=scr==='game'?'block':'none'};
 function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1800)}
 function renderMenu(){
  $('wal').textContent='🪙 '+save.coins+' 📖 '+save.un.filter(i=>!CH[i].pet).length+'/30 🏅 '+save.bs+'단계';const tb=$('tb');tb.innerHTML='';['💗 하트','🍬 간식','🌙 하늘','🐾 펫'].forEach((n,j)=>{const b=document.createElement('button');b.textContent=n;b.style.cssText='height:36px;padding:0 6px;font-size:14px'+(tab===j?';outline:3px solid #ff9ec4':'');b.onclick=()=>{tab=j;renderMenu()};tb.appendChild(b)});
@@ -141,11 +142,13 @@ function renderMenu(){
  const c=CH[save.sel];$('ci').innerHTML=`<b>${c.n}</b><br>${c.d}${c.sk?'<br>⚡ '+SK[c.sk].n+': '+SK[c.sk].d:''}`;{const q=goal(),o=GL[q.i];$('gl').textContent=(q.ok?'✅ ':'🎯 ')+o.t+' ('+Math.min(q.p,o.n)+'/'+o.n+')'+(q.ok?' 완료!':' 보상 '+o.r+'🪙')+'   ⭐ '+stT()+'/30   🎚️ '+DFN[save.df]}
  const ss=$('sts');ss.innerHTML='';
  {const b1=document.createElement('button');b1.className='big';b1.textContent='▶️ 처음부터 달리기';b1.onclick=()=>{au();startGame('stage',1)};ss.appendChild(b1);
- if(0){const b2=document.createElement('button');b2.className='big';b2.style.background='#9be0ff';b2.textContent='⏩ 이어서 ('+save.reach+'단계부터)';b2.onclick=()=>{au();startGame('stage',save.reach)};ss.appendChild(b2)}}
+ if(save.reach>=2){const b2=document.createElement('button');b2.className='big';b2.style.background='#9be0ff';b2.textContent='⏩ 이어서 ('+save.reach+'단계부터)';b2.onclick=()=>{au();startGame('stage',save.reach)};ss.appendChild(b2)}}
  const o=save.cleared>=10,f=$('inf');f.textContent=o?'♾️ 무한 모드 (최고 '+save.best+'m)':'🔒 무한 모드 (10단계 클리어 후)';f.onclick=()=>{au();o?startGame('inf',10):toast('10단계를 모두 클리어하면 열려요!')};
 }
 function toMenu(){if(scr==='game'&&g){save.coins+=g.coins;if(g.mode==='inf')save.best=Math.max(save.best,Math.floor(g.dist));store()}scr='menu';renderMenu();show('menu')}
-$('home').onclick=toMenu;$('r3').onclick=toMenu;
+function pauseGame(){if(scr!=='game'||!g||paused||g.ph==='pick')return;paused=true;ptr={};rptr={};keys={};down=false;$('pause').style.display='block'}
+function resumeGame(){if(!paused)return;paused=false;$('pause').style.display='none';last=0}
+$('home').onclick=pauseGame;$('pc1').onclick=resumeGame;$('pc2').onclick=()=>{paused=false;$('pause').style.display='none';toMenu()};$('r3').onclick=toMenu;
 const setR=()=>{$('sn').textContent=save.snd?'🔊 소리 켜짐':'🔇 소리 꺼짐';[0,1,2].forEach(i=>{const b=$('d'+i);b.textContent=DFN[i];b.style.outline=save.df===i?'4px solid #ff9ec4':'none'});$('dd').textContent=DFD[save.df];let h='';for(let i=1;i<=10;i++){const a=save.ds[i]||0,b=save.dbs[i]||0;h+='<div style="background:'+(a?'#ffe1ea':'#f4eefa')+';border-radius:10px;padding:3px 0;font-size:13px;line-height:1.25">'+i+'단계<br>💀'+a+(b?' ⚔️'+b:'')+'</div>'}$('dst').innerHTML=h};
 $('gear').onclick=()=>{au();$('rs').textContent='🗑️ 저장 데이터 지우기';setR();$('set').style.display='block'};
 $('sn').onclick=()=>{save.snd=!save.snd;store();setR()};
@@ -155,10 +158,10 @@ $('rs').onclick=()=>{if($('rs').dataset.s!=='1'){$('rs').dataset.s='1';$('rs').t
 
 function startGame(mode,stage){
  g={mode,stage,c:CH[save.sel],pt:save.pet>=0?CH[save.pet]:null,t:0,dist:0,coins:0,hp:100,inv:0,ph:'run',ob:[],it:[],pa:[],pw:{boost:0,mag:0,giant:0},p:{x:110,y:G,vy:0,j:0,sl:false,fly:0},boss:null,bgx:0,len:14+stage,seg:0,ban:2.2,spawnT:1.2,appleT:8,powT:22,shake:0,spd:300,endT:0,wt:0,zapT:1,fz:0,rf:0,ht:0,fl:0,sa:5,star:0,skc:4,skm:4,dash:0,vac:0,shield:0,glide:0,fire:0,skl:0,pk:{},psh:0,slT:0,tp:null,zw:null,zt:0,dk:1,light:0,fireT:5,az:null,noOb:false,wind:false,ice:false,dark:false,sticky:0,sandA:0,zones:[]};bt=0;bs=0;setupStage(g);
- scr='game';down=false;ptr={};rptr={};keys={};show('none');
+ scr='game';paused=false;down=false;ptr={};rptr={};keys={};show('none');
 }
-function jump(){const s=g;if(!s||s.ph==='dead'||s.ph==='pick'||s.p.fly||scr!=='game')return;const p=s.p,mx=s.c.mj||2;if(p.j<mx){p.vy=-(640*(s.c.jh||1))*(p.j>0?.92:1)*(s.sticky>0?.72:1);p.j++;snd('jump')}}
-cv.addEventListener('pointerdown',e=>{e.preventDefault();au();if(scr!=='game')return;const r=cv.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height;if(Math.hypot(fx*W-730,fy*H-332)<54){useSk();return}if(fx<.5){ptr[e.pointerId]=1;down=true}else{rptr[e.pointerId]=1;jump()}});
+function jump(){const s=g;if(paused||!s||s.ph==='dead'||s.ph==='pick'||s.p.fly||scr!=='game')return;const p=s.p,mx=s.c.mj||2;if(p.j<mx){p.vy=-(640*(s.c.jh||1))*(p.j>0?.92:1)*(s.sticky>0?.72:1);p.j++;snd('jump')}}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();au();if(scr!=='game'||paused)return;const r=cv.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height;if(Math.hypot(fx*W-730,fy*H-332)<54){useSk();return}if(fx<.5){ptr[e.pointerId]=1;down=true}else{rptr[e.pointerId]=1;jump()}});
 const pu=e=>{if(ptr[e.pointerId]){delete ptr[e.pointerId];down=Object.keys(ptr).length>0||!!keys.d}if(rptr[e.pointerId])delete rptr[e.pointerId]};
 addEventListener('pointerup',pu);addEventListener('pointercancel',pu);cv.addEventListener('contextmenu',e=>e.preventDefault());
 addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();keys.u=1;if(!e.repeat)jump()}if(e.code==='KeyX'||e.code==='Enter'){if(!e.repeat)useSk()}if(e.code==='ArrowDown'){e.preventDefault();keys.d=1;down=true}});
@@ -214,7 +217,7 @@ function bossNew(s,b,dt){const k=b.kind,d3=k==='demon'&&b.ph===3;
   else{b.tl=null;b.cd=BCD[k]*(d3?.8:1);if(k==='lion'||k==='shark'){b.stun=3.2;s.it.push({k:'Z',x:W-30,y:G-rnd(45,100)});ft('지쳤어요! ⭐을 잡아요',b.x-80,G-200,'#ffb800')}}}}
  else{b.cd-=dt;if(b.cd<=0&&b.stun<=0){b.q=bvol(s,b);b.qi=0;b.tl={t:(k==='lion'||k==='shark')?.35:Math.max(.8,(k==='boar'?1.1:.95)-Math.max(0,s.stage-3)*.02),k:b.q[0]}}}}
 function shock(){const s=g;for(const o of s.ob)if(o.k!=='P'&&o.k!=='M'&&o.x<620&&o.x>0){o.dead=1;pf(o.x,G-30,'💥',2,180)}s.shake=.4;s.sa=7;snd('hit')}
-function useSk(){const s=g;if(!s||scr!=='game'||s.skc>0||!s.c.sk||!['run','boss','warn'].includes(s.ph))return;const k=s.c.sk,p=s.p,pw=s.pw;
+function useSk(){const s=g;if(!s||paused||scr!=='game'||s.skc>0||!s.c.sk||!['run','boss','warn'].includes(s.ph))return;const k=s.c.sk,p=s.p,pw=s.pw;
  if(k==='j'){p.vy=-980;p.j=Math.max(p.j,1);s.skl=1}
  else if(k==='s')s.dash=1.5;
  else if(k==='c')s.vac=1.3;
@@ -492,12 +495,12 @@ function draw(){
 }
 let last=0,fc=0;const chk=()=>{$('rot').style.display=innerWidth>innerHeight?'none':'flex'};
 function loop(ts){const dt=Math.min(.033,(ts-last)/1000||0);last=ts;if(++fc%20===0)chk();
- if(g&&scr==='game'&&innerWidth>innerHeight){upd(dt);bgm(dt)}
+ if(g&&scr==='game'&&!paused&&innerWidth>innerHeight){upd(dt);bgm(dt)}
  if(g&&(scr==='game'||scr==='result'))draw();
  requestAnimationFrame(loop)}
 function fit(){chk();const b=document.body,s=Math.min(b.clientWidth/W,b.clientHeight/H);$('box').style.transform=`translate(${(b.clientWidth-W*s)/2}px,${(b.clientHeight-H*s)/2}px) scale(${s})`}
 addEventListener('resize',fit);addEventListener('orientationchange',()=>setTimeout(fit,200));
-document.addEventListener('visibilitychange',()=>{if(AC){if(document.hidden)AC.suspend();else AC.resume()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseGame();if(AC){if(document.hidden)AC.suspend();else AC.resume()}});
 fit();renderMenu();show('menu');requestAnimationFrame(loop);
 })();
 </script></body></html>
