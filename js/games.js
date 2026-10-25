@@ -14,6 +14,7 @@ const GAMES = [
   { id: 'animal-run',    cat: 'game', title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 8, cost: 1 },
   { id: 'claw-machine',  cat: 'game', title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요', cost: 1 },
   { id: 'bungeoppang',   cat: 'game', title: '붕어빵 타이쿤',           desc: '붕어빵을 구워 팔고 가게를 키워요', v: 1, cost: 1 },
+  { id: 'ice-cream',     cat: 'game', title: '아이스크림 가게 타이쿤',  desc: '주문대로 아이스크림을 쌓아 팔고 가게를 키워요', v: 1, cost: 1 },
   { id: 'travel-picker', cat: 'tool', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요' },
   { id: 'h1-golf',       cat: 'tool', title: 'H1 골프맵',               desc: '화성 H1 출발 1시간 이내 골프장 35곳', v: 1 }
 ];
