@@ -5,10 +5,11 @@ import { state, FAMILY, onAuthStateChanged } from './firebase-init.js?v=1.15';
 import { resetLogin } from './login.js?v=1.15';
 
 const VER = '?v=1.15';
+const FVER = { videos: '?v=1.19' };   // 기능 파일 하나만 고쳤을 때는 그 파일의 번호만 올리면 됨 (공유 파일 firebase-init/util은 그대로 1.15)
 const features = {};   // { chat, todos, videos, calendar, tickets } — 불러오기에 성공한 것만 들어감
 
 async function load(name) {
-  try { features[name] = await import('./' + name + '.js' + VER); }
+  try { features[name] = await import('./' + name + '.js' + (FVER[name] || VER)); }
   catch (e) { console.error(name + ' 기능을 불러오지 못했어요', e); }
 }
 // 기능 하나가 오류를 내도 다음 기능은 계속 실행

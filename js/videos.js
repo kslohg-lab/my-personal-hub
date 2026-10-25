@@ -26,66 +26,126 @@ function vMeta(v) {
 }
 function vNote(text, err) {
   vList.replaceChildren();
+  bigBox = restBox = null; bigKey = '';
   const e = document.createElement('div');
   e.className = 'text-center text-xs py-6 bg-slate-900 border border-slate-800 rounded-2xl ' + (err ? 'text-red-400' : 'text-slate-500');
   e.textContent = text;
   vList.append(e);
 }
-function renderVideos() {
-  if (!videos.length) { vNote('아직 영상이 없어요. 유튜브 링크를 붙여 넣어 첫 영상을 추가해 보세요!'); return; }
-  vList.replaceChildren();
-  const [first, ...rest] = videos;
-  // 최신 영상: 큰 카드
-  const big = document.createElement('div');
-  const a = document.createElement('a');
-  a.href = ytUrl(first.videoId); a.target = '_blank'; a.rel = 'noopener';
-  a.className = 'relative block overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg';
-  const img = document.createElement('img');
-  img.src = ytThumb(first.videoId); img.alt = ''; img.loading = 'lazy';
-  img.className = 'block w-full aspect-video object-cover bg-slate-800';
-  const play = document.createElement('div');
-  play.className = 'absolute inset-0 flex items-center justify-center';
-  const pc = document.createElement('div');
-  pc.className = 'w-14 h-14 rounded-full bg-black/55 text-white text-xl flex items-center justify-center pl-1';
-  pc.textContent = '▶';
-  play.append(pc);
-  const cap = document.createElement('div');
-  cap.className = 'absolute inset-x-0 bottom-0 px-4 pt-10 pb-3 bg-gradient-to-t from-black/80 to-transparent';
-  const ct = document.createElement('div');
-  ct.className = 'text-sm font-bold text-white break-words';
-  ct.textContent = first.title || '우리 가족 영상';
-  cap.append(ct);
-  a.append(img, play, cap);
+
+// ---- 목록: 큰 카드(재생 화면) 1개 + 지난 영상 줄 ----
+// 큰 카드를 누르면 새 창이 아니라 그 자리에서 유튜브 영상이 바로 재생된다.
+// 지난 영상 줄을 누르면 그 영상이 큰 카드로 올라와 바로 재생된다.
+// 큰 카드와 목록은 따로 그려서, 재생 중에 누가 새 영상을 추가해도 재생이 끊기지 않는다.
+let bigBox = null, restBox = null, bigKey = '';
+let selId = null;      // 큰 카드에 올릴 영상 (null이면 최신 영상)
+let playing = null;    // 지금 재생 중인 영상 (문서 id)
+const embedUrl = id => 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&playsinline=1&rel=0';
+
+function playVideo(id) { selId = id; playing = id; renderVideos(); if (bigBox) bigBox.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+function stopPlay() { if (playing) { playing = null; selId = null; renderVideos(); } }
+
+function bigCard(v, isPlaying) {
+  const wrap = document.createElement('div');
+  const stage = document.createElement('div');
+  stage.className = 'relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-lg aspect-video';
+  if (isPlaying) {
+    const f = document.createElement('iframe');
+    f.src = embedUrl(v.videoId);
+    f.title = v.title || '우리 가족 영상';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.className = 'absolute inset-0 w-full h-full';
+    f.style.border = '0';
+    stage.append(f);
+  } else {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.dataset.play = v.id;
+    btn.setAttribute('aria-label', '재생');
+    btn.className = 'absolute inset-0 w-full h-full text-left';
+    const img = document.createElement('img');
+    img.src = ytThumb(v.videoId); img.alt = ''; img.loading = 'lazy';
+    img.className = 'block w-full h-full object-cover bg-slate-800';
+    const play = document.createElement('div');
+    play.className = 'absolute inset-0 flex items-center justify-center';
+    const pc = document.createElement('div');
+    pc.className = 'w-14 h-14 rounded-full bg-black/55 text-white text-xl flex items-center justify-center pl-1';
+    pc.textContent = '▶';
+    play.append(pc);
+    const cap = document.createElement('div');
+    cap.className = 'absolute inset-x-0 bottom-0 px-4 pt-10 pb-3 bg-gradient-to-t from-black/80 to-transparent';
+    const ct = document.createElement('div');
+    ct.className = 'text-sm font-bold text-white break-words';
+    ct.textContent = v.title || '우리 가족 영상';
+    cap.append(ct);
+    btn.append(img, play, cap);
+    btn.addEventListener('click', () => playVideo(v.id));
+    stage.append(btn);
+  }
   const meta = document.createElement('div');
-  meta.className = 'flex items-center justify-between px-1 pt-1';
+  meta.className = 'flex items-center justify-between gap-2 px-1 pt-1';
   const mt = document.createElement('span');
-  mt.className = 'text-[11px] text-slate-500';
-  mt.textContent = vMeta(first);
-  meta.append(mt, delBtn(first));
-  big.append(a, meta);
-  vList.append(big);
-  // 지난 영상: 작은 줄
-  rest.forEach(v => {
-    const row = document.createElement('div');
-    row.className = 'flex items-center gap-3 p-2 bg-slate-900 border border-slate-800 rounded-xl';
-    const ra = document.createElement('a');
-    ra.href = ytUrl(v.videoId); ra.target = '_blank'; ra.rel = 'noopener'; ra.className = 'shrink-0';
-    const ri = document.createElement('img');
-    ri.src = ytThumb(v.videoId); ri.alt = ''; ri.loading = 'lazy';
-    ri.className = 'w-28 aspect-video object-cover rounded-lg bg-slate-800';
-    ra.append(ri);
-    const mid = document.createElement('a');
-    mid.href = ytUrl(v.videoId); mid.target = '_blank'; mid.rel = 'noopener'; mid.className = 'flex-1 min-w-0';
-    const t = document.createElement('div');
-    t.className = 'text-sm text-slate-200 break-words';
-    t.textContent = v.title || '우리 가족 영상';
-    const m = document.createElement('div');
-    m.className = 'text-[10px] text-slate-500 mt-0.5';
-    m.textContent = vMeta(v);
-    mid.append(t, m);
-    row.append(ra, mid, delBtn(v));
-    vList.append(row);
-  });
+  mt.className = 'text-[11px] text-slate-500 min-w-0 truncate';
+  mt.textContent = (isPlaying ? (v.title || '우리 가족 영상') + ' · ' : '') + vMeta(v);
+  const right = document.createElement('div');
+  right.className = 'flex items-center shrink-0';
+  if (isPlaying) {
+    const cl = document.createElement('button');
+    cl.type = 'button'; cl.className = 'text-slate-400 text-xs p-1'; cl.textContent = '닫기';
+    cl.addEventListener('click', stopPlay);
+    right.append(cl);
+  }
+  const yt = document.createElement('a');   // 재생이 안 되는 영상(퍼가기 막힘 등)은 유튜브에서 열기
+  yt.href = ytUrl(v.videoId); yt.target = '_blank'; yt.rel = 'noopener';
+  yt.className = 'text-slate-500 text-xs p-1'; yt.textContent = 'YouTube ↗';
+  right.append(yt, delBtn(v));
+  meta.append(mt, right);
+  wrap.append(stage, meta);
+  return wrap;
+}
+function restRow(v) {
+  const row = document.createElement('div');
+  row.className = 'flex items-center gap-3 p-2 bg-slate-900 border border-slate-800 rounded-xl';
+  const ra = document.createElement('button');
+  ra.type = 'button'; ra.dataset.play = v.id; ra.setAttribute('aria-label', '재생');
+  ra.className = 'relative shrink-0';
+  const ri = document.createElement('img');
+  ri.src = ytThumb(v.videoId); ri.alt = ''; ri.loading = 'lazy';
+  ri.className = 'w-28 aspect-video object-cover rounded-lg bg-slate-800';
+  const pi = document.createElement('div');
+  pi.className = 'absolute inset-0 flex items-center justify-center text-white text-sm';
+  pi.textContent = '▶';
+  ra.append(ri, pi);
+  const mid = document.createElement('button');
+  mid.type = 'button'; mid.className = 'flex-1 min-w-0 text-left';
+  const t = document.createElement('div');
+  t.className = 'text-sm text-slate-200 break-words';
+  t.textContent = v.title || '우리 가족 영상';
+  const m = document.createElement('div');
+  m.className = 'text-[10px] text-slate-500 mt-0.5';
+  m.textContent = vMeta(v);
+  mid.append(t, m);
+  ra.addEventListener('click', () => playVideo(v.id));
+  mid.addEventListener('click', () => playVideo(v.id));
+  row.append(ra, mid, delBtn(v));
+  return row;
+}
+function renderVideos() {
+  if (!videos.length) { selId = null; playing = null; vNote('아직 영상이 없어요. 유튜브 링크를 붙여 넣어 첫 영상을 추가해 보세요!'); return; }
+  if (!bigBox || !bigBox.isConnected) {
+    vList.replaceChildren();
+    bigBox = document.createElement('div'); restBox = document.createElement('div');
+    restBox.className = 'space-y-3 mt-3'; bigKey = '';
+    vList.append(bigBox, restBox);
+  }
+  let cur = videos.find(v => v.id === selId);
+  if (!cur) { selId = null; cur = videos[0]; if (playing && playing !== cur.id) playing = null; }
+  if (playing && playing !== cur.id) playing = null;
+  const isPlaying = playing === cur.id;
+  const key = cur.id + '|' + (cur.title || '') + '|' + isPlaying;
+  if (key !== bigKey) { bigKey = key; bigBox.replaceChildren(bigCard(cur, isPlaying)); }   // 같으면 그대로 둠 (재생 중 영상이 다시 시작되지 않게)
+  restBox.replaceChildren(...videos.filter(v => v !== cur).map(restRow));
 }
 function delBtn(v) {
   const b = document.createElement('button');
@@ -110,9 +170,11 @@ function startVideos() {
 }
 function stopVideos() {
   if (vUnsub) { vUnsub(); vUnsub = null; }
-  videos = [];
+  videos = []; selId = null; playing = null; bigBox = restBox = null; bigKey = '';
   vList.replaceChildren();
 }
+// 다른 탭으로 가면 재생 중인 영상을 멈춤 (소리가 계속 나지 않게)
+try { new MutationObserver(() => { const t = $('tab-home'); if (t && !t.classList.contains('active')) stopPlay(); }).observe($('tab-home'), { attributes: true, attributeFilter: ['class'] }); } catch {}
 function vErr(msg) { $('vidErr').textContent = msg; $('vidErr').hidden = !msg; }
 function closeVidForm() { $('vidForm').hidden = true; $('vidUrl').value = ''; $('vidTitle').value = ''; vErr(''); }
 function addVideo() {
