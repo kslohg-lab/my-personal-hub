@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!--
+  🔢 스도쿠 — 내 아지트 미니 게임
+  localStorage 키
+   sudokuV1     (메인 저장, JSON)
+     best     {모드: 최단 초}  (e4, e6, n9, h9, d = 오늘의 퍼즐)
+     clears   {모드: 클리어 횟수}
+     streak, bestStreak  연속 클리어 / 최고 연속 클리어 (포기하면 연속 기록이 0으로)
+     daily    {date:'YYYYMMDD', sec, stars}  오늘의 퍼즐 완료 기록
+     snd      소리 켜짐
+   sudokuV1run  (판 도중 저장, 이어하기용 — 판이 끝나거나 메뉴로 나가면 삭제)
+     m, daily, puz, sol, cur, notes, t, hints, mist
+-->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>스도쿠</title>
+<style>
+:root{--bg:#eef3ff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#202838}}
+:root[data-theme="dark"]{--bg:#202838}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;touch-action:none;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;color:#2f3f66}
+body{position:relative}
+#box{position:absolute;left:0;top:0;width:450px;height:800px;transform-origin:0 0;overflow:hidden;border-radius:16px;background:#f4f7ff}
+canvas{position:absolute;left:0;top:0;width:450px;height:800px;touch-action:none;display:block}
+.ov{position:absolute;inset:0;display:none}
+.sh{background:rgba(40,50,90,.5)}
+button{font:inherit;color:#2f3f66;border:0;border-radius:18px;background:#fff;box-shadow:0 4px 0 #c8d4f0;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #c8d4f0}
+.card{position:absolute;left:25px;top:60px;width:400px;box-sizing:border-box;padding:18px;background:#fff;border-radius:28px;text-align:center;max-height:740px}
+.card h2{margin:4px 0 8px;font-size:29px;font-weight:700}
+.big{width:100%;height:54px;font-size:21px;margin-top:9px;background:#cfe0ff;box-shadow:0 4px 0 #9fb8ea}
+.big.pri{background:#ffe27a;box-shadow:0 4px 0 #dcb23a}.big.alt{background:#c9f0d8;box-shadow:0 4px 0 #94cfae}.big.sm{height:48px;font-size:18px;background:#fff;box-shadow:0 4px 0 #c8d4f0}
+.big.h{display:flex;gap:8px;background:none;box-shadow:none;padding:0}
+.pill{display:inline-block;background:#eef3ff;border-radius:20px;padding:5px 12px;font-size:16px;margin:2px}
+#home{position:absolute;right:4px;top:4px;width:48px;height:48px;font-size:24px;display:none;padding:0}
+#toast{position:absolute;left:50%;top:512px;transform:translateX(-50%);background:#2f3f66;color:#fff;padding:9px 18px;border-radius:20px;font-size:19px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.row{display:flex;gap:8px}.row button{flex:1}
+table{width:100%;font-size:18px;border-collapse:collapse}td{padding:6px 4px;border-bottom:1px solid #e4eaf8}
+</style></head><body>
+<div id="box">
+ <canvas id="cv"></canvas>
+ <button id="home">⏸️</button>
+ <div id="menu" class="ov" style="background:linear-gradient(#dfe9ff,#e8fff1)">
+  <div class="card" style="top:40px"><div style="font-size:64px;line-height:1.1">🔢</div><h2>스도쿠</h2>
+   <div id="mw"></div><p style="font-size:15px;margin:6px 0 0">가로·세로·네모 칸에 숫자가 한 번씩만!</p>
+   <button id="b0" class="big pri" style="display:none"></button>
+   <button id="b1" class="big">🌱 쉬움 4×4</button><button id="b2" class="big">🌿 쉬움 6×6</button><button id="b3" class="big">🌳 보통 9×9</button><button id="b4" class="big">🔥 어려움 9×9</button>
+   <button id="b5" class="big alt">📅 오늘의 퍼즐</button>
+   <div class="row"><button id="b6" class="big sm">🏆 기록</button><button id="b7" class="big sm">⚙️ 설정</button></div></div>
+ </div>
+ <div id="rec" class="ov sh"><div class="card" style="top:90px"><h2>🏆 기록</h2><div id="rb"></div><button id="rx" class="big sm">닫기</button></div></div>
+ <div id="res" class="ov sh"><div class="card" style="top:150px"><h2 id="rt"></h2><div id="rbd" style="font-size:19px;line-height:1.7"></div><button id="r1" class="big pri"></button><button id="r3" class="big sm">🏠 메뉴</button></div></div>
+ <div id="pause" class="ov" style="background:#dfe6fb"><div class="card" style="top:220px"><h2>⏸️ 잠깐 멈췄어요</h2><p style="font-size:17px">판은 안전하게 저장됐어요</p><button id="p1" class="big pri">▶ 계속하기</button><button id="p2" class="big sm">🏳️ 포기하고 메뉴로</button></div></div>
+ <div id="set" class="ov sh"><div class="card" style="top:170px"><h2>⚙️ 설정</h2><button id="sn" class="big sm"></button><button id="rs" class="big sm"></button><button id="sc" class="big sm">닫기</button></div></div>
+ <div id="toast"></div>
+</div>
+<script>
+(()=>{
+const W=450,H=800,$=id=>document.getElementById(id),cv=$('cv'),cx=cv.getContext('2d');let K=1;
+const KEY='sudokuV1',KRUN='sudokuV1run';
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const DEF=()=>({best:{},clears:{},streak:0,bestStreak:0,daily:{},snd:true});
+let save=DEF();try{const s=JSON.parse(ls.get(KEY)||'null');if(s&&typeof s==='object')save=Object.assign(DEF(),s)}catch(e){}
+for(const k of['best','clears','daily'])if(!save[k]||typeof save[k]!=='object')save[k]={};
+const store=()=>ls.set(KEY,JSON.stringify(save));
+const MODES={e4:{k:'e4',n:'쉬움 4×4',N:4,br:2,bc:2,clue:8},e6:{k:'e6',n:'쉬움 6×6',N:6,br:2,bc:3,clue:20},n9:{k:'n9',n:'보통 9×9',N:9,br:3,bc:3,clue:38},h9:{k:'h9',n:'어려움 9×9',N:9,br:3,bc:3,clue:27}};
+const fmtT=t=>{t=Math.floor(t);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+/* ---------- audio ---------- */
+let AC=null;const au=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}return AC};
+function tone(f,d,ty='sine',v=.12,t0=0){if(!save.snd||!AC)return;try{const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+t0;o.type=ty;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const SND={tap(){tone(560,.06,'triangle',.09)},put(){tone(700,.09,'triangle',.12)},bad(){tone(180,.25,'sawtooth',.1)},hint(){tone(880,.12,'sine',.1);tone(1175,.14,'sine',.1,.09)},win(){[523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.14,i*.12))},done(){tone(988,.1,'triangle',.1);tone(1319,.16,'triangle',.1,.08)}};
+const snd=k=>SND[k]();
+/* ---------- generator ---------- */
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const pc=x=>{let n=0;while(x){x&=x-1;n++}return n};
+function count(m,g0,lim,rnd){const N=m.N,NN=N*N,full=((1<<N)-1)<<1,g=g0.slice(),rm=new Array(N).fill(0),cm=new Array(N).fill(0),bm=new Array(N).fill(0),bx=new Array(NN);
+ for(let i=0;i<NN;i++){bx[i]=Math.floor(Math.floor(i/N)/m.br)*(N/m.bc)+Math.floor((i%N)/m.bc);if(g[i]){const b=1<<g[i];rm[(i/N)|0]|=b;cm[i%N]|=b;bm[bx[i]]|=b}}
+ let cnt=0,out=null;
+ function rec(){let best=-1,bn=99,bcand=0;
+  for(let i=0;i<NN;i++)if(!g[i]){const cand=~(rm[(i/N)|0]|cm[i%N]|bm[bx[i]])&full,n=pc(cand);if(n<bn){bn=n;best=i;bcand=cand;if(n<=1)break}}
+  if(best<0){cnt++;if(rnd&&!out)out=g.slice();return cnt>=lim}
+  if(bn===0)return false;
+  const ds=[];for(let d=1;d<=N;d++)if(bcand&(1<<d))ds.push(d);
+  if(rnd)for(let i=ds.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[ds[i],ds[j]]=[ds[j],ds[i]]}
+  const r=(best/N)|0,c=best%N,b=bx[best];
+  for(const d of ds){const bt=1<<d;g[best]=d;rm[r]|=bt;cm[c]|=bt;bm[b]|=bt;const stop=rec();g[best]=0;rm[r]&=~bt;cm[c]&=~bt;bm[b]&=~bt;if(stop)return true}
+  return false}
+ rec();return rnd?out:cnt}
+function gen(m,rnd){const NN=m.N*m.N,sol=count(m,new Array(NN).fill(0),1,rnd),puz=sol.slice(),order=[...Array(NN).keys()];
+ for(let i=NN-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+ let clues=NN;for(const i of order){if(clues<=m.clue)break;const v=puz[i];puz[i]=0;if(count(m,puz,2)!==1)puz[i]=v;else clues--}
+ return{sol,puz}}
+/* ---------- state ---------- */
+let s=null,scr='menu',paused=false,lastTs=0,saveT=0,dailyNow=false;
+const show=n=>{['menu','rec','res','pause','set'].forEach(i=>$(i).style.display=i===n?'block':'none');$('home').style.display=scr==='game'?'block':'none'};
+function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1400)}
+const todayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
+function readRun(){const t=ls.get(KRUN);if(!t)return null;try{const d=JSON.parse(t),m=MODES[d.m];if(!m)return null;const NN=m.N*m.N,ok=a=>Array.isArray(a)&&a.length===NN&&a.every(v=>Number.isInteger(v)&&v>=0&&v<=((1<<(m.N+1))));
+  if(ok(d.puz)&&ok(d.sol)&&ok(d.cur)&&ok(d.notes)&&d.puz.every(v=>v<=m.N)&&d.sol.every(v=>v>=1&&v<=m.N)&&d.cur.every(v=>v<=m.N)&&isFinite(d.t)&&d.t>=0&&count(m,d.puz,2)===1)return d}catch(e){}return null}
+function saveRun(){if(!s||scr!=='game'||s.ph!=='play')return;ls.set(KRUN,JSON.stringify({m:s.m.k,daily:s.daily,puz:s.puz,sol:s.sol,cur:s.cur,notes:s.notes,t:s.t,hints:s.hints,mist:s.mist}))}
+function renderMenu(){const rd=readRun();$('mw').innerHTML='<span class="pill">🔥 연속 '+save.streak+'</span><span class="pill">🏅 최고 연속 '+save.bestStreak+'</span>';
+ $('b0').style.display=rd?'block':'none';if(rd)$('b0').textContent='⏯ 이어서 하기 ('+(rd.daily?'오늘의 퍼즐':MODES[rd.m].n)+' · '+fmtT(rd.t)+')';
+ $('b5').textContent=(save.daily.date===todayKey()?'✅ ':'📅 ')+'오늘의 퍼즐'+(save.daily.date===todayKey()?' (완료)':'')}
+function renderRec(){const rows=Object.values(MODES).map(m=>'<tr><td>'+m.n+'</td><td>'+(save.best[m.k]!==undefined?'⏱ '+fmtT(save.best[m.k]):'-')+'</td><td>'+(save.clears[m.k]||0)+'번</td></tr>').join('')+'<tr><td>📅 오늘의 퍼즐</td><td>'+(save.best.d!==undefined?'⏱ '+fmtT(save.best.d):'-')+'</td><td>'+(save.clears.d||0)+'번</td></tr>';$('rb').innerHTML='<table>'+rows+'</table>'}
+function setLbl(){$('sn').textContent=save.snd?'🔊 소리 켜짐':'🔇 소리 꺼짐';$('rs').textContent='🗑️ 기록 지우기';$('rs').dataset.s='0'}
+function startGame(mk,daily,rd){const m=MODES[mk];let puz,sol;
+ if(rd){puz=rd.puz;sol=rd.sol}else{const seed=daily?todayKey():Math.floor(Math.random()*2147483647),r=gen(m,mulberry(seed));puz=r.puz;sol=r.sol;ls.del(KRUN)}
+ s={m,daily:!!daily,puz,sol,cur:rd?rd.cur.slice():puz.slice(),notes:rd?rd.notes.slice():new Array(m.N*m.N).fill(0),t:rd?rd.t:0,hints:rd?rd.hints:0,mist:rd?rd.mist:0,sel:-1,nm:false,undo:[],ph:'play',pa:[],stars:0,flash:[]};
+ scr='game';paused=false;saveT=0;lastTs=0;show('none');if(!rd)toast(daily?'오늘의 퍼즐 시작!':'칸을 누르고 숫자를 골라요')}
+function giveUp(){if(s&&s.ph==='play'){save.streak=0;store()}ls.del(KRUN);scr='menu';s=null;paused=false;renderMenu();show('menu')}
+function pauseGame(){if(scr!=='game'||!s||paused||s.ph!=='play')return;paused=true;saveRun();$('pause').style.display='block'}
+function resumeGame(){if(!paused)return;paused=false;$('pause').style.display='none';lastTs=0}
+/* ---------- rules ---------- */
+const bxOf=(m,i)=>Math.floor(Math.floor(i/m.N)/m.br)*(m.N/m.bc)+Math.floor((i%m.N)/m.bc);
+const peer=(m,a,b)=>a!==b&&(((a/m.N)|0)===((b/m.N)|0)||a%m.N===b%m.N||bxOf(m,a)===bxOf(m,b));
+function unitDone(){/* flash newly completed rows/cols/boxes */}
+function checkWin(){if(s.cur.every((v,i)=>v===s.sol[i]))win()}
+function push(i){s.undo.push({i,v:s.cur[i],n:s.notes[i],ns:null});if(s.undo.length>200)s.undo.shift()}
+function put(n){if(!s||s.ph!=='play'||s.sel<0)return;const i=s.sel,m=s.m;if(s.puz[i]){toast('이 칸은 바꿀 수 없어요');return}
+ if(s.nm){if(s.cur[i]){toast('먼저 숫자를 지워요');return}push(i);s.notes[i]^=(1<<n);snd('tap');saveRun();return}
+ if(s.cur[i]===s.sol[i]&&s.cur[i]){toast('이미 맞았어요 👍');return}
+ push(i);const old=s.cur[i];s.cur[i]=old===n?0:n;s.notes[i]=0;
+ if(s.cur[i]){const undoN=[];for(let j=0;j<m.N*m.N;j++)if(peer(m,i,j)&&(s.notes[j]&(1<<n))){undoN.push([j,s.notes[j]]);s.notes[j]&=~(1<<n)}s.undo[s.undo.length-1].ns=undoN;
+  if(n!==s.sol[i]){s.mist++;snd('bad')}else{snd('put');pf(i)}}else snd('tap');
+ saveRun();checkWin()}
+function erase(){if(!s||s.ph!=='play'||s.sel<0)return;const i=s.sel;if(s.puz[i])return;if(!s.cur[i]&&!s.notes[i])return;push(i);s.cur[i]=0;s.notes[i]=0;snd('tap');saveRun()}
+function undo(){if(!s||s.ph!=='play'||!s.undo.length){toast('되돌릴 게 없어요');return}const u=s.undo.pop();s.cur[u.i]=u.v;s.notes[u.i]=u.n;if(u.ns)for(const[j,v]of u.ns)s.notes[j]=v;s.sel=u.i;snd('tap');saveRun()}
+function hint(){if(!s||s.ph!=='play')return;if(s.hints>=3){toast('힌트는 3번까지예요');snd('tap');return}
+ let t=s.sel;if(t<0||s.cur[t]===s.sol[t]){const w=[];s.cur.forEach((v,i)=>{if(v!==s.sol[i])w.push(i)});if(!w.length)return;t=w[Math.floor(Math.random()*w.length)]}
+ s.cur[t]=s.sol[t];s.notes[t]=0;s.puz[t]=s.sol[t];s.undo=s.undo.filter(u=>u.i!==t);s.hints++;s.sel=t;snd('hint');pf(t);saveRun();checkWin()}
+function pf(i){const m=s.m,cs=400/m.N,x=25+(i%m.N+.5)*cs,y=104+(((i/m.N)|0)+.5)*cs;for(let k=0;k<5;k++)s.pa.push({e:'✨',x,y,vx:(Math.random()-.5)*120,vy:-40-Math.random()*70,l:.7})}
+function win(){s.ph='won';const sc=s.mist+s.hints;s.stars=sc===0?3:sc<=2?2:1;const k=s.daily?'d':s.m.k;
+ const nb=save.best[k]===undefined||s.t<save.best[k];if(nb)save.best[k]=Math.floor(s.t);save.clears[k]=(save.clears[k]||0)+1;save.streak++;save.bestStreak=Math.max(save.bestStreak,save.streak);
+ if(s.daily&&save.daily.date!==todayKey())save.daily={date:todayKey(),sec:Math.floor(s.t),stars:s.stars};
+ store();ls.del(KRUN);snd('win');for(let i=0;i<30;i++)s.pa.push({e:['🎉','⭐','✨','🎊'][i%4],x:Math.random()*W,y:-20-Math.random()*200,vx:(Math.random()-.5)*60,vy:60+Math.random()*120,l:3});
+ s.endT=1.6;s.nb=nb}
+function showRes(){scr='result';$('rt').textContent='🎉 해냈어요! '+'⭐'.repeat(s.stars)+'☆'.repeat(3-s.stars);
+ $('rbd').innerHTML='⏱ 걸린 시간 <b>'+fmtT(s.t)+'</b>'+(s.nb?' 🏅 새 기록!':'')+'<br>❌ 틀린 횟수 '+s.mist+' · 💡 힌트 '+s.hints+'<br>🔥 연속 클리어 <b>'+save.streak+'</b>';
+ $('r1').textContent=s.daily?'🏠 메뉴로':'▶ 새 판 하기';$('r1').onclick=()=>{au();if(s.daily){toMenu()}else startGame(s.m.k,false)};show('res')}
+function toMenu(){scr='menu';s=null;paused=false;renderMenu();show('menu')}
+/* ---------- menu wiring ---------- */
+$('b0').onclick=()=>{au();const rd=readRun();if(rd)startGame(rd.m,rd.daily,rd);else{renderMenu()}};
+for(const[id,k]of[['b1','e4'],['b2','e6'],['b3','n9'],['b4','h9']])$(id).onclick=()=>{au();ls.del(KRUN);startGame(k,false)};
+$('b5').onclick=()=>{au();ls.del(KRUN);startGame('n9',true)};
+$('b6').onclick=()=>{au();renderRec();show('rec')};$('rx').onclick=()=>show('menu');
+$('b7').onclick=()=>{au();setLbl();show('set')};$('sc').onclick=()=>show('menu');
+$('sn').onclick=()=>{save.snd=!save.snd;store();setLbl()};
+$('rs').onclick=()=>{const b=$('rs');if(b.dataset.s!=='1'){b.dataset.s='1';b.textContent='⚠️ 정말 지울까요? 한 번 더!';setTimeout(()=>{b.dataset.s='0';b.textContent='🗑️ 기록 지우기'},3000)}else{save=DEF();store();ls.del(KRUN);setLbl();renderMenu();toast('모두 지웠어요')}};
+$('home').onclick=pauseGame;$('p1').onclick=()=>{au();resumeGame()};$('p2').onclick=giveUp;$('r3').onclick=toMenu;
+/* ---------- input ---------- */
+const GX=25,GY=104,GS=400;
+const padW=()=>s.m.N===9?44:s.m.N===6?62:84;
+function tap(x,y){const m=s.m,N=m.N;
+ if(x>=GX&&x<GX+GS&&y>=GY&&y<GY+GS){const c=Math.floor((x-GX)/(GS/N)),r=Math.floor((y-GY)/(GS/N));s.sel=r*N+c;snd('tap');return}
+ if(y>=520&&y<590){const i=Math.floor((x-14)/108);if(i===0){s.nm=!s.nm;snd('tap')}else if(i===1)erase();else if(i===2)undo();else if(i===3)hint();return}
+ if(y>=606&&y<686){const w=padW(),x0=(W-N*w)/2,i=Math.floor((x-x0)/w);if(i>=0&&i<N)put(i+1)}}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();au();if(scr!=='game'||paused||!s||s.ph!=='play')return;const r=cv.getBoundingClientRect();tap((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H)});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+/* ---------- draw ---------- */
+const rr=(x,y,w,h,r)=>{cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()};
+const FN='"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif';
+const tx=(t,x,y,sz,c,al)=>{cx.font='700 '+sz+'px '+FN;cx.fillStyle=c||'#2f3f66';cx.textAlign=al||'center';cx.fillText(t,x,y);cx.textAlign='center'};
+function btn(x,y,w,h,col,on){rr(x,y+3,w,h,14);cx.fillStyle='rgba(47,63,102,.18)';cx.fill();rr(x,y,w,h,14);cx.fillStyle=col;cx.fill();if(on){cx.lineWidth=4;cx.strokeStyle='#3a6fd8';cx.stroke()}}
+function draw(){cx.clearRect(0,0,W,H);cx.fillStyle='#f4f7ff';cx.fillRect(0,0,W,H);if(!s||scr==='menu')return;cx.textBaseline='middle';
+ const m=s.m,N=m.N,cs=GS/N;
+ tx(s.daily?'📅 오늘의 퍼즐':m.n,62,24,22,'#2f3f66','left');
+ tx('⏱ '+fmtT(s.t)+'   💡 '+(3-s.hints)+'   ❌ '+s.mist,62,60,17,'#5a6a96','left');
+ const sv=s.sel>=0?s.cur[s.sel]:0;
+ for(let i=0;i<N*N;i++){const r=(i/N)|0,c=i%N,x=GX+c*cs,y=GY+r*cs,v=s.cur[i],bad=v&&v!==s.sol[i];
+  let col='#fff';if(s.sel>=0){if(i===s.sel)col='#ffe27a';else if(sv&&v===sv&&!bad)col='#ffd3e6';else if(peer(m,s.sel,i))col='#e6eeff'}
+  if(bad)col=i===s.sel?'#ffb3bd':'#ffdde1';cx.fillStyle=col;cx.fillRect(x,y,cs,cs);
+  if(v){const given=s.puz[i];tx(String(v),x+cs/2,y+cs/2+2,cs*.62,bad?'#d8283f':given?'#2f3f66':'#2f6fe0');}
+  else if(s.notes[i]){const nc=N===4?2:3,nr=Math.ceil(N/nc),ns=cs/Math.max(nc,nr);for(let d=1;d<=N;d++)if(s.notes[i]&(1<<d)){const k=d-1;tx(String(d),x+(k%nc+.5)*(cs/nc),y+(Math.floor(k/nc)+.5)*(cs/nr)+1,Math.min(cs/nr*.7,ns*.7),'#7a88b0')}}}
+ cx.strokeStyle='#b9c6e6';cx.lineWidth=1;cx.beginPath();for(let i=1;i<N;i++){cx.moveTo(GX+i*cs,GY);cx.lineTo(GX+i*cs,GY+GS);cx.moveTo(GX,GY+i*cs);cx.lineTo(GX+GS,GY+i*cs)}cx.stroke();
+ cx.strokeStyle='#2f3f66';cx.lineWidth=3;cx.beginPath();for(let i=0;i<=N;i+=m.bc){cx.moveTo(GX+i*cs,GY);cx.lineTo(GX+i*cs,GY+GS)}for(let i=0;i<=N;i+=m.br){cx.moveTo(GX,GY+i*cs);cx.lineTo(GX+GS,GY+i*cs)}cx.stroke();
+ cx.strokeRect(GX,GY,GS,GS);
+ const tl=[['✏️','메모',s.nm],['🧽','지우기',false],['↩️','되돌리기',false],['💡','힌트 '+(3-s.hints),false]];
+ tl.forEach((t,i)=>{const x=14+i*108;btn(x,520,100,66,t[2]?'#cfe0ff':'#fff',t[2]);tx(t[0],x+50,540,24);tx(t[1],x+50,570,15)});
+ const w=padW(),x0=(W-N*w)/2,cntv={};s.cur.forEach((v,i)=>{if(v&&v===s.sol[i])cntv[v]=(cntv[v]||0)+1});
+ for(let d=1;d<=N;d++){const done=(cntv[d]||0)>=N,x=x0+(d-1)*w;cx.globalAlpha=done?.35:1;btn(x+2,606,w-4,72,s.nm?'#eef3ff':'#fff');tx(String(d),x+w/2,632,w>60?34:28,'#2f6fe0');tx(String(N-(cntv[d]||0)),x+w/2,662,13,'#8a97bc');cx.globalAlpha=1}
+ tx(s.nm?'✏️ 메모 모드: 작은 숫자로 적어요':'칸을 누르고 숫자를 골라요',225,722,16,'#7a88b0');
+ for(const q of s.pa){cx.globalAlpha=Math.max(0,Math.min(1,q.l*1.5));cx.font='24px sans-serif';cx.fillText(q.e,q.x,q.y)}cx.globalAlpha=1;cx.textBaseline='alphabetic'}
+function upd(dt){if(!s)return;for(const q of s.pa){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=(s.ph==='won'?40:200)*dt;q.l-=dt}s.pa=s.pa.filter(q=>q.l>0);
+ if(s.ph==='won'){s.endT-=dt;if(s.endT<=0&&scr==='game')showRes();return}
+ s.t+=dt;saveT+=dt;if(saveT>3){saveT=0;saveRun()}}
+function fit(){K=Math.min(innerWidth/W,innerHeight/H);$('box').style.transform='translate('+Math.round((innerWidth-W*K)/2)+'px,'+Math.round((innerHeight-H*K)/2)+'px) scale('+K+')'}
+function loop(ts){requestAnimationFrame(loop);const dt=lastTs?Math.min(.1,(ts-lastTs)/1000):0;lastTs=ts;if(scr==='game'&&!paused)upd(dt);if(scr==='game'||scr==='result')draw();else cx.clearRect(0,0,W,H)}
+addEventListener('resize',fit);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();store()}});
+addEventListener('pagehide',()=>{pauseGame();store()});
+cv.width=W;cv.height=H;fit();renderMenu();show('menu');requestAnimationFrame(loop);
+})();
+</script></body></html>

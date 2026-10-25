@@ -2,7 +2,7 @@
 //  - 게임들은 자기 최고 기록을 이 기기의 localStorage에 저장해 둔다 (허브와 같은 주소라서 허브가 읽을 수 있음) → 게임 파일은 고치지 않음.
 //  - 허브가 그 값을 읽어, 내 Firestore 기록보다 높으면 올린다 (기록은 올라가기만 함). 앱을 켤 때, 게임을 닫을 때, 앱으로 돌아올 때 확인.
 //  - scores/{game}__{id}: { game, name, uid, score(정수), at }   (id = 이메일 앞부분: dad, mom, chaea, jia)
-//  - 읽는 키: 산수 몬스터 mmBest / 스피드 매쓰 mb2_best / 아이스크림 iceCreamV1.bestDay / 붕어빵 bungeoppangV1.day / 동물 달리기 animalRunV6.best
+//  - 읽는 키: 산수 몬스터 mmBest / 스피드 매쓰 mb2_best / 아이스크림 iceCreamV1.bestDay / 붕어빵 bungeoppangV1.day / 체스 chessV1.rec / 스도쿠 sudokuV1.clears / 짝 맞추기 memoryV1.bestLevel / 동물 달리기 animalRunV6.best
 //  - 게임을 추가하려면 아래 BOARD에 한 줄 (게임이 기록을 어떤 localStorage 키에 저장하는지 알아야 함)
 //  - 한계: 기록은 '이 기기'의 최고 기록이라, 한 기기를 여러 명이 쓰면 로그인한 사람 이름으로 올라감.
 import { $ } from './util.js?v=1.15';
@@ -17,6 +17,9 @@ const BOARD = [
   { id: 'speed-math', title: '스피드 매쓰', icon: '⚡', unit: '점', read: () => num(ls('mb2_best')) },
   { id: 'ice-cream', title: '아이스크림 가게 · 클리어한 일차', icon: '🍦', unit: '일', read: () => { try { return num(((JSON.parse(ls('iceCreamV1') || 'null') || {}).bestDay || 1) - 1); } catch { return 0; } } },   // bestDay = 도달한 일차 → 클리어한 날 = 그 -1
   { id: 'bungeoppang', title: '붕어빵 타이쿤 · 장사한 날', icon: '🐟', unit: '일', read: () => { try { return num(((JSON.parse(ls('bungeoppangV1') || 'null') || {}).day || 1) - 1); } catch { return 0; } } },   // day = 다음에 할 일차
+  { id: 'chess', title: '체스 · 컴퓨터 이긴 횟수', icon: '♞', unit: '승', read: () => { try { const r = (JSON.parse(ls('chessV1') || 'null') || {}).rec || {}; return num([1, 2, 3].reduce((a, l) => a + (+((r[l] || {}).w) || 0), 0)); } catch { return 0; } } },   // 레벨 1~3 승수 합
+  { id: 'sudoku', title: '스도쿠 · 9×9 클리어 횟수', icon: '🔢', unit: '판', read: () => { try { const c = (JSON.parse(ls('sudokuV1') || 'null') || {}).clears || {}; return num((+c.n9 || 0) + (+c.h9 || 0)); } catch { return 0; } } },   // 쉬운 4×4·6×6과 매일 같은 '오늘의 퍼즐'은 제외(반복으로 올릴 수 있어서)
+  { id: 'memory-match', title: '짝 맞추기 · 클리어한 단계', icon: '🃏', unit: '단계', read: () => { try { return num(((JSON.parse(ls('memoryV1') || 'null') || {}).bestLevel || 1) - 1); } catch { return 0; } } },   // bestLevel = 도달한 단계 → 클리어 = -1
   { id: 'animal-run', title: '동물 달리기 · 무한 모드', icon: '🐾', unit: 'm', read: () => { try { return num((JSON.parse(ls('animalRunV6') || 'null') || {}).best); } catch { return 0; } } }
 ];
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };

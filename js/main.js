@@ -5,7 +5,7 @@ import { state, FAMILY, onAuthStateChanged } from './firebase-init.js?v=1.15';
 import { resetLogin } from './login.js?v=1.15';
 
 const VER = '?v=1.15';
-const FVER = { videos: '?v=1.19', chat: '?v=1.20', calendar: '?v=1.21', scores: '?v=1.22' };   // 기능 파일 하나만 고쳤을 때는 그 파일의 번호만 올리면 됨 (공유 파일 firebase-init/util은 그대로 1.15)
+const FVER = { videos: '?v=1.19', chat: '?v=1.20', calendar: '?v=1.21', scores: '?v=1.23' };   // 기능 파일 하나만 고쳤을 때는 그 파일의 번호만 올리면 됨 (공유 파일 firebase-init/util은 그대로 1.15)
 const features = {};   // { chat, todos, videos, calendar, tickets, scores } — 불러오기에 성공한 것만 들어감
 
 async function load(name) {

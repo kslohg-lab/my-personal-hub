@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!--
+  🃏 짝 맞추기 (기억력 카드 게임) — 내 아지트 미니 게임
+  localStorage 키
+   memoryV1     (메인 저장, JSON)
+     level      지금 도전할 단계
+     bestLevel  도달한 최고 단계
+     stars      {단계: 별 수}
+     bestScore  최고 점수 (한 단계 기준)
+     bestCombo  최고 연속 맞추기
+     snd        소리 켜짐
+   memoryV1run  (단계 도중 저장, 이어하기용 — 단계가 끝나거나 메뉴로 나가면 삭제)
+     level, deck[], st[], misses, tries, t, score, combo, bc
+-->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>짝 맞추기</title>
+<style>
+:root{--bg:#efe6ff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#241f33}}
+:root[data-theme="dark"]{--bg:#241f33}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;touch-action:none;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;color:#3d2f66}
+body{position:relative}
+#box{position:absolute;left:0;top:0;width:450px;height:800px;transform-origin:0 0;overflow:hidden;border-radius:16px;background:#f6f0ff}
+canvas{position:absolute;left:0;top:0;width:450px;height:800px;touch-action:none;display:block}
+.ov{position:absolute;inset:0;display:none}
+.sh{background:rgba(50,35,90,.5)}
+button{font:inherit;color:#3d2f66;border:0;border-radius:18px;background:#fff;box-shadow:0 4px 0 #d6c9f2;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #d6c9f2}
+.card{position:absolute;left:25px;top:60px;width:400px;box-sizing:border-box;padding:18px;background:#fff;border-radius:28px;text-align:center;max-height:740px}
+.card h2{margin:4px 0 8px;font-size:29px;font-weight:700}
+.big{width:100%;height:56px;font-size:21px;margin-top:9px;background:#e3d6ff;box-shadow:0 4px 0 #b9a5ea}
+.big.pri{background:#ffd86a;box-shadow:0 4px 0 #d6a52a}.big.alt{background:#c9f0d8;box-shadow:0 4px 0 #94cfae}.big.sm{height:48px;font-size:18px;background:#fff;box-shadow:0 4px 0 #d6c9f2}
+.pill{display:inline-block;background:#f3ecff;border-radius:20px;padding:5px 12px;font-size:16px;margin:2px}
+#home{position:absolute;right:4px;top:4px;width:48px;height:48px;font-size:24px;display:none;padding:0}
+#toast{position:absolute;left:50%;top:700px;transform:translateX(-50%);background:#3d2f66;color:#fff;padding:9px 18px;border-radius:20px;font-size:19px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.lv{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:440px;overflow-y:auto;touch-action:pan-y;margin-top:8px}
+.lv button{height:58px;font-size:17px;border-radius:14px;padding:0;line-height:1.1}.lv small{display:block;font-size:11px}
+</style></head><body>
+<div id="box">
+ <canvas id="cv"></canvas>
+ <button id="home">⏸️</button>
+ <div id="menu" class="ov" style="background:linear-gradient(#e6dcff,#ffe9f2)">
+  <div class="card" style="top:90px"><div style="font-size:70px;line-height:1.1">🃏</div><h2>짝 맞추기</h2><div id="mw"></div>
+   <p id="mi" style="font-size:16px;line-height:1.5;margin:8px 0 0">그림을 잘 보고 외운 뒤<br>같은 그림 두 장을 찾아요!</p>
+   <button id="g0" class="big pri"></button><button id="g2" class="big alt">🗺️ 단계 고르기</button>
+   <div style="display:flex;gap:8px"><button id="g3" class="big sm">📝 기록</button><button id="g4" class="big sm">⚙️ 설정</button></div></div>
+ </div>
+ <div id="lvs" class="ov sh"><div class="card" style="top:60px"><h2>🗺️ 단계 고르기</h2><div id="lvl" class="lv"></div><button id="lx" class="big sm">닫기</button></div></div>
+ <div id="rec" class="ov sh"><div class="card" style="top:160px"><h2>📝 기록</h2><div id="rb" style="font-size:19px;line-height:1.8"></div><button id="rx" class="big sm">닫기</button></div></div>
+ <div id="res" class="ov sh"><div class="card" style="top:170px"><h2 id="rt"></h2><div id="rbd" style="font-size:19px;line-height:1.7"></div><button id="r1" class="big pri"></button><button id="r2" class="big sm">↩️ 같은 단계 다시</button><button id="r3" class="big sm">🏠 메뉴</button></div></div>
+ <div id="pause" class="ov" style="background:#e4daf9"><div class="card" style="top:220px"><h2>⏸️ 잠깐 멈췄어요</h2><p style="font-size:17px">카드는 가려 놨어요 🙈</p><button id="p1" class="big pri">▶ 계속하기</button><button id="p2" class="big sm">🏠 메뉴로 (이어하기에 남아요)</button></div></div>
+ <div id="set" class="ov sh"><div class="card" style="top:170px"><h2>⚙️ 설정</h2><button id="sn" class="big sm"></button><button id="rs" class="big sm"></button><button id="sc" class="big sm">닫기</button></div></div>
+ <div id="toast"></div>
+</div>
+<script>
+(()=>{
+const W=450,H=800,$=id=>document.getElementById(id),cv=$('cv'),cx=cv.getContext('2d');let K=1;
+const KEY='memoryV1',KRUN='memoryV1run';
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const DEF=()=>({level:1,bestLevel:1,stars:{},bestScore:0,bestCombo:0,snd:true});
+let save=DEF();try{const o=JSON.parse(ls.get(KEY)||'null');if(o&&typeof o==='object')save=Object.assign(DEF(),o)}catch(e){}
+if(!save.stars||typeof save.stars!=='object')save.stars={};if(!(save.level>=1))save.level=1;save.bestLevel=Math.max(save.bestLevel|0,save.level);
+const store=()=>ls.set(KEY,JSON.stringify(save));
+const rnd=(a,b)=>a+Math.random()*(b-a),ri=n=>Math.floor(Math.random()*n),fmt=n=>Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,',');
+/* ---------- audio ---------- */
+let AC=null;const au=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}return AC};
+function tone(f,d,ty='sine',v=.12,t0=0){if(!save.snd||!AC)return;try{const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+t0;o.type=ty;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const SND={flip(){tone(520,.06,'triangle',.09)},ok(){tone(784,.1,'triangle',.12);tone(1047,.16,'triangle',.12,.08)},bad(){tone(200,.2,'sawtooth',.09)},shuf(){tone(400,.08,'square',.07);tone(500,.08,'square',.07,.08);tone(600,.08,'square',.07,.16)},win(){[523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.14,i*.12))},lose(){[400,330,260].forEach((f,i)=>tone(f,.3,'sawtooth',.1,i*.18))},tick(){tone(900,.04,'square',.05)}};
+const snd=k=>SND[k]();
+/* ---------- level design ---------- */
+const POOL=['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🦉','🦋','🐢','🐙','🐬','🍎','🍌','🍇','🍓','🍉','🍑','🍒','🍍','🥝','🍋','⭐','🌈','🌸','🚗','🚀','⚽','🎈','🎁'];
+const SIM=[['🍎','🍏','🍅','🍓'],['🐶','🐕','🐩','🦮'],['🐱','🐈','🐯','🦁'],['🌕','🌝','🌙','🌛'],['🦆','🐤','🐥','🐔'],['🍊','🍑','🥭','🍋'],['🐭','🐹','🐰','🐁'],['🔴','🟠','🟤','🟣']];
+const PAIRS=l=>l<=1?2:l===2?3:l===3?4:l<=5?6:l<=7?8:l<=9?10:l<=12?12:l<=15?14:15;
+const LAY={4:[2,2],6:[3,2],8:[4,2],12:[4,3],16:[4,4],20:[4,5],24:[4,6],28:[4,7],30:[5,6]};
+const layOf=n=>LAY[n]||[4,Math.ceil(n/4)];
+const triesOf=l=>{if(l<4)return 999;const p=PAIRS(l);return p+Math.ceil(p*Math.max(.55,1.8-.07*(l-3)))};
+const timeOf=l=>l<6?0:Math.round(Math.max(p4(l),PAIRS(l)*Math.max(4.2,9.5-.25*l)));
+const p4=l=>PAIRS(l)*3.5+15;
+const prevOf=l=>l<=3?3:Math.max(1.4,PAIRS(l)*.62-.035*l);
+const shufEvery=l=>l>=12?3:0;
+const MXL=999;
+function mkDeck(l){const p=PAIRS(l);let es=[];
+ if(l>=14){const gs=SIM.slice().sort(()=>Math.random()-.5);for(const g of gs){if(es.length+4<=p&&es.length<p)es.push(...g.slice())}}
+ else if(l>=8){const gs=SIM.slice().sort(()=>Math.random()-.5);es.push(...gs[0].slice(0,2))}
+ const rest=POOL.filter(e=>!es.includes(e)).sort(()=>Math.random()-.5);while(es.length<p)es.push(rest.pop());es=es.slice(0,p);
+ const d=[...es,...es];for(let i=d.length-1;i>0;i--){const j=ri(i+1);[d[i],d[j]]=[d[j],d[i]]}return d}
+/* ---------- state ---------- */
+let s=null,scr='menu',paused=false,lastTs=0,saveT=0;
+const show=n=>{['menu','lvs','rec','res','pause','set'].forEach(i=>$(i).style.display=i===n?'block':'none');$('home').style.display=scr==='game'?'block':'none'};
+function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1500)}
+function readRun(){const t=ls.get(KRUN);if(!t)return null;try{const d=JSON.parse(t);if(Number.isInteger(d.level)&&d.level>=1&&Array.isArray(d.deck)&&d.deck.length===PAIRS(d.level)*2&&d.deck.every(e=>typeof e==='string'&&e.length<8)&&Array.isArray(d.st)&&d.st.length===d.deck.length&&d.st.every(v=>v===0||v===1||v===2)&&d.st.filter(v=>v===1).length<=1&&isFinite(d.t)&&d.t>=0&&Number.isInteger(d.tries)&&d.tries>=0&&Number.isInteger(d.misses)&&d.misses>=0&&d.st.filter(v=>v===2).length%2===0&&d.st.some(v=>v!==2))return d}catch(e){}return null}
+function saveRun(){if(!s||scr!=='game'||s.ph==='won'||s.ph==='lost'||s.ph==='prev')return;const pend=s.sel.length===2;ls.set(KRUN,JSON.stringify({level:s.level,deck:s.cards.map(c=>c.e),st:s.cards.map((c,i)=>pend&&s.sel.includes(i)?0:c.st),misses:s.misses,tries:s.tries-(pend?1:0),t:s.t,score:s.score,combo:s.combo,bc:s.bc}))}
+function renderMenu(){const rd=readRun();$('mw').innerHTML='<span class="pill">🏆 최고 '+save.bestLevel+'단계</span><span class="pill">⭐ '+Object.values(save.stars).reduce((a,b)=>a+b,0)+'</span>';
+ $('g0').textContent=rd?'⏯ 이어서 하기 ('+rd.level+'단계)':'▶ '+save.level+'단계 시작'}
+function renderLvs(){const L=$('lvl');L.innerHTML='';for(let l=1;l<=save.bestLevel;l++){const b=document.createElement('button');b.innerHTML=l+'<small>'+'⭐'.repeat(save.stars[l]||0)+'</small>';b.onclick=()=>{au();ls.del(KRUN);startLevel(l)};L.appendChild(b)}}
+function startLevel(l,rd){const p=PAIRS(l),n=p*2,deck=rd?rd.deck:mkDeck(l),[cols,rows]=layOf(n);
+ s={level:l,pairs:p,cols,rows,cards:deck.map((e,i)=>({e,st:rd?rd.st[i]:0,f:rd?(rd.st[i]?1:0):1,sw:0})),ph:rd?'play':'prev',pv:rd?0:prevOf(l),pv0:prevOf(l),sel:[],lock:0,misses:rd?rd.misses:0,tries:rd?rd.tries:0,maxT:triesOf(l),limit:timeOf(l),t:rd?rd.t:0,score:rd?rd.score:0,combo:rd?rd.combo:0,bc:rd?rd.bc:0,pa:[],endT:0,fl:null,shufN:0};
+ scr='game';paused=false;lastTs=0;saveT=0;show('none');if(!rd){ls.del(KRUN);toast(l===1?'그림을 외워요! 곧 뒤집혀요':PAIRS(l)+'쌍 · '+(s.maxT<900?'기회 '+s.maxT+'번':'기회 무제한')+(s.limit?' · '+s.limit+'초':''))}}
+function pauseGame(){if(scr!=='game'||!s||paused||s.ph==='won'||s.ph==='lost')return;paused=true;saveRun();$('pause').style.display='block'}
+function resumeGame(){if(!paused)return;paused=false;$('pause').style.display='none';lastTs=0}
+function toMenu(){if(s&&s.ph!=='won'&&s.ph!=='lost')saveRun();scr='menu';s=null;paused=false;renderMenu();show('menu')}
+/* ---------- menu wiring ---------- */
+$('g0').onclick=()=>{au();const rd=readRun();if(rd)startLevel(rd.level,rd);else startLevel(save.level)};
+$('g2').onclick=()=>{au();renderLvs();show('lvs')};$('lx').onclick=()=>show('menu');
+$('g3').onclick=()=>{au();$('rb').innerHTML='🏆 최고 단계 <b>'+save.bestLevel+'</b><br>💯 최고 점수 <b>'+fmt(save.bestScore)+'</b><br>🔥 최고 연속 <b>'+save.bestCombo+'</b><br>⭐ 별 모은 개수 <b>'+Object.values(save.stars).reduce((a,b)=>a+b,0)+'</b>';show('rec')};$('rx').onclick=()=>show('menu');
+const setLbl=()=>{$('sn').textContent=save.snd?'🔊 소리 켜짐':'🔇 소리 꺼짐';$('rs').textContent='🗑️ 기록 지우기';$('rs').dataset.s='0'};
+$('g4').onclick=()=>{au();setLbl();show('set')};$('sc').onclick=()=>show('menu');$('sn').onclick=()=>{save.snd=!save.snd;store();setLbl()};
+$('rs').onclick=()=>{const b=$('rs');if(b.dataset.s!=='1'){b.dataset.s='1';b.textContent='⚠️ 정말 지울까요? 한 번 더!';setTimeout(()=>{b.dataset.s='0';b.textContent='🗑️ 기록 지우기'},3000)}else{save=DEF();store();ls.del(KRUN);setLbl();renderMenu();toast('모두 지웠어요')}};
+$('home').onclick=pauseGame;$('p1').onclick=()=>{au();resumeGame()};$('p2').onclick=toMenu;$('r3').onclick=toMenu;
+/* ---------- gameplay ---------- */
+function geo(){const n=s.cards.length,c=s.cols,r=s.rows,g=8,aw=410,ah=600;let cw=Math.min(100,(aw-(c-1)*g)/c),ch=Math.min(cw*1.18,(ah-(r-1)*g)/r);cw=Math.min(cw,ch/1.0);const tw=c*cw+(c-1)*g,th=r*ch+(r-1)*g;return{cw,ch,g,x0:(W-tw)/2,y0:112+(ah-th)/2}}
+const cardPos=(G,i)=>{const c=i%s.cols,r=Math.floor(i/s.cols);return[G.x0+c*(G.cw+G.g),G.y0+r*(G.ch+G.g)]};
+function tap(x,y){
+ if(s.ph==='prev'){if(s.pv<s.pv0-.7)s.pv=0;return}
+ if(s.ph!=='play'||s.lock>0)return;const G=geo();
+ for(let i=0;i<s.cards.length;i++){const[px,py]=cardPos(G,i);if(x>=px&&x<px+G.cw&&y>=py&&y<py+G.ch){const c=s.cards[i];if(c.st!==0)return;c.st=1;s.sel.push(i);snd('flip');if(s.sel.length===2)judge();else saveRun();return}}}
+function judge(){const[a,b]=s.sel,A=s.cards[a],B=s.cards[b];s.tries++;
+ if(A.e===B.e){s.lock=.55;s.ok=true}else{s.lock=.9;s.ok=false;}
+ saveRun()}
+function resolve(){const[a,b]=s.sel,A=s.cards[a],B=s.cards[b];s.sel=[];
+ if(s.ok){A.st=B.st=2;s.combo++;s.bc=Math.max(s.bc,s.combo);s.score+=100+Math.min(10,s.combo)*20;snd('ok');for(const i of[a,b]){const G=geo(),[px,py]=cardPos(G,i);for(let k=0;k<6;k++)s.pa.push({e:'✨',x:px+G.cw/2,y:py+G.ch/2,vx:rnd(-90,90),vy:rnd(-120,-20),l:.7})}
+  if(s.cards.every(c=>c.st===2)){win();return}}
+ else{A.st=B.st=0;s.combo=0;s.misses++;snd('bad');
+  const se=shufEvery(s.level);if(se&&s.misses%se===0){const un=s.cards.map((c,i)=>c.st===0?i:-1).filter(i=>i>=0);if(un.length>=3){const i=un[ri(un.length)];let j=un[ri(un.length)];while(j===i)j=un[ri(un.length)];const t=s.cards[i];s.cards[i]=s.cards[j];s.cards[j]=t;s.cards[i].sw=s.cards[j].sw=1;snd('shuf');toast('🔀 카드 두 장이 자리를 바꿨어요!')}}
+  if(s.tries>=s.maxT){lose('기회를 다 썼어요');return}}
+ saveRun()}
+function win(){s.ph='won';s.endT=.9;ls.del(KRUN);snd('win');const left=s.limit?Math.max(0,s.limit-s.t):0;s.bonus=Math.round(left*5);s.score+=s.bonus;
+ const m=s.misses,p=s.pairs;s.stars=m<=Math.floor(p*.3)?3:m<=Math.floor(p*.8)?2:1;
+ save.stars[s.level]=Math.max(save.stars[s.level]||0,s.stars);save.bestScore=Math.max(save.bestScore,s.score);save.bestCombo=Math.max(save.bestCombo,s.bc);
+ if(s.level>=save.level)save.level=s.level+1;save.bestLevel=Math.max(save.bestLevel,save.level);store();
+ for(let i=0;i<30;i++)s.pa.push({e:['🎉','⭐','✨','🎊'][i%4],x:rnd(0,W),y:rnd(-200,-20),vx:rnd(-30,30),vy:rnd(70,170),l:3})}
+function lose(why){s.ph='lost';s.endT=.9;s.why=why;ls.del(KRUN);snd('lose');save.bestCombo=Math.max(save.bestCombo,s.bc);store();for(const c of s.cards){if(c.st===0)c.st=1}}
+function showRes(){const won=s.ph==='won';scr='result';
+ $('rt').textContent=won?'🎉 '+s.level+'단계 성공! '+'⭐'.repeat(s.stars)+'☆'.repeat(3-s.stars):'😵 '+s.why;
+ $('rbd').innerHTML=won?'💯 점수 <b>'+fmt(s.score)+'</b>'+(s.bonus?' (시간 보너스 +'+s.bonus+')':'')+'<br>❌ 틀린 횟수 '+s.misses+' · 🔥 최고 연속 '+s.bc+(PAIRS(s.level+1)>PAIRS(s.level)?'<br>🆕 다음엔 카드가 늘어나요!':''):'맞춘 짝 '+s.cards.filter(c=>c.st===2).length/2+' / '+s.pairs+'<br>다시 도전해요!';
+ $('r1').textContent=won?'▶ '+(s.level+1)+'단계':'🔁 다시 도전';$('r1').onclick=()=>{au();startLevel(won?s.level+1:s.level)};$('r2').style.display=won?'block':'none';$('r2').onclick=()=>{au();startLevel(s.level)};show('res')}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();au();if(scr!=='game'||paused||!s)return;const r=cv.getBoundingClientRect();tap((e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H)});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+function upd(dt){if(!s)return;for(const c of s.cards){const tg=(c.st!==0||s.ph==='prev')?1:0;c.f+=Math.sign(tg-c.f)*Math.min(Math.abs(tg-c.f),dt*6);if(c.sw>0)c.sw-=dt*2}
+ for(const q of s.pa){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=(s.ph==='won'?30:160)*dt;q.l-=dt}s.pa=s.pa.filter(q=>q.l>0);
+ if(s.ph==='prev'){s.pv-=dt;if(s.pv<=0){s.ph='play';s.cards.forEach(c=>c.st=c.st);saveRun()}return}
+ if(s.ph==='won'||s.ph==='lost'){s.endT-=dt;if(s.endT<=0&&scr==='game')showRes();return}
+ s.t+=dt;saveT+=dt;if(saveT>3){saveT=0;saveRun()}
+ if(s.lock>0){s.lock-=dt;if(s.lock<=0)resolve()}
+ if(s.limit&&s.ph==='play'&&s.t>=s.limit)lose('시간이 끝났어요')}
+/* ---------- draw ---------- */
+const rr=(x,y,w,h,r)=>{cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()};
+const FN='"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif';
+const tx=(t,x,y,sz,c,al)=>{cx.font='700 '+sz+'px '+FN;cx.fillStyle=c||'#3d2f66';cx.textAlign=al||'center';cx.fillText(t,x,y);cx.textAlign='center'};
+function draw(){cx.clearRect(0,0,W,H);cx.fillStyle='#f6f0ff';cx.fillRect(0,0,W,H);if(!s||scr==='menu')return;cx.textBaseline='middle';
+ tx(s.level+'단계',62,24,22,'#3d2f66','left');
+ const tl=s.limit?Math.max(0,Math.ceil(s.limit-s.t)):0;
+ tx('💯 '+fmt(s.score)+(s.combo>=2?'  🔥'+s.combo:''),62,56,17,'#6a58a0','left');
+ tx((s.maxT<900?'❤️ '+Math.max(0,s.maxT-s.tries):'')+(s.limit?'   ⏱ '+tl:''),390,56,17,tl&&tl<=10?'#d83a3a':'#6a58a0','right');
+ if(s.ph==='prev'){const k=Math.max(0,s.pv/s.pv0);cx.fillStyle='rgba(61,47,102,.15)';rr(40,84,370,10,5);cx.fill();cx.fillStyle='#ffb347';rr(40,84,370*k,10,5);cx.fill()}
+ else if(s.limit){const k=Math.max(0,1-s.t/s.limit);cx.fillStyle='rgba(61,47,102,.15)';rr(40,84,370,10,5);cx.fill();cx.fillStyle=k<.2?'#ff6b6b':'#7ab8ff';rr(40,84,370*k,10,5);cx.fill()}
+ const G=geo();
+ s.cards.forEach((c,i)=>{const[px,py]=cardPos(G,i),cw=G.cw,ch=G.ch,sx=Math.abs(Math.cos(c.f*Math.PI)),up=c.f>.5,mx=px+cw/2,my=py+ch/2,wd=Math.max(2,cw*sx);
+  cx.globalAlpha=c.st===2&&s.ph==='play'?.55:1;const x=mx-wd/2;
+  rr(x,py+3,wd,ch,12);cx.fillStyle='rgba(61,47,102,.18)';cx.fill();rr(x,py,wd,ch,12);
+  if(up){cx.fillStyle=c.st===2?'#e6fbe9':'#fff';cx.fill();cx.lineWidth=3;cx.strokeStyle=c.st===2?'#7fd67f':s.sel.includes(i)?'#ffb347':'#d6c9f2';cx.stroke();if(sx>.3){cx.save();cx.translate(mx,my);cx.scale(sx,1);cx.font=Math.round(Math.min(cw,ch)*.58)+'px sans-serif';cx.textAlign='center';cx.fillStyle='#000';cx.fillText(c.e,0,2);cx.restore()}}
+  else{const g=cx.createLinearGradient(x,py,x+wd,py+ch);g.addColorStop(0,'#8f7bff');g.addColorStop(1,'#c58bff');cx.fillStyle=g;cx.fill();cx.lineWidth=3;cx.strokeStyle='#fff';cx.stroke();if(sx>.3){cx.save();cx.translate(mx,my);cx.scale(sx,1);cx.font=Math.round(Math.min(cw,ch)*.4)+'px sans-serif';cx.textAlign='center';cx.globalAlpha=.8;cx.fillText('⭐',0,2);cx.restore()}}
+  if(c.sw>0){cx.globalAlpha=Math.min(1,c.sw);cx.lineWidth=4;cx.strokeStyle='#ff7ab8';rr(px,py,cw,ch,12);cx.stroke()}
+  cx.globalAlpha=1});
+ tx(s.ph==='prev'?'👀 잘 보고 외워요! (누르면 바로 시작)':s.ph==='play'?(shufEvery(s.level)?'틀리면 카드가 바뀔 수 있어요 🔀':'같은 그림 두 장을 찾아요'):'',225,758,17,'#7a68b0');
+ for(const q of s.pa){cx.globalAlpha=Math.max(0,Math.min(1,q.l*1.5));cx.font='24px sans-serif';cx.fillText(q.e,q.x,q.y)}cx.globalAlpha=1;cx.textBaseline='alphabetic'}
+function fit(){K=Math.min(innerWidth/W,innerHeight/H);$('box').style.transform='translate('+Math.round((innerWidth-W*K)/2)+'px,'+Math.round((innerHeight-H*K)/2)+'px) scale('+K+')'}
+function loop(ts){requestAnimationFrame(loop);const dt=lastTs?Math.min(.1,(ts-lastTs)/1000):0;lastTs=ts;if(scr==='game'&&!paused)upd(dt);if(scr==='game'||scr==='result')draw();else cx.clearRect(0,0,W,H)}
+addEventListener('resize',fit);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();store()}});
+addEventListener('pagehide',()=>{pauseGame();store()});
+cv.width=W;cv.height=H;fit();renderMenu();show('menu');requestAnimationFrame(loop);
+})();
+</script></body></html>
