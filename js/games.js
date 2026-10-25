@@ -52,7 +52,7 @@ function showGameView(v) {
   $('gamePlayer').hidden = v !== 'player';
   $('runnerView').hidden = v !== 'runner';
 }
-let curGame = null, flip = store.get('hub_flip', '0') === '1';
+let curGame = null, flip = store.get('hub_flip', '0') === '1', rotated = false;
 
 // 가로 전용 게임: 폰이 세로 상태면 게임 화면을 앱이 직접 90도 돌려서 채움
 function layoutPlayer() {
@@ -60,6 +60,8 @@ function layoutPlayer() {
   const g = GAMES.find(x => x.id === curGame), f = $('gpFrame'), box = $('gamePlayer');
   const W = box.clientWidth, H = box.clientHeight;
   const rot = !!(g && g.landscape && H > W);
+  rotated = rot;
+  setRotStyle(f, rot);
   $('gpFlip').hidden = !rot;
   if (rot) {
     f.style.width = H + 'px'; f.style.height = W + 'px';
@@ -67,6 +69,52 @@ function layoutPlayer() {
   } else {
     f.style.width = '100%'; f.style.height = '100%'; f.style.transform = 'none';
   }
+}
+// 회전해서 보여 줄 때의 스크롤 보정:
+// 브라우저는 touch-action(pan-y 등)을 '돌리기 전' 화면 기준으로 판단해서, 게임 안 스크롤 영역(캐릭터 목록 등)이
+// 손가락으로 전혀 안 움직인다. 그래서 회전 중에는 게임 안의 touch-action을 끄고 손가락 이동을 직접 스크롤로 바꿔 준다.
+// (게임 파일은 고치지 않아도 됨. 같은 출처라서 허브가 iframe 안에 접근 가능)
+function setRotStyle(f, on) {
+  try {
+    const st = f.contentDocument && f.contentDocument.getElementById('hubRotStyle');
+    if (st) st.media = on ? 'all' : 'not all';
+  } catch {}
+}
+function hookRotatedScroll(f) {
+  let doc, win;
+  try { doc = f.contentDocument; win = f.contentWindow; } catch { return; }
+  if (!doc || !doc.documentElement || doc.getElementById('hubRotStyle')) return;
+  const st = doc.createElement('style');
+  st.id = 'hubRotStyle';
+  st.textContent = '*{touch-action:none!important}';
+  (doc.head || doc.documentElement).append(st);
+  setRotStyle(f, rotated);
+  let tgt = null, lx = 0, ly = 0, moved = false, swallow = false;
+  const scroller = el => {
+    for (; el && el.nodeType === 1 && el !== doc.documentElement; el = el.parentElement) {
+      const o = win.getComputedStyle(el).overflowY;
+      if ((o === 'auto' || o === 'scroll') && el.scrollHeight > el.clientHeight + 1) return el;
+    }
+    return null;
+  };
+  doc.addEventListener('touchstart', e => {
+    moved = false; tgt = null;
+    if (!rotated || e.touches.length !== 1) return;
+    tgt = scroller(e.target); lx = e.touches[0].clientX; ly = e.touches[0].clientY;
+  }, { passive: true });
+  doc.addEventListener('touchmove', e => {
+    if (!rotated || !tgt || e.touches.length !== 1) return;
+    const t = e.touches[0], dx = t.clientX - lx, dy = t.clientY - ly;
+    if (!moved && Math.hypot(dx, dy) < 8) return;     // 살짝 눌렀다 뗀 건 탭으로 둠
+    moved = true; lx = t.clientX; ly = t.clientY;
+    // 게임 안 좌표 기준: 게임의 세로 이동(dy)과, 폰 화면의 세로 이동에 해당하는 게임의 가로 이동(dx)을 모두 스크롤로 사용
+    const k = tgt.getBoundingClientRect().height / (tgt.offsetHeight || 1) || 1;   // 게임 화면 축소 비율
+    tgt.scrollTop -= (dy + (flip ? -dx : dx)) / k;
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+  doc.addEventListener('touchend', () => { if (moved) { swallow = true; setTimeout(() => { swallow = false; }, 350); } tgt = null; moved = false; }, { passive: true });
+  doc.addEventListener('touchcancel', () => { tgt = null; moved = false; }, { passive: true });
+  doc.addEventListener('click', e => { if (swallow) { e.stopPropagation(); e.preventDefault(); } }, true);   // 끌다가 뗀 자리의 버튼이 눌리지 않게
 }
 // iframe의 src를 바꾸면 브라우저 이동 기록이 하나 더 쌓여서 폰 뒤로가기를 두 번 눌러야 목록으로 돌아간다.
 // 그래서 열고 닫을 때마다 iframe을 새것으로 갈아 끼운다 (새 iframe의 첫 이동은 기록에 남지 않음).
@@ -85,6 +133,7 @@ function openGame(id) {
   showGameView('player');
   const f = freshFrame();
   layoutPlayer();
+  f.addEventListener('load', () => { hookRotatedScroll(f); layoutPlayer(); });
   f.src = 'games/' + id + '/index.html' + (g.v ? '?v=' + g.v : '');
   try { const el = document.documentElement; if (el.requestFullscreen) el.requestFullscreen().catch(() => {}); } catch {}
 }
