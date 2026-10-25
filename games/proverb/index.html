@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<!--
+  📜 속담 맞추기 — 내 아지트 미니 게임
+  localStorage 키
+   proverbV1     (메인 저장, JSON)
+     level       지금 도전할 단계
+     bestLevel   도달한 최고 단계
+     stars       {단계: 별 수}
+     dex         {속담번호: 맞힌 횟수}   (속담 도감)
+     wrong       {속담번호: 틀린 횟수}   (틀린 속담은 더 자주 나와요)
+     bestStreak  최고 연속 정답
+     snd         소리 켜짐
+   proverbV1run  (단계 도중 저장, 이어하기용 — 단계가 끝나거나 메뉴로 나가면 삭제)
+     level, qs[], i, hearts, ok, hints, streak
+-->
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>속담 맞추기</title>
+<style>
+:root{--bg:#fff1dc}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2d2518}}
+:root[data-theme="dark"]{--bg:#2d2518}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;touch-action:none;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;color:#4a3320}
+body{position:relative}
+#box{position:absolute;left:0;top:0;width:450px;height:800px;transform-origin:0 0;overflow:hidden;border-radius:16px;background:#fff8ea}
+.ov{position:absolute;inset:0;display:none}
+.sh{background:rgba(70,45,20,.5)}
+button{font:inherit;color:#4a3320;border:0;border-radius:18px;background:#fff;box-shadow:0 4px 0 #e6d3b0;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #e6d3b0}
+.card{position:absolute;left:25px;top:60px;width:400px;box-sizing:border-box;padding:18px;background:#fffdf7;border-radius:28px;text-align:center;max-height:740px}
+.card h2{margin:4px 0 8px;font-size:29px;font-weight:700}
+.big{width:100%;height:56px;font-size:21px;margin-top:9px;background:#ffe2b0;box-shadow:0 4px 0 #dcb070}
+.big.pri{background:#ffcf5a;box-shadow:0 4px 0 #d6a020}.big.alt{background:#cdebc4;box-shadow:0 4px 0 #98c58c}.big.sm{height:48px;font-size:18px;background:#fff;box-shadow:0 4px 0 #e6d3b0}
+.pill{display:inline-block;background:#fff1dc;border-radius:20px;padding:5px 12px;font-size:16px;margin:2px}
+#home{position:absolute;right:4px;top:4px;width:48px;height:48px;font-size:24px;display:none;padding:0;z-index:5}
+#toast{position:absolute;left:50%;top:640px;transform:translateX(-50%);background:#4a3320;color:#fff;padding:9px 18px;border-radius:20px;font-size:19px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:9}
+.lst{overflow-y:auto;touch-action:pan-y;text-align:left}
+.lv{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:440px;overflow-y:auto;touch-action:pan-y;margin-top:8px}
+.lv button{height:58px;font-size:17px;border-radius:14px;padding:0;line-height:1.1}.lv small{display:block;font-size:11px}
+.dxi{background:#fff1dc;border-radius:14px;padding:8px 10px;margin-bottom:8px;font-size:17px;line-height:1.35}.dxi small{display:block;font-size:13px;color:#8a6a48;font-weight:400}
+#play{background:#fff8ea}
+#hud{position:absolute;left:62px;top:8px;right:60px;height:34px;display:flex;align-items:center;justify-content:space-between;font-size:19px}
+#tb{position:absolute;left:20px;right:20px;top:56px;height:9px;background:rgba(74,51,32,.12);border-radius:5px;overflow:hidden}#tf{height:100%;width:100%;background:#ffb347;border-radius:5px}
+#q{position:absolute;left:20px;right:20px;top:76px;height:236px;background:#fff;border-radius:24px;box-shadow:0 5px 0 #e6d3b0;box-sizing:border-box;padding:14px 16px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+#qt{font-size:15px;color:#a07a50;margin-bottom:8px}#qx{font-size:29px;line-height:1.4;word-break:keep-all}
+#qx b{color:#e0562a;display:inline-block;min-width:80px;border-bottom:4px solid #e0562a}
+#ch{position:absolute;left:20px;right:20px;top:326px}
+#ch button{display:block;width:100%;min-height:58px;margin-bottom:8px;font-size:20px;line-height:1.25;padding:8px 12px;word-break:keep-all}
+#ch button.ok{background:#bdf0bd;box-shadow:0 4px 0 #7fcf7f}#ch button.no{background:#ffc9c9;box-shadow:0 4px 0 #e69090}#ch button.off{opacity:.3;pointer-events:none}
+#hint{position:absolute;left:20px;top:606px;width:130px;height:40px;font-size:15px;padding:0;display:none}
+#fb{position:absolute;left:20px;right:20px;top:604px;height:184px;background:#fffdf7;border-radius:22px;box-shadow:0 5px 0 #e6d3b0;box-sizing:border-box;padding:12px 14px;text-align:center;display:none}
+#fb .r{font-size:21px}#fb .p{font-size:20px;color:#c24a1a;margin:4px 0;line-height:1.3;word-break:keep-all}#fb .m{font-size:16px;line-height:1.35;font-weight:400;color:#6a4a2a;word-break:keep-all}
+#nx{position:absolute;left:14px;right:14px;bottom:10px;height:46px;font-size:19px;background:#ffcf5a;box-shadow:0 4px 0 #d6a020}
+#ans,#pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+#ans{min-height:84px;background:rgba(74,51,32,.06);border-radius:16px;padding:8px;box-sizing:border-box;margin-bottom:12px;align-content:flex-start}
+#ans button,#pool button{width:auto;min-height:46px;margin:0;font-size:19px;padding:6px 12px;border-radius:14px;display:inline-block}
+#ans button{background:#ffe9a8;box-shadow:0 4px 0 #dcb23a}
+#go{width:100%;margin-top:10px;height:52px;font-size:20px;background:#ffcf5a;box-shadow:0 4px 0 #d6a020}
+</style></head><body>
+<div id="box">
+ <button id="home">⏸️</button>
+ <div id="play" class="ov">
+  <div id="hud"><span id="hl"></span><span id="hh"></span></div>
+  <div id="tb"><div id="tf"></div></div>
+  <div id="q"><div id="qt"></div><div id="qx"></div></div>
+  <div id="ch"></div>
+  <button id="hint" class="big sm"></button>
+  <div id="fb"><div class="r" id="fr"></div><div class="p" id="fp"></div><div class="m" id="fm"></div><button id="nx">다음 ▶</button></div>
+ </div>
+ <div id="menu" class="ov" style="background:linear-gradient(#ffe9c4,#e8f6d8)">
+  <div class="card" style="top:90px"><div style="font-size:70px;line-height:1.1">📜</div><h2>속담 맞추기</h2><div id="mw"></div>
+   <p style="font-size:16px;line-height:1.5;margin:8px 0 0">옛날부터 내려온 말,<br>뒷부분을 맞춰 도감을 채워요!</p>
+   <button id="g0" class="big pri"></button><button id="g2" class="big alt">🗺️ 단계 고르기</button>
+   <div style="display:flex;gap:8px"><button id="g3" class="big sm">📖 속담 도감</button><button id="g4" class="big sm">⚙️ 설정</button></div></div>
+ </div>
+ <div id="lvs" class="ov sh"><div class="card" style="top:60px"><h2>🗺️ 단계 고르기</h2><div id="lvl" class="lv"></div><button id="lx" class="big sm">닫기</button></div></div>
+ <div id="dex" class="ov sh"><div class="card" style="top:24px;height:752px;padding:14px"><h2 style="margin:0 0 4px;font-size:26px">📖 속담 도감</h2><div id="dw"></div><div id="dl" class="lst" style="height:590px;margin-top:6px"></div><button id="dx" class="big sm" style="margin-top:6px;height:46px">닫기</button></div></div>
+ <div id="res" class="ov sh"><div class="card" style="top:150px"><h2 id="rt"></h2><div id="rbd" style="font-size:19px;line-height:1.7"></div><button id="r1" class="big pri"></button><button id="r2" class="big sm">↩️ 같은 단계 다시</button><button id="r3" class="big sm">🏠 메뉴</button></div></div>
+ <div id="pause" class="ov" style="background:#f8ead0"><div class="card" style="top:220px"><h2>⏸️ 잠깐 멈췄어요</h2><p style="font-size:17px">문제는 안전하게 저장됐어요</p><button id="p1" class="big pri">▶ 계속하기</button><button id="p2" class="big sm">🏠 메뉴로 (이어하기에 남아요)</button></div></div>
+ <div id="set" class="ov sh"><div class="card" style="top:170px"><h2>⚙️ 설정</h2><button id="sn" class="big sm"></button><button id="rs" class="big sm"></button><button id="sc" class="big sm">닫기</button></div></div>
+ <div id="toast"></div>
+</div>
+<script>
+(()=>{
+const W=450,H=800,$=id=>document.getElementById(id);let K=1;
+const KEY='proverbV1',KRUN='proverbV1run';
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const DEF=()=>({level:1,bestLevel:1,stars:{},dex:{},wrong:{},bestStreak:0,snd:true});
+let save=DEF();try{const o=JSON.parse(ls.get(KEY)||'null');if(o&&typeof o==='object')save=Object.assign(DEF(),o)}catch(e){}
+for(const k of['stars','dex','wrong'])if(!save[k]||typeof save[k]!=='object')save[k]={};if(!(save.level>=1))save.level=1;save.bestLevel=Math.max(save.bestLevel|0,save.level);
+const store=()=>ls.set(KEY,JSON.stringify(save));
+const ri=n=>Math.floor(Math.random()*n),shuf=a=>{for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+/* ---------- audio ---------- */
+let AC=null;const au=()=>{if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}return AC};
+function tone(f,d,ty='sine',v=.12,t0=0){if(!save.snd||!AC)return;try{const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+t0;o.type=ty;o.frequency.setValueAtTime(f,s);g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+d)}catch(e){}}
+const SND={tap(){tone(560,.06,'triangle',.08)},ok(){tone(784,.1,'triangle',.12);tone(1047,.16,'triangle',.12,.08)},bad(){tone(200,.25,'sawtooth',.09)},win(){[523,659,784,1047].forEach((f,i)=>tone(f,.25,'triangle',.14,i*.12))},lose(){[400,330,260].forEach((f,i)=>tone(f,.3,'sawtooth',.1,i*.18))}};
+const snd=k=>SND[k]();
+/* ---------- 속담 데이터: [앞부분, 뒷부분, 빈칸 낱말, 뜻, 난이도] ---------- */
+const PR=[
+['가는 말이 고와야','오는 말이 곱다','고와야','내가 남에게 좋게 해야 남도 나에게 좋게 해 줘요.',1],
+['낮말은 새가 듣고','밤말은 쥐가 듣는다','쥐가','아무도 안 듣는 것 같아도 말은 늘 조심해야 해요.',1],
+['티끌 모아','태산','태산','작은 것도 모이면 큰 것이 돼요.',1],
+['천 리 길도','한 걸음부터','한 걸음부터','아무리 큰일도 작은 것부터 시작해요.',1],
+['소 잃고','외양간 고친다','외양간','일이 잘못된 뒤에야 뒤늦게 대비해요.',1],
+['호랑이도','제 말 하면 온다','호랑이도','다른 사람 이야기를 하면 마침 그 사람이 나타나요.',1],
+['원숭이도','나무에서 떨어진다','원숭이도','아무리 잘하는 사람도 실수할 때가 있어요.',1],
+['세 살 버릇','여든까지 간다','여든까지','어릴 때 든 버릇은 늙어서도 고치기 어려워요.',1],
+['백지장도','맞들면 낫다','맞들면','쉬운 일도 힘을 합치면 더 쉬워요.',1],
+['고래 싸움에','새우 등 터진다','새우','힘센 사람들이 싸우면 약한 사람이 피해를 봐요.',1],
+['누워서','떡 먹기','떡','아주 쉬운 일이에요.',1],
+['우물 안','개구리','개구리','넓은 세상을 모르고 자기가 아는 것이 전부인 줄 알아요.',1],
+['아는 길도','물어 가라','물어','잘 아는 일도 조심해서 확인하라는 뜻이에요.',1],
+['같은 값이면','다홍치마','다홍치마','같은 조건이면 더 좋은 것을 골라요.',1],
+['말 한마디로','천 냥 빚을 갚는다','천 냥','말을 잘하면 큰 어려움도 풀 수 있어요.',1],
+['하늘이 무너져도','솟아날 구멍이 있다','솟아날','아무리 어려워도 살아날 길은 있어요.',1],
+['낫 놓고','기역 자도 모른다','기역','글자를 전혀 모르는 것처럼 아주 무식해요.',1],
+['가랑비에','옷 젖는 줄 모른다','가랑비에','작은 것도 쌓이면 큰 영향을 줘요.',1],
+['쇠귀에','경 읽기','경','아무리 말해 줘도 알아듣지 못해요.',1],
+['개구리 올챙이 적','생각 못 한다','올챙이','형편이 나아지면 어려웠던 때를 잊어요.',1],
+['될성부른 나무는','떡잎부터 알아본다','떡잎부터','잘될 사람은 어릴 때부터 달라요.',1],
+['열 번 찍어','안 넘어가는 나무 없다','열 번','포기하지 않고 계속하면 이룰 수 있어요.',1],
+['믿는 도끼에','발등 찍힌다','도끼에','믿었던 사람에게 배신을 당해요.',1],
+['호랑이에게 물려가도','정신만 차리면 산다','정신만','위험해도 침착하면 헤쳐 나올 수 있어요.',1],
+['등잔 밑이','어둡다','등잔','가까이에 있는 것을 오히려 잘 몰라요.',1],
+['가재는','게 편이다','가재는','비슷한 처지끼리 서로 편을 들어요.',2],
+['꿩 먹고','알 먹는다','알','한 가지 일로 두 가지 이익을 얻어요.',2],
+['도랑 치고','가재 잡는다','도랑','한 번에 두 가지 이득을 봐요.',2],
+['바늘 도둑이','소 도둑 된다','소 도둑','작은 나쁜 짓도 버릇이 되면 큰 죄가 돼요.',2],
+['빈 수레가','요란하다','수레가','실속 없는 사람이 더 시끄럽게 떠들어요.',2],
+['윗물이 맑아야','아랫물이 맑다','아랫물이','윗사람이 잘해야 아랫사람도 따라 해요.',2],
+['서당 개 삼 년이면','풍월을 읊는다','풍월을','오래 보고 들으면 저절로 배워요.',2],
+['못된 송아지','엉덩이에 뿔 난다','뿔','못된 사람이 더 못된 짓을 해요.',2],
+['지렁이도','밟으면 꿈틀한다','꿈틀한다','약한 사람도 너무 얕보면 화를 내요.',2],
+['시작이','반이다','반이다','시작만 해도 절반은 한 거예요.',2],
+['급할수록','돌아가라','돌아가라','급해도 차근차근 해야 해요.',2],
+['사공이 많으면','배가 산으로 간다','사공이','간섭하는 사람이 많으면 일이 잘 안 돼요.',2],
+['병 주고','약 준다','약','해를 입히고 나서 도와주는 척해요.',2],
+['열 길 물속은 알아도','한 길 사람 속은 모른다','한 길','사람 마음은 알기 어려워요.',2],
+['땅 짚고','헤엄치기','헤엄치기','아주 쉬운 일이에요.',2],
+['아니 땐 굴뚝에','연기 날까','굴뚝에','원인이 없으면 결과도 없어요.',2],
+['오르지 못할 나무는','쳐다보지도 마라','나무는','될 수 없는 일은 욕심내지 마세요.',2],
+['가는 날이','장날이다','장날이다','뜻하지 않게 다른 일과 겹쳐요.',2],
+['개똥도','약에 쓰려면 없다','개똥도','흔하던 것도 막상 필요하면 없어요.',2],
+['꼬리가 길면','밟힌다','밟힌다','나쁜 짓을 오래 하면 결국 들켜요.',2],
+['말이','씨가 된다','씨가','늘 하던 말이 정말로 이루어지기도 해요.',2],
+['발 없는 말이','천 리 간다','천 리','말은 아주 빨리 퍼져요.',2],
+['불난 집에','부채질한다','부채질','어려운 사람을 더 어렵게 만들어요.',2],
+['설마가','사람 잡는다','설마가','"설마" 하고 방심하면 큰일이 나요.',2],
+['싼 게','비지떡','비지떡','값이 싼 것은 품질이 좋지 않아요.',2],
+['쥐구멍에도','볕 들 날 있다','볕','아무리 힘들어도 좋은 날이 와요.',2],
+['첫술에','배부르랴','첫술에','처음부터 만족할 수는 없어요.',2],
+['하룻강아지','범 무서운 줄 모른다','범','철이 없어서 무서운 줄 모르고 덤벼요.',2],
+['호랑이 굴에 가야','호랑이 새끼를 잡는다','굴에','위험을 무릅써야 큰 것을 얻어요.',2],
+['금강산도','식후경','식후경','아무리 좋은 구경도 먹고 나서 해요.',2],
+['고생 끝에','낙이 온다','낙이','힘든 일을 참으면 즐거운 일이 와요.',2],
+['형만 한','아우 없다','아우','아우는 형만큼 잘하기 어려워요.',2],
+['가는 정이 있어야','오는 정이 있다','가는 정이','내가 먼저 정을 주어야 상대도 정을 줘요.',2],
+['달면 삼키고','쓰면 뱉는다','뱉는다','자기에게 이로우면 가까이하고 해로우면 멀리해요.',3],
+['제 눈에','안경','안경','못난 것도 자기 눈에는 좋아 보여요.',3],
+['가는 토끼 잡으려다','잡은 토끼 놓친다','잡은 토끼','욕심내다가 가진 것까지 잃어요.',3],
+['구슬이 서 말이라도','꿰어야 보배','꿰어야','아무리 좋은 것도 쓸모 있게 만들어야 값져요.',3],
+['우물을 파도','한 우물을 파라','한 우물을','한 가지 일에 집중해서 끝까지 해야 해요.',3],
+['공든 탑이','무너지랴','공든','정성을 들인 일은 헛되지 않아요.',3],
+['비 온 뒤에','땅이 굳는다','땅이','어려움을 겪은 뒤에 더 단단해져요.',3],
+['원수는','외나무다리에서 만난다','외나무다리에서','피하고 싶은 사람을 꼭 마주치게 돼요.',3],
+['남의 잔치에','감 놓아라 배 놓아라 한다','감','남의 일에 쓸데없이 간섭해요.',3],
+['수박','겉핥기','겉핥기','속은 모르고 겉만 대충 알아요.',3],
+['새 발의','피','피','아주 적은 양이에요.',3],
+['눈 가리고','아웅 한다','아웅','뻔히 보이는 얕은 속임수를 써요.',3],
+['가까운 이웃이','먼 사촌보다 낫다','이웃이','급할 때는 가까이 사는 이웃이 더 도움이 돼요.',3],
+['호박이','넝쿨째 굴러떨어졌다','넝쿨째','뜻밖에 큰 행운이 찾아왔어요.',3],
+['고양이 목에','방울 달기','방울','실행하기 어려운 일을 의논만 해요.',3],
+['번갯불에','콩 볶아 먹겠다','콩','행동이 아주 재빨라요.',3],
+['돌다리도','두들겨 보고 건너라','돌다리도','잘 아는 일도 조심해서 확인해요.',3],
+['얌전한 고양이가','부뚜막에 먼저 올라간다','부뚜막에','얌전해 보이는 사람이 먼저 엉뚱한 일을 해요.',3],
+['자라 보고 놀란 가슴','솥뚜껑 보고 놀란다','솥뚜껑','한 번 놀란 일 때문에 비슷한 것만 봐도 겁을 내요.',3],
+['입에 쓴 약이','몸에 좋다','약이','듣기 싫은 충고가 나중에는 도움이 돼요.',3],
+['두 마리 토끼를 쫓다가','한 마리도 못 잡는다','두 마리','욕심내서 여러 가지를 하면 하나도 못 이뤄요.',3],
+['장고 끝에','악수 둔다','악수','너무 오래 생각하면 오히려 실수해요.',3],
+['피는','물보다 진하다','진하다','가족은 남보다 특별히 가까워요.',3],
+['말 타면','경마 잡히고 싶다','경마','사람의 욕심은 끝이 없어요.',3],
+['개천에서','용 난다','용','어려운 환경에서도 훌륭한 사람이 나와요.',3],
+['똥 묻은 개가','겨 묻은 개 나무란다','겨','자기 허물은 모르고 남의 작은 허물을 흉봐요.',3]
+];
+const full=i=>PR[i][0]+' '+PR[i][1];
+/* ---------- level design ---------- */
+const NQ=8;
+const typesOf=l=>l<=2?['A']:l<=4?['A','B']:l<=6?['A','B','C']:l<=9?['A','B','C','D']:['A','B','C','D','D'];
+const tiersOf=l=>l<=2?[1]:l<=4?[1,1,2]:l<=6?[1,2,2]:l<=9?[2,2,3]:[2,3,3];
+const nChoice=l=>l<=2?3:4;
+const timeOf=(l,ty)=>l<4?0:Math.max(8,22-l)+(ty==='D'?10:0);
+function pickIds(l){const used=new Set(),out=[],tiers=tiersOf(l);let guard=0;
+ while(out.length<NQ&&guard++<500){const t=tiers[ri(tiers.length)];const pool=[];PR.forEach((p,i)=>{if(p[4]===t&&!used.has(i)){const w=(save.dex[i]?1:4)+(save.wrong[i]||0)*3;for(let k=0;k<w;k++)pool.push(i)}});
+  if(!pool.length)continue;const id=pool[ri(pool.length)];used.add(id);out.push(id)}
+ while(out.length<NQ){const id=ri(PR.length);if(!used.has(id)){used.add(id);out.push(id)}}return out}
+function near(arr,len,k){return arr.sort((a,b)=>Math.abs(a.length-len)-Math.abs(b.length-len)).slice(0,k)}
+function mkQ(id,ty,l){const p=PR[id],n=nChoice(l);let ch,ans;
+ const others=PR.map((q,i)=>i).filter(i=>i!==id);
+ const pick=(cands,len,k)=>{const u=[...new Set(cands)];return shuf(l>=5?near(u.sort(()=>Math.random()-.5),len,8):u).slice(0,k)};
+ if(ty==='A'){const c=pick(others.map(i=>PR[i][1]).filter(x=>x!==p[1]),p[1].length,n-1);ch=shuf([p[1],...c]);ans=ch.indexOf(p[1])}
+ else if(ty==='B'){const c=pick(others.map(i=>PR[i][2]).filter(x=>x!==p[2]&&!full(id).includes(x)),p[2].length,n-1);ch=shuf([p[2],...c]);ans=ch.indexOf(p[2])}
+ else if(ty==='C'){const c=pick(others.filter(i=>PR[i][3]!==p[3]).map(i=>full(i)),full(id).length,n-1);ch=shuf([full(id),...c]);ans=ch.indexOf(full(id))}
+ else{let ws=full(id).split(' ');if(ws.length>6){const k=Math.ceil(ws.length/4),g=[];for(let i=0;i<ws.length;i+=k)g.push(ws.slice(i,i+k).join(' '));ws=g}
+  ch=ws.slice();let tries=0;do{shuf(ch)}while(ch.join(' ')===ws.join(' ')&&tries++<20);ans=-1}
+ return{id,ty,ch,ans}}
+function build(l){const ids=pickIds(l),ts=typesOf(l),qs=[];ids.forEach((id,i)=>{let ty=ts[Math.min(ts.length-1,ri(ts.length))];if(i===0)ty='A';qs.push(mkQ(id,ty,l))});return qs}
+/* ---------- state ---------- */
+let s=null,scr='menu',paused=false,lastTs=0;
+const show=n=>{['menu','lvs','dex','res','pause','set','play'].forEach(i=>$(i).style.display=i===n?'block':'none');$('home').style.display=scr==='game'?'block':'none'};
+function toast(t){const e=$('toast');e.textContent=t;e.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>e.style.opacity=0,1500)}
+const okQ=q=>q&&Number.isInteger(q.id)&&q.id>=0&&q.id<PR.length&&['A','B','C','D'].includes(q.ty)&&Array.isArray(q.ch)&&q.ch.length>=2&&q.ch.length<=8&&q.ch.every(x=>typeof x==='string'&&x.length<80)&&Number.isInteger(q.ans)&&q.ans>=-1&&q.ans<q.ch.length;
+function readRun(){const t=ls.get(KRUN);if(!t)return null;try{const d=JSON.parse(t);if(Number.isInteger(d.level)&&d.level>=1&&Array.isArray(d.qs)&&d.qs.length===NQ&&d.qs.every(okQ)&&Number.isInteger(d.i)&&d.i>=0&&d.i<NQ&&d.hearts>=1&&d.hearts<=3&&d.ok>=0&&d.ok<=NQ)return d}catch(e){}return null}
+function saveRun(){if(!s||scr!=='game'||s.ph!=='ask')return;ls.set(KRUN,JSON.stringify({level:s.level,qs:s.qs,i:s.i,hearts:s.hearts,ok:s.ok,hints:s.hints,streak:s.streak,nd:s.nd,bad:s.bad}))}
+function renderMenu(){const rd=readRun();$('mw').innerHTML='<span class="pill">🏆 '+save.bestLevel+'단계</span><span class="pill">📖 '+Object.keys(save.dex).length+' / '+PR.length+'</span><span class="pill">🔥 최고 '+save.bestStreak+'</span>';
+ $('g0').textContent=rd?'⏯ 이어서 하기 ('+rd.level+'단계 · '+(rd.i+1)+'/'+NQ+')':'▶ '+save.level+'단계 시작'}
+function renderLvs(){const L=$('lvl');L.innerHTML='';for(let l=1;l<=save.bestLevel;l++){const b=document.createElement('button');b.innerHTML=l+'<small>'+'⭐'.repeat(save.stars[l]||0)+'</small>';b.onclick=()=>{au();ls.del(KRUN);startLevel(l)};L.appendChild(b)}}
+function renderDex(){const ks=Object.keys(save.dex).map(Number).filter(i=>PR[i]).sort((a,b)=>a-b);$('dw').innerHTML='<span class="pill">📖 '+ks.length+' / '+PR.length+'개 모았어요</span>';
+ $('dl').innerHTML=ks.length?ks.map(i=>'<div class="dxi">'+full(i)+'<small>'+PR[i][3]+'</small></div>').join(''):'<p style="text-align:center;font-size:18px;margin-top:40px">아직 없어요.<br>속담을 맞히면 도감에 모여요!</p>'}
+function startLevel(l,rd){s={level:l,qs:rd?rd.qs:build(l),i:rd?rd.i:0,hearts:rd?rd.hearts:3,ok:rd?rd.ok:0,hints:rd?rd.hints:2,streak:rd?rd.streak:0,nd:rd?rd.nd:0,bad:rd?rd.bad:0,ph:'ask',t:0,lim:0,ans:[],off:[],bs:0};
+ scr='game';paused=false;lastTs=0;if(!rd)ls.del(KRUN);show('play');showQ()}
+function showQ(){const q=s.qs[s.i],p=PR[q.id];s.ph='ask';s.ans=[];s.off=[];s.lim=timeOf(s.level,q.ty);s.t=0;
+ $('hl').textContent=s.level+'단계 · '+(s.i+1)+'/'+NQ;$('hh').textContent='❤️'.repeat(s.hearts)+'🖤'.repeat(3-s.hearts);
+ const T={A:'뒤에 이어질 말을 골라요',B:'빈칸에 들어갈 말은?',C:'이런 뜻의 속담은?',D:'순서대로 눌러 속담을 완성해요'};$('qt').textContent=T[q.ty];
+ $('qx').innerHTML=q.ty==='A'?p[0]+' <b>&nbsp;&nbsp;&nbsp;</b>':q.ty==='B'?full(q.id).replace(p[2],'<b>&nbsp;&nbsp;&nbsp;</b>'):q.ty==='C'?'“'+p[3]+'”':'🧩';
+ $('fb').style.display='none';$('ch').style.display='block';
+ if(q.ty==='D')renderD();else{$('ch').innerHTML=q.ch.map((c,i)=>'<button data-i="'+i+'">'+c+'</button>').join('');}
+ $('hint').style.display=q.ty==='D'?'none':'block';$('hint').textContent='💡 두 개 지우기 ('+s.hints+')';
+ $('tb').style.visibility=s.lim?'visible':'hidden';$('tf').style.width='100%'}
+function renderD(){const q=s.qs[s.i];$('ch').innerHTML='<div id="ans">'+s.ans.map(i=>'<button data-a="'+i+'">'+q.ch[i]+'</button>').join('')+'</div><div id="pool">'+q.ch.map((c,i)=>s.ans.includes(i)?'':'<button data-p="'+i+'">'+c+'</button>').join('')+'</div><button id="go" class="big" '+(s.ans.length===q.ch.length?'':'style="opacity:.4"')+'>확인</button>'}
+$('ch').onclick=e=>{const b=e.target.closest('button');if(!b||!s||s.ph!=='ask'||paused)return;au();const q=s.qs[s.i];
+ if(q.ty!=='D'){if(b.dataset.i===undefined)return;answer(+b.dataset.i);return}
+ if(b.dataset.p!==undefined){s.ans.push(+b.dataset.p);snd('tap');renderD()}else if(b.dataset.a!==undefined){const k=+b.dataset.a;s.ans=s.ans.filter(x=>x!==k);snd('tap');renderD()}else if(b.id==='go'){if(s.ans.length!==q.ch.length){toast('조각을 다 놓아요!');return}answer(-2)}};
+$('hint').onclick=()=>{if(!s||s.ph!=='ask'||paused)return;au();if(s.hints<=0){toast('힌트를 다 썼어요');return}const q=s.qs[s.i];if(q.ty==='D')return;const w=q.ch.map((c,i)=>i).filter(i=>i!==q.ans&&!s.off.includes(i));if(w.length<2){toast('더 지울 게 없어요');return}shuf(w);s.off.push(w[0],w[1]);s.hints--;snd('tap');[...$('ch').children].forEach((b,i)=>{if(s.off.includes(i))b.classList.add('off')});$('hint').textContent='💡 두 개 지우기 ('+s.hints+')'};
+function answer(idx){const q=s.qs[s.i],p=PR[q.id];s.ph='fb';let good;
+ if(q.ty==='D')good=s.ans.map(i=>q.ch[i]).join(' ')===full(q.id);else good=idx===q.ans;
+ if(idx===-1)good=false;
+ if(q.ty!=='D'){[...$('ch').children].forEach((b,i)=>{if(i===q.ans)b.classList.add('ok');else if(i===idx)b.classList.add('no')})}
+ if(good){s.ok++;s.streak++;save.bestStreak=Math.max(save.bestStreak,s.streak);if(!save.dex[q.id]){s.nd++}save.dex[q.id]=(save.dex[q.id]||0)+1;snd('ok')}
+ else{s.hearts--;s.streak=0;s.bad++;save.wrong[q.id]=(save.wrong[q.id]||0)+1;snd('bad')}
+ store();
+ $('fr').textContent=good?'⭕ 맞았어요!'+(s.streak>=3?' 🔥'+s.streak+'연속':''):(idx===-1?'⏰ 시간이 끝났어요':'❌ 아쉬워요');$('fp').textContent=full(q.id);$('fm').textContent=p[3];
+ $('fb').style.display='block';$('hh').textContent='❤️'.repeat(Math.max(0,s.hearts))+'🖤'.repeat(3-Math.max(0,s.hearts));
+ $('nx').textContent=s.hearts<=0||s.i===NQ-1?'결과 보기 ▶':'다음 ▶';
+ if(q.ty==='D'){$('ch').style.display='none'}
+ saveRunAfter()}
+function saveRunAfter(){/* 다음 문제로 넘어갈 상태로 저장 */if(s.hearts<=0||s.i===NQ-1){ls.del(KRUN);return}ls.set(KRUN,JSON.stringify({level:s.level,qs:s.qs,i:s.i+1,hearts:s.hearts,ok:s.ok,hints:s.hints,streak:s.streak,nd:s.nd,bad:s.bad}))}
+$('nx').onclick=()=>{if(!s||s.ph!=='fb')return;au();if(s.hearts<=0||s.i===NQ-1){finish();return}s.i++;showQ()};
+function finish(){s.ph='end';ls.del(KRUN);const won=s.hearts>0;scr='result';
+ if(won){s.stars=s.bad===0?3:s.bad===1?2:1;save.stars[s.level]=Math.max(save.stars[s.level]||0,s.stars);if(s.level>=save.level)save.level=s.level+1;save.bestLevel=Math.max(save.bestLevel,save.level);snd('win')}else snd('lose');store();
+ $('rt').textContent=won?'🎉 '+s.level+'단계 성공! '+'⭐'.repeat(s.stars)+'☆'.repeat(3-s.stars):'💔 하트가 없어졌어요';
+ $('rbd').innerHTML='⭕ 맞힌 문제 '+s.ok+' / '+NQ+'<br>📖 새로 모은 속담 <b>'+s.nd+'</b>개 (모두 '+Object.keys(save.dex).length+'개)'+(won?'':'<br>틀린 속담은 더 자주 나와서 금방 익힐 수 있어요!');
+ $('r1').textContent=won?'▶ '+(s.level+1)+'단계':'🔁 다시 도전';$('r1').onclick=()=>{au();startLevel(won?s.level+1:s.level)};$('r2').style.display=won?'block':'none';$('r2').onclick=()=>{au();startLevel(s.level)};show('res')}
+function pauseGame(){if(scr!=='game'||!s||paused||s.ph==='end')return;paused=true;saveRun();$('pause').style.display='block'}
+function resumeGame(){if(!paused)return;paused=false;$('pause').style.display='none';lastTs=0}
+function toMenu(){if(s&&s.ph!=='end'){if(s.ph==='ask')saveRun();}scr='menu';s=null;paused=false;renderMenu();show('menu')}
+$('g0').onclick=()=>{au();const rd=readRun();if(rd)startLevel(rd.level,rd);else startLevel(save.level)};
+$('g2').onclick=()=>{au();renderLvs();show('lvs')};$('lx').onclick=()=>show('menu');
+$('g3').onclick=()=>{au();renderDex();show('dex')};$('dx').onclick=()=>show('menu');
+const setLbl=()=>{$('sn').textContent=save.snd?'🔊 소리 켜짐':'🔇 소리 꺼짐';$('rs').textContent='🗑️ 기록 지우기';$('rs').dataset.s='0'};
+$('g4').onclick=()=>{au();setLbl();show('set')};$('sc').onclick=()=>show('menu');$('sn').onclick=()=>{save.snd=!save.snd;store();setLbl()};
+$('rs').onclick=()=>{const b=$('rs');if(b.dataset.s!=='1'){b.dataset.s='1';b.textContent='⚠️ 정말 지울까요? 한 번 더!';setTimeout(()=>{b.dataset.s='0';b.textContent='🗑️ 기록 지우기'},3000)}else{save=DEF();store();ls.del(KRUN);setLbl();renderMenu();toast('모두 지웠어요')}};
+$('home').onclick=pauseGame;$('p1').onclick=()=>{au();resumeGame()};$('p2').onclick=toMenu;$('r3').onclick=toMenu;
+function upd(dt){if(!s||s.ph!=='ask'||!s.lim)return;s.t+=dt;$('tf').style.width=Math.max(0,100*(1-s.t/s.lim))+'%';if(s.t>=s.lim)answer(-1)}
+function fit(){K=Math.min(innerWidth/W,innerHeight/H);$('box').style.transform='translate('+Math.round((innerWidth-W*K)/2)+'px,'+Math.round((innerHeight-H*K)/2)+'px) scale('+K+')'}
+function loop(ts){requestAnimationFrame(loop);const dt=lastTs?Math.min(.1,(ts-lastTs)/1000):0;lastTs=ts;if(scr==='game'&&!paused)upd(dt)}
+addEventListener('resize',fit);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();store()}});
+addEventListener('pagehide',()=>{pauseGame();store()});
+fit();renderMenu();show('menu');requestAnimationFrame(loop);
+})();
+</script></body></html>
