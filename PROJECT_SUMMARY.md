@@ -1,6 +1,6 @@
 # 📌 My Personal Hub — 프로젝트 정리 (Project Summary)
 
-- **현재 버전:** v1.17
+- **현재 버전:** v1.18
 - **마지막 업데이트:** 2026-10-22
 - **저장소:** `kslohg-lab/my-personal-hub` (branch: `main`)
 - **이 문서의 목적:** 새 대화방이나 다른 AI가 이 문서만 읽고도 프로젝트를 정확히 이해하고, 기존 기능을 깨뜨리지 않고 수정할 수 있게 하는 **단일 상태 문서**입니다. 수정할 때마다 맨 아래 "변경 이력"과 필요한 섹션을 함께 갱신하세요.
@@ -25,7 +25,7 @@ my-personal-hub/
 ├─ css/app.css             ← 공통 스타일
 ├─ js/
 │  ├─ core.js              ← [일반 스크립트] $, store, 화면 전환(enterApp/showLogin), 탭 전환, 연결 실패 안내
-│  ├─ games.js             ← [일반 스크립트] 게임 목록(GAMES), 전체 화면 플레이어, 내장 Cyber Runner
+│  ├─ games.js             ← [일반 스크립트] 게임·도구 목록(CATS/GAMES), 전체 화면 플레이어
 │  ├─ main.js              ← [모듈] 진입점: 로그인 상태에 따라 chat/todos/videos를 켜고 끔
 │  ├─ firebase-init.js     ← [모듈] firebaseConfig, FAMILY(가족 계정), Firebase 초기화, 공유 상태(state)
 │  ├─ login.js             ← [모듈] 이름 선택 + 비밀번호 로그인 화면, 로그아웃 버튼
@@ -44,8 +44,9 @@ my-personal-hub/
    ├─ speed-math/      (index.html, thumb.svg)  스피드 매쓰 블리츠 2
    ├─ animal-run/      (index.html, thumb.svg)  동물 친구 달리기 (가로 전용)
    ├─ claw-machine/    (index.html, thumb.svg)  말랑말랑 인형뽑기
-   ├─ travel-picker/   (index.html, thumb.svg)  우리 가족 해외여행 선택 보드
-   └─ cyber-runner/    (thumb.svg만 있음)         Cyber Runner (js/games.js 안에 내장)
+   ├─ bungeoppang/     (index.html, thumb.svg)  붕어빵 타이쿤 (세로 게임, 저장 키 bungeoppangV1)
+   ├─ travel-picker/   (index.html, thumb.svg)  우리 가족 해외여행 선택 보드  [도구]
+   └─ h1-golf/         (index.html, thumb.svg)  H1 골프맵 (화성 H1 출발 1시간 이내 골프장 35곳)  [도구]
 ```
 - 배포: GitHub 저장소의 파일이 그대로 반영됨 (반영까지 약 1~2분). 배포 서비스 이름: ______ (직접 기입)
 
@@ -54,7 +55,7 @@ my-personal-hub/
 |---|---|
 | 홈 | 환영 카드, **우리 가족 영상 카드**(Firestore `videos`, 앱 안에서 유튜브 링크 추가/삭제), YouTube / Instagram 링크 카드 (현재 링크는 각 사이트 첫 화면 placeholder) |
 | 가족채팅 | Firebase Firestore 실시간 채팅, 사진 전송 (보낸 사람 이름은 로그인 계정 기준) |
-| AI게임 | 게임 카드 목록 → 전체 화면 실행 |
+| 게임·도구 | 분류 2개: **🎮 AI 미니 게임**(산수 몬스터, 스피드 매쓰, 동물 달리기, 인형뽑기, 붕어빵 타이쿤) / **🧭 가족 도구**(해외여행 선택 보드, H1 골프맵). 카드 → 실행 |
 | 게임 티켓 | 아빠·엄마가 채아·지아에게 🎫 티켓을 주거나 회수(이유 기록). 게임 입장 시 티켓 `cost`장(전 게임 1장)을 내고 입장, 같은 게임 5분 안 재입장은 무료, 부모님은 무료, 부족하면 입장 불가. 잔액 `wallets/{id}`, 내역 `wallets/{id}/log` |
 | 가족 달력 | 월간 달력(날짜별 색 점, 날짜를 누르면 그날 목록, 추가/수정/삭제), 시간·누구 일정·메모, **매년 반복**(생일·기념일). 홈에 오늘/30일 안 일정과 D-day 표시. Firestore `events` |
 | 일정(가족 보드) | 가족이 함께 보는 일정/요청 게시판 (Firestore `todos` 실시간 공유, 추가한 사람/완료한 사람 표시, **받는 사람 지정**, 글을 눌러 **답글**, 글쓴이 **수정**) |
@@ -189,16 +190,17 @@ service cloud.firestore {
 ## 4. AI 게임 모듈
 
 ### 동작 방식
-- 목록은 `js/games.js`의 `GAMES` 배열에서 만들어짐. 항목: `id`, `title`, `desc`, `landscape`(가로 전용), `builtin`(내장), `v`(게임 파일 캐시 번호), `cost`(입장 티켓 수, 없거나 0이면 무료).
+- 목록은 `js/games.js`의 `GAMES` 배열에서 만들어짐. 항목: `id`, `cat`(`'game'` 게임 / `'tool'` 도구 — 분류는 `CATS` 배열), `title`, `desc`, `landscape`(가로 전용), `v`(파일 캐시 번호), `cost`(입장 티켓 수, 없거나 0이면 무료 — **도구는 티켓 없이 무료**). 분류 이름은 `CATS`에서 바꿈.
 - 카드 이미지: `games/<id>/thumb.svg` (2:1 가로 비율).
 - 카드를 누르면 `games/<id>/index.html`을 **화면 전체를 덮는 iframe**으로 실행 (헤더/하단 메뉴 숨김). 안드로이드 크롬에서는 Fullscreen API도 함께 시도.
-- 왼쪽 위 `←` 버튼 또는 **폰 뒤로가기**로 목록 복귀 (`history.pushState` / `popstate` 사용, **뒤로가기 1번**으로 복귀). 다른 탭으로 이동하면 게임은 종료됨. 게임 iframe은 **열고 닫을 때마다 새 iframe으로 갈아 끼움**(`freshFrame()`) — iframe의 `src`를 바꾸면 브라우저 이동 기록이 쌓여 뒤로가기를 두 번 눌러야 하므로 `src`를 직접 바꾸지 말 것. 카드 이미지는 `games/<id>/thumb.svg`라서 `GAMES`의 `id`는 폴더 이름과 같아야 함(내장 러너도 `cyber-runner`).
+- 왼쪽 위 `←` 버튼 또는 **폰 뒤로가기**로 목록 복귀 (`history.pushState` / `popstate` 사용, **뒤로가기 1번**으로 복귀). 다른 탭으로 이동하면 게임은 종료됨. 게임 iframe은 **열고 닫을 때마다 새 iframe으로 갈아 끼움**(`freshFrame()`) — iframe의 `src`를 바꾸면 브라우저 이동 기록이 쌓여 뒤로가기를 두 번 눌러야 하므로 `src`를 직접 바꾸지 말 것. 카드 이미지는 `games/<id>/thumb.svg`라서 `GAMES`의 `id`는 폴더 이름과 같아야 함
+- **도구(`cat: 'tool'`)는 위에 제목 줄(`#gpBar`: ← 버튼 + 이름)을 두고 그 아래에 화면(iframe)을 배치**해서 ← 버튼이 내용을 가리지 않음. 전체화면은 요청하지 않음(링크가 새 탭으로 열려도 안전). 게임(`'game'`)은 기존대로 화면 전체.
 - **가로 전용 게임**(`landscape: true`, 현재 동물 친구 달리기): 폰이 세로 상태면 iframe을 CSS로 90° 회전해 가로로 채움 → 게임이 "화면을 가로로 돌려주세요"를 띄우지 않고 바로 실행. `↻ 방향` 버튼으로 반대 방향 전환(선택 기억). 폰이 이미 가로면 회전 없이 실행.
 - **회전 중 손가락 스크롤 보정(v1.14):** 브라우저는 `touch-action`(예: 게임의 `pan-y`)을 회전 전 화면 기준으로 판단해서, 회전해 보여 주는 동안 게임 안 스크롤 영역(캐릭터 목록 등)이 손가락으로 안 움직임. 그래서 `games.js`의 `hookRotatedScroll()`이 iframe이 로드될 때 게임 문서에 `<style id="hubRotStyle">`(touch-action 끄기, 회전 중에만 켜짐)와 터치 리스너를 넣어 손가락 이동을 직접 스크롤로 바꿔 줌(폰 세로 이동과 가로 이동 모두 사용, 끌다 뗀 자리의 버튼은 눌리지 않음). 게임 파일은 고칠 필요 없음. 폰이 가로면 꺼져서 기본 스크롤 사용.
 
-### 새 게임 추가 방법
-1. `games/새게임이름/index.html` (게임 본체), `games/새게임이름/thumb.svg` (카드 이미지) 추가.
-2. `js/games.js`의 `GAMES` 배열에 한 줄 추가. (가로 전용이면 `landscape: true`)
+### 새 게임·도구 추가 방법
+1. `games/새이름/index.html` (본체), `games/새이름/thumb.svg` (카드 이미지, 320×160) 추가.
+2. `js/games.js`의 `GAMES` 배열에 한 줄 추가. (`cat: 'game'` 또는 `'tool'`, 가로 전용이면 `landscape: true`, 게임이면 `cost: 1`)
 3. 게임 파일은 **독립 파일**이므로 허브 코드를 고칠 때 게임 파일은 건드리지 않음.
 
 ---
@@ -291,8 +293,13 @@ service cloud.firestore {
 | v1.15 | 2026-10-25 | 게임 티켓 추가(`js/tickets.js`, `wallets` 컬렉션): 부모가 아이에게 티켓 지급/회수, 모든 게임 입장 1장, 부모님 무료, 5분 안 재입장 무료, 내역 기록. `FAMILY`에 `parent` 표시, `state.me`에 `email/id/parent` 추가. **Firestore 규칙 변경 필요**(`isParent()`와 `wallets`). 캐시 버전 전체 `?v=1.15` |
 | v1.16 | 2026-10-25 | 동물 친구 달리기 새 버전 반영(`GAMES`의 `v`: 7): 🏠 버튼이 일시정지 화면(계속하기/메뉴로)으로 바뀜, 앱이 백그라운드로 가면 자동 일시정지, 메뉴에 "이어서 (N단계부터)" 버튼 복원. 저장 키 `animalRunV6` 그대로 |
 | v1.17 | 2026-10-25 | **동물 달리기 "이어서 하기"**: 판 도중 상태를 localStorage `animalRunV6run`에 2초마다·일시정지·백그라운드 때 저장 → 앱을 껐다 켜도 메뉴의 "▶️ 이어서 하기 (N단계 · 🪙코인)"로 그 자리에서 계속(복원 직후엔 일시정지 상태). 판이 끝나거나 '메뉴로'/'처음부터'를 누르면 저장본 삭제(모은 코인은 정산). 기존 "이어서 (N단계부터)"는 "N단계부터 새로 시작"으로 이름 변경. **허브(`games.js`)**: 폰 홈 버튼으로 전체화면이 풀릴 때(fullscreenchange) 게임을 닫아 버려 게임이 리셋되던 문제 수정 — 백그라운드 직후 2.5초 안의 전체화면 해제는 무시. `GAMES`의 `v`: 8 |
+| v1.18 | 2026-10-25 | **Cyber Runner 삭제**(허브 안 내장 코드·화면·`games/cyber-runner/` 폴더 제거). **분류 신설**: 게임·도구 탭을 `🎮 AI 미니 게임` / `🧭 가족 도구`로 나누고(`CATS`, 항목의 `cat`), 해외여행 선택 보드를 도구로 이동 + **H1 골프맵 추가**. 도구는 제목 줄이 있는 화면, 티켓 없이 무료, 전체화면 안 씀. **붕어빵 타이쿤 추가**(게임, 티켓 1장, `v`: 1). 하단 메뉴 이름 `AI게임` → `게임·도구`. `games.js` 태그 `?v=1.18` |
 
 
 ## 부록: 동물 달리기 '이어서 하기' 주의 (게임 개발방에 새 버전 요청할 때)
 - 게임 파일 안의 `중단 저장 / 이어서 하기 (허브 추가)` 블록(`snapRun/getRun/bankRun/resumeRun/clrRun`, `RKEY='animalRunV6run'`)과 `startGame`의 `bankRun()`, `fin`의 `clrRun()`, `toMenu`의 `clrRun()`, `loop`의 2초 저장, `visibilitychange`/`pagehide`의 `snapRun()` 호출은 **새 버전에서도 반드시 유지**해야 한다. (개발방 새 버전을 받으면 이 기능이 빠졌는지 먼저 확인)
 - 허브 쪽 입장 티켓: 앱을 닫았다가 5분 넘어 다시 들어오면 입장 티켓이 다시 차감된다(이어서 하기 포함). 필요하면 유예 시간을 늘리는 것을 검토.
+
+## 부록: 붕어빵 타이쿤 / H1 골프맵 메모
+- 붕어빵 타이쿤: 저장 키 `bungeoppangV1`. 하루(약 2분) 도중에는 저장하지 않음(앱이 꺼지면 그날 진행 분실, 홈 버튼으로 나가면 일시정지로 유지). 필요하면 동물 달리기처럼 '이어서 하기'를 추가할 수 있음. 난이도 조정 후보: 초반(2~7일차) 목표가 수입보다 빨리 커짐, 별 기준이 평범한 실력에는 높음, 35일차 이후 코인 쓸 곳이 없음.
+- H1 골프맵: 외부 CDN(Tailwind, FontAwesome, Google Fonts)을 쓰므로 인터넷이 필요. 파일 안 제목은 '35개 구장'인데 실제 자료는 38곳. 요금·거리 등은 AI가 만든 자료라 예약 전 각 골프장 공식 사이트에서 확인해야 함.

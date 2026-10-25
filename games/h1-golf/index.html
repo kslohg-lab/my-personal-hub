@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>삼성 H1 기준 1시간 이내 골프장 추천 & 코스 정보 (35개 구장)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Noto Sans KR -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        golf: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen pb-12">
+
+    <!-- App Header -->
+    <header class="sticky top-0 z-30 bg-slate-900 text-white shadow-md border-b border-slate-800">
+        <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 rounded-full bg-golf-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                    <i class="fa-solid font-bold fa-flag-checkered"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base tracking-tight leading-tight flex items-center gap-1.5">
+                        <span>H1 파트너스 골프맵</span>
+                        <span class="text-[10px] bg-golf-500 text-white font-semibold px-1.5 py-0.5 rounded">35개 구장 확장</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">화성사업장 출발 1시간 이내 골프장 총집합</p>
+                </div>
+            </div>
+            <button id="resetFilterBtn" class="text-xs text-slate-300 hover:text-white bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-700 transition active:scale-95 flex items-center gap-1">
+                <i class="fa-solid fa-rotate-right text-[10px]"></i> 초기화
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 pt-3 space-y-3.5">
+
+        <!-- Search & Quick Filters Container -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-3">
+            <!-- Search Input -->
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" placeholder="골프장명, 지역 (예: 용인, 안성, 리베라, 회원제)" 
+                       class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-golf-500 focus:bg-white transition">
+            </div>
+
+            <!-- Region Category Tabs -->
+            <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+                    <i class="fa-solid fa-map-location-dot text-golf-600"></i> 지역 권역
+                </label>
+                <div class="flex items-center gap-1 overflow-x-auto hide-scrollbar py-0.5" id="regionContainer">
+                    <button class="region-btn active text-xs py-1.5 px-3 rounded-xl font-medium whitespace-nowrap bg-slate-800 text-white" data-region="all">전체 지역 (35개)</button>
+                    <button class="region-btn text-xs py-1.5 px-3 rounded-xl font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="화성/오산/수원">화성/오산/수원</button>
+                    <button class="region-btn text-xs py-1.5 px-3 rounded-xl font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="용인 기흥/수원">용인 기흥</button>
+                    <button class="region-btn text-xs py-1.5 px-3 rounded-xl font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="용인 처인">용인 처인</button>
+                    <button class="region-btn text-xs py-1.5 px-3 rounded-xl font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="안성/평택">안성/평택</button>
+                    <button class="region-btn text-xs py-1.5 px-3 rounded-xl font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-region="이천/광주">이천/광주</button>
+                </div>
+            </div>
+
+            <!-- Date / Day Selector -->
+            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100">
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+                        <i class="fa-regular fa-calendar text-golf-600"></i> 요금 기준
+                    </label>
+                    <div class="grid grid-cols-2 gap-1">
+                        <button class="day-btn active border text-[11px] py-1.5 px-2 rounded-lg font-medium transition text-center bg-golf-600 text-white border-golf-600 shadow-sm" data-day="weekday">평일</button>
+                        <button class="day-btn border text-[11px] py-1.5 px-2 rounded-lg font-medium transition text-center bg-white text-slate-600 border-slate-200 hover:bg-slate-50" data-day="weekend">주말</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-car text-golf-600"></i> 이동 시간 제한
+                    </label>
+                    <div class="grid grid-cols-2 gap-1">
+                        <button class="dist-btn active border text-[11px] py-1.5 px-2 rounded-lg font-semibold transition text-center bg-golf-100 text-golf-800 border-golf-200" data-max-time="60">60분 이내</button>
+                        <button class="dist-btn border text-[11px] py-1.5 px-2 rounded-lg font-medium transition text-center bg-white text-slate-600 border-slate-200" data-max-time="30">30분 이내</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Slot Filter -->
+            <div>
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
+                    <i class="fa-regular fa-clock text-golf-600"></i> 선호 티타임
+                </label>
+                <div class="flex items-center gap-1 overflow-x-auto hide-scrollbar py-0.5">
+                    <button class="time-btn active text-xs py-1.5 px-2.5 rounded-lg font-medium whitespace-nowrap bg-slate-800 text-white" data-slot="all">전체 시간</button>
+                    <button class="time-btn text-xs py-1.5 px-2.5 rounded-lg font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-slot="slot1">1부 (새벽/오전)</button>
+                    <button class="time-btn text-xs py-1.5 px-2.5 rounded-lg font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-slot="slot2">2부 (오후)</button>
+                    <button class="time-btn text-xs py-1.5 px-2.5 rounded-lg font-medium whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200" data-slot="slot3">3부 (야간/라이트)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Count and Sorting -->
+        <div class="flex items-center justify-between px-1 text-xs text-slate-500">
+            <div>
+                검색 결과 <span id="golfCourseCount" class="font-bold text-golf-700 text-sm">0</span>개 구장
+            </div>
+            <div class="flex items-center gap-1">
+                <span>정렬:</span>
+                <select id="sortSelect" class="bg-transparent font-semibold text-slate-700 focus:outline-none cursor-pointer">
+                    <option value="distance">거리순 (H1 가까운순)</option>
+                    <option value="priceAsc">그린피 낮은순</option>
+                    <option value="rating">평점 높은순</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Golf Course Cards List -->
+        <div id="golfCourseList" class="space-y-3">
+            <!-- Dynamic Golf Cards inserted here via JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Course & Pricing Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity duration-300">
+        <div class="bg-white w-full max-w-md max-h-[90vh] sm:max-h-[85vh] rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+            
+            <!-- Modal Header -->
+            <div class="p-4 bg-slate-900 text-white flex items-center justify-between relative border-b border-slate-800">
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span id="modalDistanceTag" class="text-[11px] font-bold bg-golf-600 text-white px-2 py-0.5 rounded-full">30분 소요</span>
+                        <span id="modalHolesTag" class="text-[11px] bg-slate-800 text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">36홀</span>
+                    </div>
+                    <h2 id="modalTitle" class="text-xl font-bold tracking-tight">골프장 이름</h2>
+                    <p id="modalLocation" class="text-xs text-slate-400 mt-0.5">경기 화성시 동탄면</p>
+                </div>
+                <button id="closeModalBtn" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content - Scrollable -->
+            <div class="p-4 overflow-y-auto space-y-4 text-slate-700 text-sm">
+                
+                <!-- Quick Info Highlights Grid -->
+                <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center border border-slate-200/80">
+                    <div>
+                        <div class="text-[11px] text-slate-400 font-medium">잔디 종류</div>
+                        <div id="modalGrass" class="font-bold text-slate-800 text-xs mt-0.5">조선잔디</div>
+                    </div>
+                    <div class="border-x border-slate-200">
+                        <div class="text-[11px] text-slate-400 font-medium">그린 스피드</div>
+                        <div id="modalGreenSpeed" class="font-bold text-golf-600 text-xs mt-0.5">2.7 m</div>
+                    </div>
+                    <div>
+                        <div class="text-[11px] text-slate-400 font-medium">난이도</div>
+                        <div id="modalDifficulty" class="font-bold text-amber-600 text-xs mt-0.5">중상급</div>
+                    </div>
+                </div>
+
+                <!-- Course Description & Strategic Tip -->
+                <div class="space-y-2">
+                    <h3 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-info text-golf-600"></i> 코스 특징 및 공략 팁
+                    </h3>
+                    <p id="modalCourseDesc" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+                        코스 설명이 들어갑니다.
+                    </p>
+                </div>
+
+                <!-- Pricing Breakdown Table (Golfmon Style) -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-won-sign text-golf-600"></i> 타임별 요금 정보 (골프몬 데이터 기준)
+                        </h3>
+                        <span class="text-[10px] text-slate-400">* 팀당 카트/캐디피 별도</span>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                        <table class="w-full text-xs text-left text-slate-600">
+                            <thead class="text-[11px] text-slate-700 bg-slate-100 uppercase border-b border-slate-200">
+                                <tr>
+                                    <th class="py-2 px-2.5">시간대/구분</th>
+                                    <th class="py-2 px-2.5">평일 그린피</th>
+                                    <th class="py-2 px-2.5">주말 그린피</th>
+                                    <th class="py-2 px-2.5">특이사항</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalPriceTable" class="divide-y divide-slate-100 bg-white">
+                                <!-- Price Rows JS inserted -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] text-slate-500 px-1 pt-0.5">
+                        <span id="modalCartFee">카트피: 100,000원</span>
+                        <span id="modalCaddieFee">캐디피: 150,000원</span>
+                    </div>
+                </div>
+
+                <!-- Facilities & Tags -->
+                <div>
+                    <h3 class="font-bold text-slate-900 text-xs mb-1.5">특징 키워드</h3>
+                    <div id="modalTags" class="flex flex-wrap gap-1.5">
+                        <!-- Tags inserted JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer Action -->
+            <div class="p-3.5 bg-slate-50 border-t border-slate-200 flex items-center gap-2">
+                <a id="modalWebLink" href="#" target="_blank" rel="noopener noreferrer" 
+                   class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs text-center transition flex items-center justify-center gap-2 shadow-sm active:scale-95">
+                    <span>공식 홈페이지 예약 / 코스 안내</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /*
+         * Expanded Golf Course Dataset (35 courses within 1 hour radius of Samsung H1 Hwaseong)
+         */
+        const golfCoursesData = [
+            // 1. 화성/동탄/오산/수원 권역
+            {
+                id: "riviera",
+                name: "리베라CC",
+                region: "화성/오산/수원",
+                location: "경기 화성시 동탄면",
+                driveTimeMinutes: 18,
+                distanceKm: "8.5km",
+                holes: "36홀",
+                rating: 4.5,
+                grass: "조선잔디",
+                greenSpeed: "2.7m",
+                difficulty: "중급",
+                officialWebsite: "https://www.rivieracc.co.kr",
+                courseDesc: "화성 H1 신동탄과 인접하여 최상급 접근성을 자랑하는 36홀 도심형 구장. 체리/파인 코스는 페어웨이가 넓어 드라이버 티샷 부담이 적으며, 밸리/동탄 코스는 다이나믹한 언듈레이션이 특징입니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 150000, weekend: 210000, note: "일반 부킹" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 170000, weekend: 230000, note: "인기 타임" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 120000, weekend: 160000, note: "LED 라이트 우수" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["H1 20분이내", "36홀 대단지", "야간 라이트", "조선잔디"]
+            },
+            {
+                id: "hwaseong_sangrok",
+                name: "화성상록GC",
+                region: "화성/오산/수원",
+                location: "경기 화성시 동탄면",
+                driveTimeMinutes: 22,
+                distanceKm: "11.0km",
+                holes: "27홀",
+                rating: 4.7,
+                grass: "조선잔디",
+                greenSpeed: "2.6m",
+                difficulty: "중급",
+                officialWebsite: "https://www.sangrokresort.co.kr/hwaseong/",
+                courseDesc: "공무원연금공단에서 운영하는 가성비 최고의 대중제 골프장. 코스 관리가 매우 뛰어나고 동탄 신도시와 가까워 예약 경쟁이 매우 치열한 편입니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 135000, weekend: 195000, note: "가성비 추천" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 155000, weekend: 215000, note: "대중제 정가" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "야간 미운영" }
+                ],
+                cartFee: "90,000원",
+                caddieFee: "140,000원",
+                tags: ["공공 가성비", "코스 관리 우수", "동탄 근접"]
+            },
+            {
+                id: "balios",
+                name: "발리오스CC",
+                region: "화성/오산/수원",
+                location: "경기 화성시 팔탄면",
+                driveTimeMinutes: 32,
+                distanceKm: "22.0km",
+                holes: "27홀",
+                rating: 4.6,
+                grass: "조선잔디/양잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.balioscc.co.kr",
+                courseDesc: "서해안 고속도로 발안 IC 인근. 울창한 수목과 워터 해저드가 어우러진 수려한 경관의 전통 있는 명문 골프장입니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 170000, weekend: 240000, note: "회원제 우대" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 190000, weekend: 260000, note: "주요 타임" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["서해안고속도로", "명문회원제", "수목 울창"]
+            },
+            {
+                id: "rabidol",
+                name: "라비돌CC",
+                region: "화성/오산/수원",
+                location: "경기 화성시 정남면",
+                driveTimeMinutes: 20,
+                distanceKm: "10.5km",
+                holes: "9홀 퍼블릭",
+                rating: 4.1,
+                grass: "조선잔디",
+                greenSpeed: "2.5m",
+                difficulty: "쉬움",
+                officialWebsite: "http://www.laviedor.com",
+                courseDesc: "H1에서 20분 거리. 숏게임 연습 및 9홀 2바퀴 라운딩에 최적화된 아기자기한 숏코스 구장입니다.",
+                pricing: [
+                    { timeSlot: "1부 (07:00~09:00)", weekday: 70000, weekend: 100000, note: "9홀 기준" },
+                    { timeSlot: "2부 (11:00~14:00)", weekday: 120000, weekend: 160000, note: "18홀 기준" },
+                    { timeSlot: "3부 (노캐디)", weekday: 80000, weekend: 110000, note: "노캐디 9홀/18홀" }
+                ],
+                cartFee: "60,000원",
+                caddieFee: "120,000원 (노캐디가능)",
+                tags: ["20분이내", "가성비", "숏게임연습", "노캐디"]
+            },
+            {
+                id: "namsuwon",
+                name: "남수원CC",
+                region: "화성/오산/수원",
+                location: "경기 화성시 송산동",
+                driveTimeMinutes: 22,
+                distanceKm: "12.0km",
+                holes: "18홀",
+                rating: 4.3,
+                grass: "조선잔디",
+                greenSpeed: "2.6m",
+                difficulty: "중급",
+                officialWebsite: "https://www.mndfmc.or.kr/sub/namsuwon/",
+                courseDesc: "국방부 체력단련장 군 골프장으로 민간인 예약도 일부 가능. 가격이 매우 저렴하며 코스 관리가 단정합니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 110000, weekend: 150000, note: "민간인 기준" },
+                    { timeSlot: "2부 (11:30~13:30)", weekday: 120000, weekend: 160000, note: "민간인 기준" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "야간 미운영" }
+                ],
+                cartFee: "80,000원",
+                caddieFee: "130,000원",
+                tags: ["군골프장", "초가성비", "H1 근접"]
+            },
+
+            // 2. 용인 기흥 / 수원 권역
+            {
+                id: "gold",
+                name: "골드CC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 기흥구",
+                driveTimeMinutes: 25,
+                distanceKm: "14.2km",
+                holes: "36홀",
+                rating: 4.4,
+                grass: "조선잔디 / 양잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.goldcc.co.kr",
+                courseDesc: "기흥 IC 인근으로 퇴근 후 야간 3부 라운딩으로 인기가 높음. 마스터 코스는 전장이 길고 벙커 배치가 도전적입니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 140000, weekend: 210000, note: "일반" },
+                    { timeSlot: "2부 (11:30~13:30)", weekday: 160000, weekend: 230000, note: "인기 부킹" },
+                    { timeSlot: "3부 (17:00~라이트)", weekday: 110000, weekend: 150000, note: "노캐디/조인 선택" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["기흥IC 5분", "3부 야간명가", "노캐디 선택"]
+            },
+            {
+                id: "korea",
+                name: "코리아CC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 처인구",
+                driveTimeMinutes: 28,
+                distanceKm: "16.1km",
+                holes: "27홀",
+                rating: 4.6,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중급",
+                officialWebsite: "http://www.koreacc.org",
+                courseDesc: "골드CC와 인접한 명문 코스. 업다운이 적당하고 잔디 관리가 우수합니다. 야간 라이트 시설이 매우 밝습니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 155000, weekend: 220000, note: "일반" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 175000, weekend: 240000, note: "골든타임" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 125000, weekend: 165000, note: "조인/특가" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["야간 라이트", "잔디 상태 우수", "기흥근접"]
+            },
+            {
+                id: "gihung",
+                name: "기흥CC",
+                region: "용인 기흥/수원",
+                location: "경기 화성시 동탄면 / 용인 경계",
+                driveTimeMinutes: 24,
+                distanceKm: "13.5km",
+                holes: "36홀",
+                rating: 4.7,
+                grass: "조선잔디",
+                greenSpeed: "2.9m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.gihungcc.co.kr",
+                courseDesc: "동탄 신도시 바로 옆, H1에서 25분 이내 접근. 삼성이 지분을 소유했던 명문 회원제 구장으로 넓은 페어웨이와 최상급 잔디 관리 수준을 자랑합니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 180000, weekend: 250000, note: "회원 동반/우대" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 200000, weekend: 270000, note: "명문 코스" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 전용" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["동탄 바로옆", "명문 회원제", "페어웨이 넓음"]
+            },
+            {
+                id: "taekwang",
+                name: "태광CC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 기흥구",
+                driveTimeMinutes: 30,
+                distanceKm: "18.5km",
+                holes: "36홀",
+                rating: 4.5,
+                grass: "조선잔디",
+                greenSpeed: "2.7m",
+                difficulty: "쉬움/중급",
+                officialWebsite: "https://www.taekwangcc.co.kr",
+                courseDesc: "평지형 위주의 넓은 페어웨이로 초보자부터 중급자까지 편안하게 즐길 수 있는 코스. 대형 인도어 연습장 보유.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 160000, weekend: 230000, note: "인기" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 180000, weekend: 250000, note: "골든 타임" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 130000, weekend: 170000, note: "야간 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["평지형 코스", "초보추천", "300m 연습장"]
+            },
+            {
+                id: "suwon",
+                name: "수원CC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 기흥구 구갈동",
+                driveTimeMinutes: 32,
+                distanceKm: "19.0km",
+                holes: "36홀",
+                rating: 4.7,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중급",
+                officialWebsite: "http://www.suwoncc.co.kr",
+                courseDesc: "수인분당선 기흥역 바로 옆에 위치한 도심속 도보 접근 가능 수준의 36홀 대단지 회원제 골프장.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 180000, weekend: 250000, note: "회원제" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 200000, weekend: 270000, note: "골든타임" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["역세권 골프장", "전통 명문", "도심근교"]
+            },
+            {
+                id: "hanseong",
+                name: "한성CC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 기흥구 보정동",
+                driveTimeMinutes: 35,
+                distanceKm: "22.5km",
+                holes: "27홀",
+                rating: 4.6,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.hanseongcc.co.kr",
+                courseDesc: "분당/용인 경계에 위치. 페어웨이가 매우 넓고 직선 코스가 많아 드라이버를 시원하게 지를 수 있는 남성적인 코스.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 175000, weekend: 245000, note: "인기" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 195000, weekend: 265000, note: "정가" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["넓은 페어웨이", "드라이버 추천", "분당근접"]
+            },
+            {
+                id: "88cc",
+                name: "88CC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 기흥구 청덕동",
+                driveTimeMinutes: 38,
+                distanceKm: "24.0km",
+                holes: "36홀",
+                rating: 4.8,
+                grass: "조선잔디/양잔디",
+                greenSpeed: "3.0m",
+                difficulty: "상급",
+                officialWebsite: "https://www.88cc.co.kr",
+                courseDesc: "국가유공자 복지기금 마련을 위해 설립된 명문 36홀 코스. 호국코스/보훈코스 모두 정교한 코스 관리 상태 보유.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 185000, weekend: 260000, note: "명문코스" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 210000, weekend: 280000, note: "프리미엄" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["국가보훈 구장", "그린스피드 3.0", "상급 관리"]
+            },
+            {
+                id: "plaza_yongin",
+                name: "플라자CC 용인",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 처인구 남사읍",
+                driveTimeMinutes: 32,
+                distanceKm: "20.0km",
+                holes: "36홀",
+                rating: 4.4,
+                grass: "조선잔디",
+                greenSpeed: "2.7m",
+                difficulty: "중급",
+                officialWebsite: "https://www.hanwharesort.co.kr/irsweb/rr_0100/index.do?bp_cd=1100",
+                courseDesc: "한화그룹에서 운영하는 36홀 대단지. 타이거 코스는 전장이 길고 야간 라이트 라운딩이 가능하여 퇴근 후 직장인 라운딩 추천.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 145000, weekend: 215000, note: "한화 리조트" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 165000, weekend: 235000, note: "주간 타임" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 120000, weekend: 160000, note: "타이거코스 야간" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["한화그룹", "야간 라이트", "36홀 대단지"]
+            },
+            {
+                id: "glenross",
+                name: "글렌로스GC",
+                region: "용인 기흥/수원",
+                location: "경기 용인시 처인구 포곡읍 (에버랜드 내)",
+                driveTimeMinutes: 42,
+                distanceKm: "28.0km",
+                holes: "9홀 (18티/18그린)",
+                rating: 4.7,
+                grass: "양잔디/조선잔디",
+                greenSpeed: "2.9m",
+                difficulty: "중상급",
+                officialWebsite: "https://www.golfsamsung.com/web/grMain.do",
+                courseDesc: "삼성 에버랜드 단지 내 위치한 삼성 운영 프리미엄 퍼블릭. 9홀이지만 각 홀마다 티박스 및 그린이 2개씩 분리되어 18홀 느낌 완벽 구현.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 150000, weekend: 210000, note: "삼성 관리" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 170000, weekend: 230000, note: "최상급 잔디" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 전용" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["삼성 에버랜드", "최고급 잔디", "듀얼 티/그린"]
+            },
+
+            // 3. 용인 처인 권역
+            {
+                id: "sehyun",
+                name: "세현CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 이동읍",
+                driveTimeMinutes: 38,
+                distanceKm: "24.5km",
+                holes: "18홀",
+                rating: 4.6,
+                grass: "양잔디(신품종)",
+                greenSpeed: "2.9m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.sehyuncc.co.kr",
+                courseDesc: "최신 신설 골프장으로 클럽하우스 및 최첨단 최신형 카트 시설 구비. 양잔디 특유의 촘촘함과 빠르고 정교한 그린 스피드를 즐길 수 있습니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 150000, weekend: 220000, note: "신설 최신시설" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 170000, weekend: 240000, note: "양잔디 상태 우수" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 125000, weekend: 165000, note: "스마트 카트" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["신설 클럽하우스", "빠른 그린", "양잔디"]
+            },
+            {
+                id: "eunhwasam",
+                name: "은화삼CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 남동",
+                driveTimeMinutes: 40,
+                distanceKm: "26.0km",
+                holes: "18홀",
+                rating: 4.6,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.eunhwasamcc.co.kr",
+                courseDesc: "아놀드 파머가 직접 설계한 울창한 산림 속 명문 코스. 아기자기하면서도 전략적인 홀 배치가 돋보입니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 160000, weekend: 230000, note: "아놀드파머 설계" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 180000, weekend: 250000, note: "명문 코스" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["아놀드파머 설계", "전통 명문", "경관 우수"]
+            },
+            {
+                id: "sunningpoint",
+                name: "써닝포인트CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 백암면",
+                driveTimeMinutes: 52,
+                distanceKm: "39.0km",
+                holes: "18홀",
+                rating: 4.8,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중급",
+                officialWebsite: "https://www.sunningpoint.com",
+                courseDesc: "KG그룹 운영, KLPGA 대회 개최 구장. 전 홀에 고성능 LED 라이트가 설치되어 야간 라운딩 만족도가 수도권 최고 수준입니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 150000, weekend: 220000, note: "KLPGA 대회장" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 170000, weekend: 240000, note: "인기 구장" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 130000, weekend: 170000, note: "LED 야간 최상급" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["KLPGA 대회장", "LED 야간명가", "코스 양호"]
+            },
+            {
+                id: "shinwon",
+                name: "신원CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 이동읍",
+                driveTimeMinutes: 42,
+                distanceKm: "27.5km",
+                holes: "27홀",
+                rating: 4.9,
+                grass: "조선잔디/양잔디",
+                greenSpeed: "3.1m",
+                difficulty: "상급",
+                officialWebsite: "http://www.swcc.iclick.co.kr",
+                courseDesc: "주주 회원제로 운영되는 대한민국 최상위 명문 회원제. 압도적인 잔디 관리 상태와 3.0m 이상의 유리알 그린 제공.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 200000, weekend: 280000, note: "최상급 회원제" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 220000, weekend: 300000, note: "주주회원제" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "품질 유지로 야간 없음" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["최고급 명문", "유리알 그린", "주주 회원제"]
+            },
+            {
+                id: "lakeside",
+                name: "레이크사이드CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 모현읍",
+                driveTimeMinutes: 48,
+                distanceKm: "33.0km",
+                holes: "54홀",
+                rating: 4.8,
+                grass: "조선잔디/양잔디",
+                greenSpeed: "2.9m",
+                difficulty: "중상급",
+                officialWebsite: "https://www.golfsamsung.com/web/lsMain.do",
+                courseDesc: "삼성그룹에서 운영하는 54홀 초대형 골프장. 동/남/서 코스로 구성되며 퍼블릭과 회원제가 조화롭게 운영됩니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 170000, weekend: 250000, note: "삼성 라이프" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 190000, weekend: 270000, note: "인기 부킹" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["삼성그룹 운영", "54홀 초대형", "접근성 양호"]
+            },
+            {
+                id: "jisan",
+                name: "지산CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 원삼면",
+                driveTimeMinutes: 50,
+                distanceKm: "36.0km",
+                holes: "36홀",
+                rating: 4.7,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.jisanresort.co.kr",
+                courseDesc: "지산 리조트 단지 내 위치. 자연 림을 그대로 살린 수려한 경관과 아카데미 시설을 갖춘 명문 코스.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 165000, weekend: 235000, note: "회원제 우대" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 185000, weekend: 255000, note: "주요 타임" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["지산리조트", "자연림 풍경", "아카데미 보유"]
+            },
+            {
+                id: "asianna",
+                name: "아시아나CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 양지면",
+                driveTimeMinutes: 52,
+                distanceKm: "38.0km",
+                holes: "36홀",
+                rating: 4.8,
+                grass: "양잔디",
+                greenSpeed: "3.0m",
+                difficulty: "상급 (매우 어려움)",
+                officialWebsite: "https://www.asianacc.co.kr",
+                courseDesc: "금호석유화학 운영. 극심한 다이나믹 언듈레이션과 2단 3단 그린으로 골퍼들에게 강한 도전 의식을 불러일으키는 최고 난이도 구장.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 190000, weekend: 270000, note: "회원제" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 210000, weekend: 290000, note: "상급자 추천" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["최고 난이도", "양잔디", "도전적 레이아웃"]
+            },
+            {
+                id: "hwasan",
+                name: "화산CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 이동읍",
+                driveTimeMinutes: 44,
+                distanceKm: "29.0km",
+                holes: "18홀",
+                rating: 4.8,
+                grass: "조선잔디",
+                greenSpeed: "2.9m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.hwasan-cc.co.kr",
+                courseDesc: "자연 친화적 설계로 유명한 프라이빗 명문 회원제. 소수 회원 중심 운영으로 한적하고 여유로운 라운딩 가능.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 180000, weekend: 260000, note: "프라이빗" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 200000, weekend: 280000, note: "정가" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 전용" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["프라이빗", "여유로운 진행", "자연친화"]
+            },
+            {
+                id: "blueone_yongin",
+                name: "블루원용인CC",
+                region: "용인 처인",
+                location: "경기 용인시 처인구 원삼면",
+                driveTimeMinutes: 48,
+                distanceKm: "34.0km",
+                holes: "27홀",
+                rating: 4.6,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "https://yi.blueone.com",
+                courseDesc: "태영그룹(TY홀딩스) 운영. 산악 지형을 절묘하게 활용한 코스 설계와 품격 있는 클럽하우스 서비스 제공.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 165000, weekend: 235000, note: "블루원 멤버십" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 185000, weekend: 255000, note: "주요 타임" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["태영그룹", "산악형 코스", "클럽하우스 훌륭"]
+            },
+
+            // 4. 안성 / 평택 권역
+            {
+                id: "anseong_benest",
+                name: "안성베네스트GC",
+                region: "안성/평택",
+                location: "경기 안성시 양성면",
+                driveTimeMinutes: 45,
+                distanceKm: "32.0km",
+                holes: "36홀",
+                rating: 4.8,
+                grass: "안성형 잔디/벤트그라스",
+                greenSpeed: "3.0m",
+                difficulty: "상급",
+                officialWebsite: "https://www.golfsamsung.com",
+                courseDesc: "삼성그룹 잔디 연구소 관리로 그린 및 페어웨이 상태가 수도권 최고 수준. 울창한 수목이 어우러진 프리미엄 구장.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 180000, weekend: 260000, note: "삼성 골프 명문" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 200000, weekend: 280000, note: "최상급 상태" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "품질 관리로 야간 없음" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["삼성 관리", "그린스피드 3.0", "프리미엄"]
+            },
+            {
+                id: "golfzone_anseong_h",
+                name: "골프존카운티 안성H",
+                region: "안성/평택",
+                location: "경기 안성시 보개면",
+                driveTimeMinutes: 52,
+                distanceKm: "41.0km",
+                holes: "18홀",
+                rating: 4.6,
+                grass: "조선잔디",
+                greenSpeed: "2.7m",
+                difficulty: "중급",
+                officialWebsite: "https://www.golfzonecounty.com",
+                courseDesc: "골프존에서 스마트 시스템(에어모션 카메라, 스마트 스코어)을 도입하여 운영하는 실속파 인기 대중제 구장.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 135000, weekend: 195000, note: "골프존 멤버십" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 155000, weekend: 215000, note: "스마트 카트" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 110000, weekend: 150000, note: "노캐디/라이트" }
+                ],
+                cartFee: "90,000원",
+                caddieFee: "140,000원",
+                tags: ["골프존 운영", "스마트 촬영", "가성비 우수"]
+            },
+            {
+                id: "golfzone_anseong_w",
+                name: "골프존카운티 안성W",
+                region: "안성/평택",
+                location: "경기 안성시 양성면",
+                driveTimeMinutes: 44,
+                distanceKm: "31.0km",
+                holes: "18홀",
+                rating: 4.5,
+                grass: "조선잔디",
+                greenSpeed: "2.7m",
+                difficulty: "중급",
+                officialWebsite: "https://www.golfzonecounty.com",
+                courseDesc: "H1 접근성이 뛰어난 양성면에 위치. 여성 골퍼 선호도가 높으며 정교한 티샷 전략이 필요한 편안한 코스.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 130000, weekend: 190000, note: "할인 부킹" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 150000, weekend: 210000, note: "스마트 시스템" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 105000, weekend: 145000, note: "야간 노캐디" }
+                ],
+                cartFee: "90,000원",
+                caddieFee: "140,000원",
+                tags: ["H1 40분대", "여성 선호", "스마트 스코어"]
+            },
+            {
+                id: "maestro",
+                name: "마에스트로CC",
+                region: "안성/평택",
+                location: "경기 안성시 양성면",
+                driveTimeMinutes: 46,
+                distanceKm: "33.5km",
+                holes: "18홀",
+                rating: 4.7,
+                grass: "양잔디",
+                greenSpeed: "2.9m",
+                difficulty: "상급",
+                officialWebsite: "http://www.maestrocc.co.kr",
+                courseDesc: "유럽풍 최고급 클럽하우스와 럭셔리 골프텔 구비. 벙커와 해저드가 웅장하게 배치된 고급 프리미엄 코스.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 170000, weekend: 240000, note: "유럽풍 클럽하우스" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 190000, weekend: 260000, note: "양잔디 우수" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["유럽풍 골프텔", "양잔디", "럭셔리"]
+            },
+            {
+                id: "pinecreek",
+                name: "파인크리크CC",
+                region: "안성/평택",
+                location: "경기 안성시 양성면",
+                driveTimeMinutes: 45,
+                distanceKm: "32.5km",
+                holes: "27홀",
+                rating: 4.6,
+                grass: "양잔디",
+                greenSpeed: "2.8m",
+                difficulty: "상급",
+                officialWebsite: "http://www.pinecreek.co.kr",
+                courseDesc: "소나무 숲이 빽빽하게 둘러싸인 계곡형 명문 코스. 자연 지형을 최대한 살려 정교한 아이언샷이 요구됨.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 165000, weekend: 235000, note: "회원제 우대" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 185000, weekend: 255000, note: "자연 경관" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["울창한 소나무", "계곡형 코스", "회원제"]
+            },
+            {
+                id: "shinan",
+                name: "신안CC",
+                region: "안성/평택",
+                location: "경기 안성시 고삼면",
+                driveTimeMinutes: 48,
+                distanceKm: "35.0km",
+                holes: "27홀",
+                rating: 4.4,
+                grass: "조선잔디",
+                greenSpeed: "2.7m",
+                difficulty: "중급",
+                officialWebsite: "http://www.shinancc.co.kr",
+                courseDesc: "신안그룹 운영. 애플/토마토/오렌지 코스로 구성되어 전장이 매우 길고 호원하여 드라이버를 시원하게 날릴 수 있음.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 145000, weekend: 215000, note: "신안 그룹" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 165000, weekend: 235000, note: "긴 전장" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 115000, weekend: 155000, note: "야간 라이트" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["긴 전장", "드라이버 비거리", "신안그룹"]
+            },
+            {
+                id: "winchest",
+                name: "윈체스트GC",
+                region: "안성/평택",
+                location: "경기 안성시 서운면",
+                driveTimeMinutes: 55,
+                distanceKm: "45.0km",
+                holes: "18홀",
+                rating: 4.5,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중급",
+                officialWebsite: "http://www.winchest.co.kr",
+                courseDesc: "클래식한 클래식 음악 테마 골프장. 코스 전체가 일체감 있게 조성되어 있으며 평지 지형과 대형 호수가 인상적.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 140000, weekend: 200000, note: "클래식 코스" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 160000, weekend: 220000, note: "인기 부킹" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["클래식 음악 테마", "대형 호수", "평지형"]
+            },
+            {
+                id: "eaglemont",
+                name: "이글몬트CC",
+                region: "안성/평택",
+                location: "경기 안성시 삼죽면",
+                driveTimeMinutes: 58,
+                distanceKm: "47.0km",
+                holes: "27홀",
+                rating: 4.6,
+                grass: "양잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.eaglemont.co.kr",
+                courseDesc: "최근 개장한 대형 신설 퍼블릭 구장. 독수리 형상의 클럽하우스와 27홀 감각적인 양잔디 코스 보유.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 145000, weekend: 210000, note: "신설 퍼블릭" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 165000, weekend: 230000, note: "양잔디 코스" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 120000, weekend: 160000, note: "최신 LED" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["신설 27홀", "양잔디", "스마트 시설"]
+            },
+            {
+                id: "edenblue",
+                name: "에덴블루CC",
+                region: "안성/평택",
+                location: "경기 안성시 죽산면",
+                driveTimeMinutes: 56,
+                distanceKm: "46.0km",
+                holes: "27홀",
+                rating: 4.4,
+                grass: "조선잔디",
+                greenSpeed: "2.6m",
+                difficulty: "중급",
+                officialWebsite: "http://www.edenblue.co.kr",
+                courseDesc: "가성비 뛰어난 27홀 대중제 골프장. 코스 난이도가 무난하여 편안한 스코어를 노리는 골퍼들에게 인기가 높습니다.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 125000, weekend: 185000, note: "초가성비" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 145000, weekend: 205000, note: "부담없는 가격" },
+                    { timeSlot: "3부 (17:30~라이트)", weekday: 100000, weekend: 140000, note: "야간 특가" }
+                ],
+                cartFee: "90,000원",
+                caddieFee: "140,000원",
+                tags: ["가성비 최고", "27홀", "스코어 잘나옴"]
+            },
+
+            // 5. 이천 / 광주 권역
+            {
+                id: "blackstone_icheon",
+                name: "블랙스톤 이천GC",
+                region: "이천/광주",
+                location: "경기 이천시 장호원읍",
+                driveTimeMinutes: 58,
+                distanceKm: "49.0km",
+                holes: "27홀",
+                rating: 4.9,
+                grass: "양잔디(벤트그라스)",
+                greenSpeed: "3.2m",
+                difficulty: "최상급 (어려움)",
+                officialWebsite: "https://www.blackstoneresort.com",
+                courseDesc: "대한민국 최상급 명문 프리미엄 코스. KPGA/KLPGA 투어 개최지. 양잔디 벤트그라스 페어웨이와 유리알 그린 스피드 자랑.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 220000, weekend: 310000, note: "최고급 명문" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 250000, weekend: 340000, note: "투어 대회장" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "120,000원",
+                caddieFee: "160,000원",
+                tags: ["최고급 명문", "투어 대회장", "벤트그라스"]
+            },
+            {
+                id: "hwsundex",
+                name: "뉴스프링빌CC",
+                region: "이천/광주",
+                location: "경기 이천시 모가면",
+                driveTimeMinutes: 54,
+                distanceKm: "43.0km",
+                holes: "54홀",
+                rating: 4.7,
+                grass: "조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중급",
+                officialWebsite: "http://www.newspringville.cc",
+                courseDesc: "노캐디 9홀 퍼블릭과 36홀 정규 코스를 함께 보유한 54홀 메가 골프 리조트. 잔디 상태와 정원이 매우 아름다움.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 155000, weekend: 225000, note: "정규 18홀" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 175000, weekend: 245000, note: "인기 코스" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["54홀 초대형", "정원같은 풍경", "노캐디 9홀"]
+            },
+            {
+                id: "vietris",
+                name: "비에비스타CC",
+                region: "이천/광주",
+                location: "경기 이천시 모가면",
+                driveTimeMinutes: 52,
+                distanceKm: "42.0km",
+                holes: "37홀",
+                rating: 4.6,
+                grass: "양잔디/조선잔디",
+                greenSpeed: "2.8m",
+                difficulty: "중상급",
+                officialWebsite: "http://www.bievista.cc",
+                courseDesc: "남이천 IC 3분 거리의 최상급 교통 편리성. 대단지 회원제 및 대중제 코스를 고루 갖춘 전통 명문 구장.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 160000, weekend: 230000, note: "남이천IC 3분" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 180000, weekend: 250000, note: "접근성 우수" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["남이천IC 3분", "접근성 최상", "대단지"]
+            },
+            {
+                id: "solmoro",
+                name: "솔모로CC",
+                region: "이천/광주",
+                location: "경기 여주시 가남읍 (이천 경계)",
+                driveTimeMinutes: 58,
+                distanceKm: "48.0km",
+                holes: "36홀",
+                rating: 4.7,
+                grass: "조선잔디",
+                greenSpeed: "2.9m",
+                difficulty: "상급 (벙커 악명)",
+                officialWebsite: "http://www.solmoro.co.kr",
+                courseDesc: "3m에 달하는 몬스터 벙커(솔모로 벙커)로 유명한 도전적 코스. 울창한 소나무 숲길 라운딩이 낭만적.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 165000, weekend: 235000, note: "몬스터 벙커" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 185000, weekend: 255000, note: "소나무 명품" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 전용" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["몬스터 벙커", "소나무 명품", "도전적인"]
+            },
+            {
+                id: "namseoul",
+                name: "남서울CC",
+                region: "이천/광주",
+                location: "경기 성남시 분당구 백현동",
+                driveTimeMinutes: 45,
+                distanceKm: "32.0km",
+                holes: "18홀",
+                rating: 4.9,
+                grass: "조선잔디/양잔디",
+                greenSpeed: "3.2m",
+                difficulty: "상급",
+                officialWebsite: "http://www.nscc.co.kr",
+                courseDesc: "GS칼텍스 매경오픈 개최지. 판교 신도시 바로 옆 최고 접근성을 자랑하며 정교하고 빠른 그린 스피드가 백미.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 220000, weekend: 290000, note: "매경오픈 개최지" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 240000, weekend: 310000, note: "판교 근접" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간만 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["매경오픈 대회장", "판교 5분", "유리알 그린"]
+            },
+            {
+                id: "gangnam_300",
+                name: "강남300CC",
+                region: "이천/광주",
+                location: "경기 광주시 목현동",
+                driveTimeMinutes: 52,
+                distanceKm: "38.0km",
+                holes: "18홀",
+                rating: 4.1,
+                grass: "조선잔디",
+                greenSpeed: "2.6m",
+                difficulty: "중급",
+                officialWebsite: "http://www.kn300.or.kr",
+                courseDesc: "강남/분당권 접근성이 뛰어난 도심 근교형 골프장. 산악 지형 업다운이 다소 존재함.",
+                pricing: [
+                    { timeSlot: "1부 (06:30~08:30)", weekday: 140000, weekend: 200000, note: "도심 근교" },
+                    { timeSlot: "2부 (12:00~14:00)", weekday: 160000, weekend: 220000, note: "부킹 용이" },
+                    { timeSlot: "3부 (미운영)", weekday: 0, weekend: 0, note: "주간 운영" }
+                ],
+                cartFee: "100,000원",
+                caddieFee: "150,000원",
+                tags: ["강남/분당 근교", "접근성", "산악지형"]
+            }
+        ];
+
+        // State Management
+        let currentRegionFilter = 'all';  // 'all' or specific region string
+        let currentDayFilter = 'weekday'; // 'weekday' or 'weekend'
+        let currentTimeSlot = 'all';     // 'all', 'slot1', 'slot2', 'slot3'
+        let currentMaxDriveTime = 60;     // 30 or 60
+        let currentSearchQuery = '';
+        let currentSortBy = 'distance';
+
+        // DOM Element Cache
+        const golfCourseListEl = document.getElementById('golfCourseList');
+        const golfCourseCountEl = document.getElementById('golfCourseCount');
+        const searchInputEl = document.getElementById('searchInput');
+        const sortSelectEl = document.getElementById('sortSelect');
+        const resetFilterBtn = document.getElementById('resetFilterBtn');
+
+        // Modal Elements
+        const detailModal = document.getElementById('detailModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalLocation = document.getElementById('modalLocation');
+        const modalDistanceTag = document.getElementById('modalDistanceTag');
+        const modalHolesTag = document.getElementById('modalHolesTag');
+        const modalGrass = document.getElementById('modalGrass');
+        const modalGreenSpeed = document.getElementById('modalGreenSpeed');
+        const modalDifficulty = document.getElementById('modalDifficulty');
+        const modalCourseDesc = document.getElementById('modalCourseDesc');
+        const modalPriceTable = document.getElementById('modalPriceTable');
+        const modalCartFee = document.getElementById('modalCartFee');
+        const modalCaddieFee = document.getElementById('modalCaddieFee');
+        const modalTags = document.getElementById('modalTags');
+        const modalWebLink = document.getElementById('modalWebLink');
+
+        // Helper: Format Price
+        function formatWon(num) {
+            if (!num || num === 0) return "운영 없음";
+            return (num / 10000).toLocaleString() + "만원";
+        }
+
+        // Helper: Get Lowest Price based on current day filter and time slot
+        function getLowestPrice(course, dayType, timeSlot) {
+            let availableSlots = course.pricing.filter(p => p[dayType] > 0);
+            
+            if (timeSlot === 'slot1') availableSlots = availableSlots.filter(p => p.timeSlot.includes('1부'));
+            if (timeSlot === 'slot2') availableSlots = availableSlots.filter(p => p.timeSlot.includes('2부'));
+            if (timeSlot === 'slot3') availableSlots = availableSlots.filter(p => p.timeSlot.includes('3부'));
+
+            if (availableSlots.length === 0) return 0;
+            const prices = availableSlots.map(p => p[dayType]);
+            return Math.min(...prices);
+        }
+
+        /*
+         * STREAMING_CHUNK:Filtering and Rendering Logic...
+         */
+        function renderGolfCourses() {
+            // Filter logic
+            let filtered = golfCoursesData.filter(course => {
+                // Drive time filter
+                if (course.driveTimeMinutes > currentMaxDriveTime) return false;
+
+                // Region filter
+                if (currentRegionFilter !== 'all' && course.region !== currentRegionFilter) {
+                    return false;
+                }
+
+                // Search query filter
+                if (currentSearchQuery.trim() !== '') {
+                    const q = currentSearchQuery.toLowerCase();
+                    const matchName = course.name.toLowerCase().includes(q);
+                    const matchLoc = course.location.toLowerCase().includes(q);
+                    const matchRegion = course.region.toLowerCase().includes(q);
+                    const matchTags = course.tags.some(t => t.toLowerCase().includes(q));
+                    if (!matchName && !matchLoc && !matchRegion && !matchTags) return false;
+                }
+
+                // Time slot availability filter
+                if (currentTimeSlot !== 'all') {
+                    const lowest = getLowestPrice(course, currentDayFilter, currentTimeSlot);
+                    if (lowest === 0) return false;
+                }
+
+                return true;
+            });
+
+            // Sorting logic
+            filtered.sort((a, b) => {
+                if (currentSortBy === 'distance') {
+                    return a.driveTimeMinutes - b.driveTimeMinutes;
+                } else if (currentSortBy === 'priceAsc') {
+                    const priceA = getLowestPrice(a, currentDayFilter, currentTimeSlot) || 9999999;
+                    const priceB = getLowestPrice(b, currentDayFilter, currentTimeSlot) || 9999999;
+                    return priceA - priceB;
+                } else if (currentSortBy === 'rating') {
+                    return b.rating - a.rating;
+                }
+                return 0;
+            });
+
+            golfCourseCountEl.textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                golfCourseListEl.innerHTML = `
+                    <div class="bg-white rounded-2xl p-8 text-center border border-slate-200">
+                        <i class="fa-solid fa-golf-ball-tee text-4xl text-slate-300 mb-3"></i>
+                        <p class="font-bold text-slate-700 text-sm">검색 조건에 일치하는 골프장이 없습니다.</p>
+                        <p class="text-xs text-slate-400 mt-1">이동 시간(60분)이나 지역 필터를 넓혀보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render cards
+            golfCourseListEl.innerHTML = filtered.map(course => {
+                const lowestPrice = getLowestPrice(course, currentDayFilter, currentTimeSlot);
+                const priceText = lowestPrice > 0 ? formatWon(lowestPrice) : "해당타임 없음";
+                
+                return `
+                    <div onclick="openModal('${course.id}')" 
+                         class="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-200 hover:border-golf-500 hover:shadow-md transition cursor-pointer active:scale-[0.99] space-y-2.5">
+                        
+                        <!-- Top Row: Name & Drive Time -->
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center gap-1.5 mb-0.5">
+                                    <span class="text-[10px] font-bold bg-golf-100 text-golf-800 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                        <i class="fa-solid fa-car text-[9px]"></i> H1에서 ${course.driveTimeMinutes}분
+                                    </span>
+                                    <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">${course.region}</span>
+                                </div>
+                                <h2 class="text-base font-bold text-slate-900 leading-snug flex items-center gap-1.5">
+                                    ${course.name}
+                                    <span class="text-xs font-normal text-amber-500"><i class="fa-solid fa-star text-[10px]"></i> ${course.rating}</span>
+                                </h2>
+                                <p class="text-xs text-slate-500">${course.location} · ${course.holes}</p>
+                            </div>
+                            
+                            <!-- Price Badge -->
+                            <div class="text-right bg-slate-50 border border-slate-100 px-2.5 py-1.5 rounded-xl">
+                                <div class="text-[9px] text-slate-400 font-medium">${currentDayFilter === 'weekday' ? '평일' : '주말'} 최저 그린피</div>
+                                <div class="text-sm font-extrabold text-golf-700">${priceText}</div>
+                            </div>
+                        </div>
+
+                        <!-- Mid Row: Specs & Highlights -->
+                        <div class="grid grid-cols-3 gap-1 bg-slate-50 p-2 rounded-xl text-center text-[11px] text-slate-600 border border-slate-100">
+                            <div>잔디: <strong class="text-slate-800">${course.grass.split('/')[0]}</strong></div>
+                            <div class="border-x border-slate-200">그린: <strong class="text-golf-600">${course.greenSpeed}</strong></div>
+                            <div>난이도: <strong class="text-slate-800">${course.difficulty}</strong></div>
+                        </div>
+
+                        <!-- Tags Row -->
+                        <div class="flex flex-wrap gap-1 pt-0.5">
+                            ${course.tags.map(tag => `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium">#${tag}</span>`).join('')}
+                        </div>
+
+                        <!-- Bottom Callout -->
+                        <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-xs text-golf-700 font-semibold">
+                            <span class="flex items-center gap-1 text-[11px]">
+                                <i class="fa-solid fa-circle-info"></i> 코스 특징 및 타임별 요금 보기
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /*
+         * STREAMING_CHUNK:Modal Handlers and Interactive Actions...
+         */
+        function openModal(courseId) {
+            const course = golfCoursesData.find(c => c.id === courseId);
+            if (!course) return;
+
+            modalTitle.textContent = course.name;
+            modalLocation.textContent = `${course.location} (${course.distanceKm})`;
+            modalDistanceTag.textContent = `H1 기준 ${course.driveTimeMinutes}분 소요`;
+            modalHolesTag.textContent = course.holes;
+            modalGrass.textContent = course.grass;
+            modalGreenSpeed.textContent = course.greenSpeed;
+            modalDifficulty.textContent = course.difficulty;
+            modalCourseDesc.textContent = course.courseDesc;
+            modalCartFee.textContent = `카트피: ${course.cartFee}`;
+            modalCaddieFee.textContent = `캐디피: ${course.caddieFee}`;
+            modalWebLink.href = course.officialWebsite;
+
+            // Render Price Table
+            modalPriceTable.innerHTML = course.pricing.map(p => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-2.5 px-2.5 font-medium text-slate-800">${p.timeSlot}</td>
+                    <td class="py-2.5 px-2.5 font-bold text-slate-700">${p.weekday > 0 ? formatWon(p.weekday) : '-'}</td>
+                    <td class="py-2.5 px-2.5 font-bold text-golf-700">${p.weekend > 0 ? formatWon(p.weekend) : '-'}</td>
+                    <td class="py-2.5 px-2.5 text-slate-400 text-[10px]">${p.note}</td>
+                </tr>
+            `).join('');
+
+            // Render Tags
+            modalTags.innerHTML = course.tags.map(tag => `
+                <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">#${tag}</span>
+            `).join('');
+
+            detailModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            detailModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        /*
+         * STREAMING_CHUNK:Event Listeners Attaching...
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGolfCourses();
+
+            // Search input event
+            searchInputEl.addEventListener('input', (e) => {
+                currentSearchQuery = e.target.value;
+                renderGolfCourses();
+            });
+
+            // Sort select event
+            sortSelectEl.addEventListener('change', (e) => {
+                currentSortBy = e.target.value;
+                renderGolfCourses();
+            });
+
+            // Region Filter Buttons
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.region-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-slate-800', 'text-white');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    });
+                    btn.classList.add('active', 'bg-slate-800', 'text-white');
+                    btn.classList.remove('bg-slate-100', 'text-slate-600');
+
+                    currentRegionFilter = btn.getAttribute('data-region');
+                    renderGolfCourses();
+                });
+            });
+
+            // Day Filter Buttons
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.day-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-golf-600', 'text-white', 'border-golf-600', 'shadow-sm');
+                        b.classList.add('bg-white', 'text-slate-600', 'border-slate-200');
+                    });
+                    btn.classList.add('active', 'bg-golf-600', 'text-white', 'border-golf-600', 'shadow-sm');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200');
+
+                    currentDayFilter = btn.getAttribute('data-day');
+                    renderGolfCourses();
+                });
+            });
+
+            // Distance Filter Buttons
+            document.querySelectorAll('.dist-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.dist-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-golf-100', 'text-golf-800', 'border-golf-200', 'font-semibold');
+                        b.classList.add('bg-white', 'text-slate-600', 'border-slate-200', 'font-medium');
+                    });
+                    btn.classList.add('active', 'bg-golf-100', 'text-golf-800', 'border-golf-200', 'font-semibold');
+                    btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-200', 'font-medium');
+
+                    currentMaxDriveTime = parseInt(btn.getAttribute('data-max-time'));
+                    renderGolfCourses();
+                });
+            });
+
+            // Time Slot Filter Buttons
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.time-btn').forEach(b => {
+                        b.classList.remove('active', 'bg-slate-800', 'text-white');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    });
+                    btn.classList.add('active', 'bg-slate-800', 'text-white');
+                    btn.classList.remove('bg-slate-100', 'text-slate-600');
+
+                    currentTimeSlot = btn.getAttribute('data-slot');
+                    renderGolfCourses();
+                });
+            });
+
+            // Reset Filter Event
+            resetFilterBtn.addEventListener('click', () => {
+                currentRegionFilter = 'all';
+                currentDayFilter = 'weekday';
+                currentTimeSlot = 'all';
+                currentMaxDriveTime = 60;
+                currentSearchQuery = '';
+                searchInputEl.value = '';
+                sortSelectEl.value = 'distance';
+                currentSortBy = 'distance';
+
+                // Reset Region Buttons
+                document.querySelectorAll('.region-btn').forEach((b, idx) => {
+                    if (idx === 0) {
+                        b.classList.add('active', 'bg-slate-800', 'text-white');
+                        b.classList.remove('bg-slate-100', 'text-slate-600');
+                    } else {
+                        b.classList.remove('active', 'bg-slate-800', 'text-white');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    }
+                });
+
+                // Reset Day Buttons
+                document.querySelectorAll('.day-btn').forEach((b, idx) => {
+                    if (idx === 0) {
+                        b.classList.add('active', 'bg-golf-600', 'text-white', 'border-golf-600');
+                        b.classList.remove('bg-white', 'text-slate-600');
+                    } else {
+                        b.classList.remove('active', 'bg-golf-600', 'text-white', 'border-golf-600');
+                        b.classList.add('bg-white', 'text-slate-600');
+                    }
+                });
+
+                // Reset Distance Buttons
+                document.querySelectorAll('.dist-btn').forEach((b, idx) => {
+                    if (idx === 0) {
+                        b.classList.add('active', 'bg-golf-100', 'text-golf-800', 'border-golf-200');
+                    } else {
+                        b.classList.remove('active', 'bg-golf-100', 'text-golf-800', 'border-golf-200');
+                        b.classList.add('bg-white', 'text-slate-600');
+                    }
+                });
+
+                // Reset Time Buttons
+                document.querySelectorAll('.time-btn').forEach((b, idx) => {
+                    if (idx === 0) {
+                        b.classList.add('active', 'bg-slate-800', 'text-white');
+                    } else {
+                        b.classList.remove('active', 'bg-slate-800', 'text-white');
+                        b.classList.add('bg-slate-100', 'text-slate-600');
+                    }
+                });
+
+                renderGolfCourses();
+            });
+
+            // Close Modal
+            closeModalBtn.addEventListener('click', closeModal);
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) closeModal();
+            });
+        });
+    </script>
+</body>
+</html>

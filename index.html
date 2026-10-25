@@ -147,12 +147,12 @@
       </div>
     </section>
 
-    <!-- 3. 게임: 목록 / 외부 게임(iframe) / 내장 러너 -->
+    <!-- 3. 게임·도구: 목록 / 전체 화면 플레이어(iframe) -->
     <section id="tab-games" class="tab">
       <div id="gameList" class="col space-y-4">
         <div>
-          <h2 class="text-lg font-bold text-slate-100">AI 미니 게임</h2>
-          <p class="text-xs text-slate-400">게임을 골라서 바로 즐겨보세요</p>
+          <h2 class="text-lg font-bold text-slate-100">게임 · 도구</h2>
+          <p class="text-xs text-slate-400">골라서 바로 써보세요</p>
         </div>
         <div id="tkBar" class="flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2" hidden>
           <div id="tkLabel" class="text-sm text-slate-200 min-w-0"></div>
@@ -164,20 +164,11 @@
 
       <div id="gamePlayer" class="fixed inset-0 z-40 bg-black" hidden>
         <iframe id="gpFrame" title="game" allow="autoplay; fullscreen" style="position:absolute;left:0;top:0;width:100%;height:100%;border:0;background:#fff;transform-origin:0 0"></iframe>
+        <div id="gpBar" hidden style="position:fixed;left:0;right:0;top:0;z-index:45;height:calc(48px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);background:#0f172a;border-bottom:1px solid #1e293b">
+          <div id="gpBarTitle" style="height:48px;line-height:48px;padding-left:56px;padding-right:12px;font-size:14px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+        </div>
         <button id="gpBack" aria-label="목록으로" class="fixed left-2 z-50 w-10 h-10 rounded-full bg-black/50 text-white text-lg font-bold backdrop-blur" style="top:calc(env(safe-area-inset-top) + 8px)">←</button>
         <button id="gpFlip" aria-label="방향 뒤집기" class="fixed left-2 z-50 px-3 h-8 rounded-full bg-black/50 text-white text-xs font-semibold backdrop-blur" style="top:calc(env(safe-area-inset-top) + 56px)" hidden>↻ 방향</button>
-      </div>
-
-      <div id="runnerView" class="col space-y-3" hidden>
-        <div class="flex items-center gap-2">
-          <button id="rnBack" class="text-sm text-indigo-400 font-semibold px-2 py-1">← 목록</button>
-          <h2 class="text-sm font-bold text-slate-200">Cyber Runner</h2>
-        </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg text-center space-y-3">
-          <div class="flex justify-between text-xs text-slate-400"><span>점프로 장애물을 피하세요</span><span id="scoreText">Score: 0</span></div>
-          <canvas id="gameCanvas" width="320" height="160" class="w-full bg-slate-950 rounded-xl border border-slate-800"></canvas>
-          <button id="jumpBtn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 font-bold rounded-xl text-sm transition-all">점프 (Jump)</button>
-        </div>
       </div>
     </section>
 
@@ -235,7 +226,7 @@
     <div class="max-w-md mx-auto grid grid-cols-4">
       <button data-tab="home" class="flex flex-col items-center gap-1 py-2 text-indigo-400"><svg class="ic"><use href="#i-home"/></svg><span class="text-[10px] font-medium">홈</span></button>
       <button data-tab="chat" class="flex flex-col items-center gap-1 py-2 text-slate-400"><svg class="ic"><use href="#i-chat"/></svg><span class="text-[10px] font-medium">가족채팅</span></button>
-      <button data-tab="games" class="flex flex-col items-center gap-1 py-2 text-slate-400"><svg class="ic"><use href="#i-game"/></svg><span class="text-[10px] font-medium">AI게임</span></button>
+      <button data-tab="games" class="flex flex-col items-center gap-1 py-2 text-slate-400"><svg class="ic"><use href="#i-game"/></svg><span class="text-[10px] font-medium">게임·도구</span></button>
       <button data-tab="planner" class="flex flex-col items-center gap-1 py-2 text-slate-400"><svg class="ic"><use href="#i-cal"/></svg><span class="text-[10px] font-medium">일정</span></button>
     </div>
   </nav>
@@ -243,7 +234,7 @@
 
 <!-- ① 일반 스크립트: Firebase와 무관 (화면 전환, 탭, 게임). Firebase가 실패해도 항상 동작 -->
 <script src="js/core.js?v=1.15"></script>
-<script src="js/games.js?v=1.15"></script>
+<script src="js/games.js?v=1.18"></script>
 
 <!-- ② 모듈 스크립트: Firebase 로그인/채팅/일정/영상. 진입점은 main.js -->
 <script type="module" src="js/main.js?v=1.15"></script>
