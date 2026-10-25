@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<link rel="stylesheet" href="css/app.css?v=1.13">
+<link rel="stylesheet" href="css/app.css?v=1.15">
 </head>
 <body class="bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
 
@@ -154,6 +154,11 @@
           <h2 class="text-lg font-bold text-slate-100">AI 미니 게임</h2>
           <p class="text-xs text-slate-400">게임을 골라서 바로 즐겨보세요</p>
         </div>
+        <div id="tkBar" class="flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2" hidden>
+          <div id="tkLabel" class="text-sm text-slate-200 min-w-0"></div>
+          <button id="tkToggle" class="shrink-0 text-xs text-indigo-400 font-semibold px-2 py-1">내역</button>
+        </div>
+        <div id="tkPanel" class="space-y-3 bg-slate-900 border border-slate-800 rounded-xl p-3" hidden></div>
         <div id="gameCards" class="space-y-3"></div>
       </div>
 
@@ -237,10 +242,10 @@
 </div>
 
 <!-- ① 일반 스크립트: Firebase와 무관 (화면 전환, 탭, 게임). Firebase가 실패해도 항상 동작 -->
-<script src="js/core.js?v=1.13"></script>
-<script src="js/games.js?v=1.14"></script>
+<script src="js/core.js?v=1.15"></script>
+<script src="js/games.js?v=1.15"></script>
 
 <!-- ② 모듈 스크립트: Firebase 로그인/채팅/일정/영상. 진입점은 main.js -->
-<script type="module" src="js/main.js?v=1.13"></script>
+<script type="module" src="js/main.js?v=1.15"></script>
 </body>
 </html>

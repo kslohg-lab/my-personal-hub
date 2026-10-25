@@ -2,8 +2,8 @@
 //  - 일정: { title, date:'YYYY-MM-DD', time:'' | 'HH:MM', who:'' | 가족이름, repeat:'' | 'yearly', memo, by, uid, createdAt }
 //  - 달력은 화면에 보이는 6주 구간만 구독, 매년 반복(생일·기념일)은 따로 구독
 //  - 일정 탭 위의 [달력 | 보드] 전환 버튼도 이 파일이 켜 준다 (이 파일이 고장 나도 보드는 기본으로 보임)
-import { $ } from './util.js?v=1.13';
-import { state, myName, FAMILY, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from './firebase-init.js?v=1.13';
+import { $ } from './util.js?v=1.15';
+import { state, myName, FAMILY, collection, addDoc, query, orderBy, where, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc } from './firebase-init.js?v=1.15';
 
 const NAMES = FAMILY.map(f => f.name);
 const COLORS = { '': '#a78bfa', '아빠': '#60a5fa', '엄마': '#f472b6', '채아': '#fbbf24', '지아': '#34d399' };

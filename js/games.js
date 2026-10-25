@@ -39,13 +39,14 @@ resetGame();
 
 // 게임 목록 (새 게임은 여기에 한 줄 추가 + games/폴더이름/ 에 index.html, thumb.svg 넣기)
 // v: 게임 파일을 새로 올릴 때마다 숫자를 올리면 폰이 옛 파일을 캐시에서 쓰지 않음
+// cost: 입장에 필요한 게임 티켓 수 (부모님 계정은 무료, 0이거나 없으면 무료)
 const GAMES = [
-  { id: 'math-monster',  title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요' },
-  { id: 'speed-math',    title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결' },
-  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 6 },
-  { id: 'claw-machine',  title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요' },
-  { id: 'travel-picker', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요' },
-  { id: 'cyber-runner',  title: 'Cyber Runner',           desc: '점프로 장애물을 피하세요', builtin: true }
+  { id: 'math-monster',  title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요', cost: 1 },
+  { id: 'speed-math',    title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결', cost: 1 },
+  { id: 'animal-run',    title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 6, cost: 1 },
+  { id: 'claw-machine',  title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요', cost: 1 },
+  { id: 'travel-picker', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요', cost: 1 },
+  { id: 'cyber-runner',  title: 'Cyber Runner',           desc: '점프로 장애물을 피하세요', builtin: true, cost: 1 }
 ];
 function showGameView(v) {
   $('gameList').hidden = v !== 'list';
@@ -124,9 +125,25 @@ function freshFrame() {
   old.replaceWith(f);
   return f;
 }
+let entering = false;
 function openGame(id) {
   const g = GAMES.find(x => x.id === id);
-  if (!g) return;
+  if (!g || entering) return;
+  const gate = window.hubTickets;             // js/tickets.js가 있으면 입장 티켓을 확인 (없으면 그냥 입장)
+  if (gate && g.cost) {
+    entering = true;
+    let p;
+    try { p = Promise.resolve(gate.enter(g)); } catch { p = Promise.resolve(true); }
+    p.catch(() => false).then(ok => {
+      entering = false;
+      if (ok && !curGame && $('tab-games').classList.contains('active')) enterGame(g);
+    });
+    return;
+  }
+  enterGame(g);
+}
+function enterGame(g) {
+  const id = g.id;
   curGame = id;
   try { history.pushState({ game: id }, ''); } catch {}   // 폰의 뒤로가기로 목록 복귀
   if (g.builtin) { resetGame(); showGameView('runner'); startGame(); return; }
@@ -171,6 +188,13 @@ document.addEventListener('fullscreenchange', () => { if (!document.fullscreenEl
     d.textContent = g.desc;
     cap.append(t, d);
     b.append(img, cap);
+    if (g.cost) {   // 티켓 표시 (tickets.js가 켜질 때 보이게 함, 부모님은 숨김)
+      const tk = document.createElement('div');
+      tk.className = 'tkBadge absolute right-2 top-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[11px] font-bold backdrop-blur';
+      tk.textContent = '🎫 ' + g.cost;
+      tk.hidden = true;
+      b.append(tk);
+    }
     b.addEventListener('click', () => openGame(g.id));
     box.append(b);
   });

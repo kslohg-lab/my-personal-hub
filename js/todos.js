@@ -1,8 +1,8 @@
 // 가족 일정 보드 (Firestore todos 컬렉션)
 //  - 받는 사람 지정(to), 글쓴이 수정, 답글(todos/{id}/replies 하위 컬렉션, 개수는 rc)
 //  - 옛 기기 저장 일정 이전
-import { $ } from './util.js?v=1.13';
-import { state, myName, FAMILY, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, increment } from './firebase-init.js?v=1.13';
+import { $ } from './util.js?v=1.15';
+import { state, myName, FAMILY, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp, doc, updateDoc, deleteDoc, increment } from './firebase-init.js?v=1.15';
 
 let todos = [], tUnsub = null;
 let openId = null, pn = null;          // 펼친 일정 id, 펼친 칸 정보

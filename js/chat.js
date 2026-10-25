@@ -1,6 +1,6 @@
 // 가족 채팅 (Firestore chats 컬렉션) + 연결 상태 표시 + 사진 확대
-import { $ } from './util.js?v=1.13';
-import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp } from './firebase-init.js?v=1.13';
+import { $ } from './util.js?v=1.15';
+import { state, myName, firebaseConfig, collection, addDoc, query, orderBy, limitToLast, onSnapshot, serverTimestamp } from './firebase-init.js?v=1.15';
 
 const box = $('chatMessages'), input = $('chatMessage');
 let unsub = null, docs = [];
