@@ -74,6 +74,7 @@ function renderBar() {
     const me = KIDS.find(k => k.id === state.me.id), v = me ? bal[me.id] : null;
     label.textContent = '🎫 내 티켓 ' + (v == null ? '…' : v + '장');
   }
+  try { document.dispatchEvent(new CustomEvent('hub:sum', { detail: { tickets: label.textContent } })); } catch {}
   $('tkToggle').textContent = panelOpen ? '닫기' : (isParent ? '티켓 관리' : '내역');
 }
 

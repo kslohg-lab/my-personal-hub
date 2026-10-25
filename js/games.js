@@ -122,6 +122,7 @@ function openGame(id) {
 function enterGame(g) {
   const id = g.id;
   curGame = id;
+  if (g.cat !== 'tool') pushRecent(id);
   try { history.pushState({ game: id }, ''); } catch {}   // 폰의 뒤로가기로 목록 복귀
   showGameView('player');
   $('gpBarTitle').textContent = g.title;
@@ -137,6 +138,7 @@ function doClose() {
   freshFrame();
   try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch {}
   showGameView('list');
+  renderRecent();
   document.dispatchEvent(new Event('hub:gameclosed'));   // 점수판(scores.js)이 새 기록을 확인
 }
 function closeGame() {
@@ -175,11 +177,34 @@ document.addEventListener('fullscreenchange', () => {
     sub.textContent = cat.sub;
     hd.append(h, sub);
     box.append(hd);
-    list.forEach(g => box.append(makeCard(g)));
+    const grid = document.createElement('div');   // 카드는 2열로 작게 (게임이 많아져도 한눈에 보이게)
+    grid.className = 'grid grid-cols-2 gap-3 mt-2';
+    list.forEach(g => grid.append(makeCard(g)));
+    box.append(grid);
   });
+  renderRecent();
   $('gpBack').addEventListener('click', closeGame);
   $('gpFlip').addEventListener('click', () => { flip = !flip; store.set('hub_flip', flip ? '1' : '0'); layoutPlayer(); });
 })();
+// 최근에 한 게임 (이 기기에 기억, 최대 2개 — 게임만, 도구는 제외)
+function readRecent() { try { const a = JSON.parse(store.get('hub_recentGames', '[]')); return Array.isArray(a) ? a.filter(id => GAMES.some(g => g.id === id && g.cat === 'game')) : []; } catch { return []; } }
+function pushRecent(id) { store.set('hub_recentGames', JSON.stringify([id, ...readRecent().filter(x => x !== id)].slice(0, 4))); }
+function renderRecent() {
+  const box = $('gameRecent');
+  if (!box) return;
+  box.replaceChildren();
+  const ids = readRecent().slice(0, 2);
+  if (!ids.length) return;
+  const h = document.createElement('div');
+  h.className = 'text-sm font-bold text-slate-100';
+  h.textContent = '🕘 최근에 한 게임';
+  const grid = document.createElement('div');
+  grid.className = 'grid grid-cols-2 gap-3 mt-2';
+  ids.forEach(id => { const c = makeCard(GAMES.find(g => g.id === id)); grid.append(c); });
+  box.append(h, grid);
+  const ref = document.querySelector('#gameCards .tkBadge');   // 티켓 표시 여부는 아래 목록과 같게
+  box.querySelectorAll('.tkBadge').forEach(b => { b.hidden = ref ? ref.hidden : true; });
+}
 function makeCard(g) {
   const b = document.createElement('button');
   b.className = 'relative block w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 text-left shadow-lg';
@@ -188,18 +213,18 @@ function makeCard(g) {
   img.alt = '';
   img.className = 'block w-full aspect-[2/1] object-cover';
   const cap = document.createElement('div');
-  cap.className = 'absolute inset-x-0 bottom-0 px-4 pt-8 pb-3 bg-gradient-to-t from-black/80 to-transparent';
+  cap.className = 'absolute inset-x-0 bottom-0 px-2.5 pt-6 pb-2 bg-gradient-to-t from-black/80 to-transparent';
   const t = document.createElement('div');
-  t.className = 'text-sm font-bold text-white';
+  t.className = 'text-[13px] leading-tight font-bold text-white truncate';
   t.textContent = g.title;
   const d = document.createElement('div');
-  d.className = 'text-[11px] text-slate-300';
+  d.className = 'text-[10px] text-slate-300 truncate';
   d.textContent = g.desc;
   cap.append(t, d);
   b.append(img, cap);
   if (g.cost) {   // 티켓 표시 (tickets.js가 켜질 때 보이게 함, 부모님은 숨김)
     const tk = document.createElement('div');
-    tk.className = 'tkBadge absolute right-2 top-2 px-2 py-0.5 rounded-full bg-black/60 text-white text-[11px] font-bold backdrop-blur';
+    tk.className = 'tkBadge absolute right-1.5 top-1.5 px-1.5 py-0.5 rounded-full bg-black/60 text-white text-[10px] font-bold backdrop-blur';
     tk.textContent = '🎫 ' + g.cost;
     tk.hidden = true;
     b.append(tk);

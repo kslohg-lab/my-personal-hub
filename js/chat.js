@@ -33,6 +33,7 @@ function updateBadge() {
   const n = chatActive() ? 0 : unreadCount();
   b.hidden = n === 0;
   b.textContent = n > 99 ? '99+' : String(n);
+  try { document.dispatchEvent(new CustomEvent('hub:sum', { detail: { unread: n } })); } catch {}
 }
 function markRead() {
   if (!state.db || !state.me || !chatVisible() || !(readsOk || readsFailed)) return;

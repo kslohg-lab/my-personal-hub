@@ -1,4 +1,4 @@
-// 가족 일정 보드 (Firestore todos 컬렉션)
+// 가족 할 일 보드 (Firestore todos 컬렉션)
 //  - 받는 사람 지정(to), 글쓴이 수정, 답글(todos/{id}/replies 하위 컬렉션, 개수는 rc)
 //  - 옛 기기 저장 일정 이전
 import { $ } from './util.js?v=1.15';
@@ -60,11 +60,12 @@ function buildRow(t) {
 }
 
 function renderTodos() {
-  $('todoCount').textContent = todos.length ? '남은 일정 ' + todos.filter(t => !t.done).length + '개' : '';
+  $('todoCount').textContent = todos.length ? '남은 할 일 ' + todos.filter(t => !t.done).length + '개' : '';
+  try { document.dispatchEvent(new CustomEvent('hub:sum', { detail: { todoOpen: todos.filter(t => !t.done).length, todoMine: todos.filter(t => !t.done && t.to && t.to === myName()).length } })); } catch {}
   if (openId && !todos.some(t => t.id === openId)) closePanel();
   if (!todos.length) {
     items.clear();
-    tList.replaceChildren(mk('li', 'text-center text-slate-500 text-xs py-8', '아직 일정이 없어요. 첫 일정을 추가해 보세요!'));
+    tList.replaceChildren(mk('li', 'text-center text-slate-500 text-xs py-8', '아직 할 일이 없어요. 첫 할 일을 추가해 보세요!'));
     return;
   }
   const ids = new Set(todos.map(t => t.id));
@@ -204,7 +205,7 @@ function startTodos() {
     renderTodos();
   }, err => {
     console.error(err);
-    $('todoCount').textContent = '⚠ 일정을 불러오지 못했어요 (' + (err.code || err.message) + ')';
+    $('todoCount').textContent = '⚠ 할 일을 불러오지 못했어요 (' + (err.code || err.message) + ')';
   });
 }
 function stopTodos() {
@@ -227,7 +228,7 @@ function toggleTodo(t) {
   updateDoc(doc(state.db, 'todos', t.id), { done: !t.done, doneBy: t.done ? '' : myName() }).catch(todoFail);
 }
 function removeTodo(t) {
-  if (confirm('이 일정을 삭제할까요?\n"' + t.text + '"')) deleteDoc(doc(state.db, 'todos', t.id)).catch(todoFail);
+  if (confirm('이 할 일을 삭제할까요?\n"' + t.text + '"')) deleteDoc(doc(state.db, 'todos', t.id)).catch(todoFail);
 }
 $('todoAdd').addEventListener('click', addTodo);
 $('todoInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) addTodo(); });
@@ -239,7 +240,7 @@ function migrateLocalTodos() {
   try { flag = localStorage.getItem('hub_todos_migrated'); list = JSON.parse(localStorage.getItem('my_hub_todos') || '[]') || []; } catch {}
   list = list.filter(t => t && t.text);
   if (flag || !list.length) return;
-  if (!confirm('이 폰에 저장된 일정 ' + list.length + '개를 가족 일정으로 옮길까요?')) { try { localStorage.setItem('hub_todos_migrated', 'no'); } catch {} return; }
+  if (!confirm('이 폰에 저장된 할 일 ' + list.length + '개를 가족 할 일로 옮길까요?')) { try { localStorage.setItem('hub_todos_migrated', 'no'); } catch {} return; }
   Promise.all(list.map(t => addDoc(collection(state.db, 'todos'), {
     text: String(t.text).slice(0, 200), to: '', rc: 0, done: !!t.done, doneBy: t.done ? myName() : '', by: myName(), uid: state.me.uid, createdAt: serverTimestamp()
   }))).then(() => { try { localStorage.setItem('hub_todos_migrated', '1'); } catch {} }).catch(todoFail);

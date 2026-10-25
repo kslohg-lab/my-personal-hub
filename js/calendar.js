@@ -254,12 +254,17 @@ function goCalendar(ds) {
   goToDate(ds);
 }
 $('homeCal').addEventListener('click', () => goCalendar(todayStr()));
+// 홈 '오늘 요약'(today.js)에 오늘 일정·공휴일을 알려줌
+function sumHome(todayEvents) {
+  try { document.dispatchEvent(new CustomEvent('hub:sum', { detail: { todayEvents, holiday: holidayOf(todayStr()) } })); } catch {}
+}
 function renderHome() {
   const box = $('homeEvents');
   if (!started) return;
   box.replaceChildren();
-  if (homeError) { box.append(mk('div', 'text-xs text-red-400', homeError)); return; }
+  if (homeError) { box.append(mk('div', 'text-xs text-red-400', homeError)); sumHome(null); return; }
   const list = upcomingList(), t = todayStr();
+  sumHome(list.filter(x => x.ds === t).map(x => ({ title: x.e.title, yearly: x.e.repeat === 'yearly' })));
   if (!list.length) { box.append(mk('div', 'text-xs text-slate-500 py-2', '앞으로 30일 안에 예정된 일정이 없어요.')); return; }
   list.slice(0, 5).forEach(({ ds, e }) => {
     const n = diffDays(t, ds);
