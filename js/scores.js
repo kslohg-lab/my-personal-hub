@@ -17,6 +17,7 @@ const BOARD = [
   { id: 'speed-math', title: '스피드 매쓰', icon: '⚡', unit: '점', read: () => num(ls('mb2_best')) },
   { id: 'ice-cream', title: '아이스크림 가게 · 클리어한 일차', icon: '🍦', unit: '일', read: () => { try { return num(((JSON.parse(ls('iceCreamV1') || 'null') || {}).bestDay || 1) - 1); } catch { return 0; } } },   // bestDay = 도달한 일차 → 클리어한 날 = 그 -1
   { id: 'bungeoppang', title: '붕어빵 타이쿤 · 장사한 날', icon: '🐟', unit: '일', read: () => { try { return num(((JSON.parse(ls('bungeoppangV1') || 'null') || {}).day || 1) - 1); } catch { return 0; } } },   // day = 다음에 할 일차
+  { id: 'bungeoppang2', title: '붕어빵 서바이벌 · 도달 단계', icon: '🔥', unit: '단계', read: () => { try { return num(((JSON.parse(ls('bungeoppang2V1') || 'null') || {}).best || {}).stage); } catch { return 0; } } },
   { id: 'chess', title: '체스 · 컴퓨터 이긴 횟수', icon: '♞', unit: '승', read: () => { try { const r = (JSON.parse(ls('chessV1') || 'null') || {}).rec || {}; return num([1, 2, 3].reduce((a, l) => a + (+((r[l] || {}).w) || 0), 0)); } catch { return 0; } } },   // 레벨 1~3 승수 합
   { id: 'sudoku', title: '스도쿠 · 9×9 클리어 횟수', icon: '🔢', unit: '판', read: () => { try { const c = (JSON.parse(ls('sudokuV1') || 'null') || {}).clears || {}; return num((+c.n9 || 0) + (+c.h9 || 0)); } catch { return 0; } } },   // 쉬운 4×4·6×6과 매일 같은 '오늘의 퍼즐'은 제외(반복으로 올릴 수 있어서)
   { id: 'memory-match', title: '짝 맞추기 · 클리어한 단계', icon: '🃏', unit: '단계', read: () => { try { return num(((JSON.parse(ls('memoryV1') || 'null') || {}).bestLevel || 1) - 1); } catch { return 0; } } },   // bestLevel = 도달한 단계 → 클리어 = -1
