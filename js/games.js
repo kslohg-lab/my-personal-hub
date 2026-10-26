@@ -10,7 +10,7 @@ const CATS = [
 ];
 const GAMES = [
   { id: 'math-monster',  cat: 'game', title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요', cost: 1 },
-  { id: 'speed-math',    cat: 'game', title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결', cost: 1 },
+  { id: 'speed-math',    cat: 'game', title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결', v: 2, cost: 1 },
   { id: 'animal-run',    cat: 'game', title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 8, cost: 1 },
   { id: 'claw-machine',  cat: 'game', title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요', cost: 1 },
   { id: 'bungeoppang',   cat: 'game', title: '붕어빵 타이쿤',           desc: '붕어빵을 구워 팔고 가게를 키워요', v: 1, cost: 1 },

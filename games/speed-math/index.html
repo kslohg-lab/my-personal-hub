@@ -104,7 +104,7 @@ main{flex:1;display:flex;flex-direction:column;padding:10px 16px 14px;min-height
   <div class="overlay" id="start">
     <div class="big">⚡</div>
     <h1>스피드 매쓰 블리츠</h1>
-    <p style="color:var(--sub);margin:0;line-height:1.6">맞으면 ⭕, 틀리면 ❌ 를 빠르게!<br>5콤보마다 ❄️ 시간 얼리기, 보스 문제는 하트 회복!</p>
+    <p style="color:var(--sub);margin:0;line-height:1.6">맞으면 ⭕, 틀리면 ❌ 를 빠르게!<br>5콤보마다 ❄️ 시간 얼리기, 보스 문제는 점수 3배!<br>하트 3개가 다 닳으면 끝! 갈수록 어려워져요</p>
     <div class="diff" id="diff"><button data-d="0">😊 쉬움</button><button data-d="1" class="on">😎 보통</button><button data-d="2">🔥 어려움</button></div>
     <div class="panel"><small>BEST</small><div id="best0">0</div></div>
     <button class="btn go" id="startBtn">게임 시작 🚀</button>
@@ -155,23 +155,39 @@ function gen(boss){
   if(lv>=2)ops.push('×');
   if(lv>=3)ops.push('÷');
   if(lv>=5)ops.push('mix');
-  let op=pick(ops),a,b,c,txt,ans;
-  const sc=1+d*.35;
-  if(op==='+'){a=R(12,Math.round(40*sc+lv*4));b=R(11,Math.round(38*sc+lv*4));ans=a+b;txt=`${a} + ${b}`}
-  else if(op==='-'){a=R(30,Math.round(70*sc+lv*5));b=R(11,a-8);ans=a-b;txt=`${a} − ${b}`}
-  else if(op==='×'){a=R(3,Math.min(9+d*2+Math.floor(lv/2),15));b=R(4,Math.min(9+d*2+Math.floor(lv/2),15));ans=a*b;txt=`${a} × ${b}`}
-  else if(op==='÷'){b=R(3,9+d);ans=R(3,10+d*2);a=b*ans;txt=`${a} ÷ ${b}`}
-  else{a=R(3,9);b=R(3,9);c=R(5,30);ans=a*b+c;txt=`${a} × ${b} + ${c}`}
-  const q={txt,ans};
+  if(lv>=7)ops.push('tri','tri');          // 7단계~ 세 수 계산
+  if(lv>=9)ops.push('big','par');          // 9단계~ 큰 곱셈, 괄호
+  if(lv>=12)ops.push('par','tri2','big');  // 12단계~ 괄호·곱셈 뺄셈 섞기
+  if(lv>=8){ // 8단계부터는 쉬운 덧셈·뺄셈 비중을 줄여요 (허브 수정: 원본 반복문은 중복이 없어 아무 일도 안 했음 → 문제마다 둘 중 하나를 무작위로 뺌)
+    ops.splice(ops.indexOf(Math.random()<.5?'+':'-'),1);
+  }
+  const op=pick(ops);let a,b,c,txt,ans,tm=1;
+  const sc=1+d*.35, g=Math.max(0,lv-1);
+  if(op==='+'){a=R(12,Math.round(40*sc+lv*5));b=R(11,Math.round(38*sc+lv*5));ans=a+b;txt=`${a} + ${b}`}
+  else if(op==='-'){a=R(30,Math.round(70*sc+lv*6));b=R(11,a-8);ans=a-b;txt=`${a} − ${b}`}
+  else if(op==='×'){const m=Math.min(9+d*2+Math.floor(lv/2),25);a=R(3,m);b=R(4,Math.min(m,15+d*2));ans=a*b;txt=`${a} × ${b}`;tm=1.1}
+  else if(op==='÷'){b=R(3,Math.min(9+d+Math.floor(lv/3),15));ans=R(3,Math.min(10+d*2+Math.floor(lv/2),30));a=b*ans;txt=`${a} ÷ ${b}`;tm=1.1}
+  else if(op==='mix'){a=R(3,9+Math.floor(lv/3));b=R(3,9+Math.floor(lv/3));c=R(5,30+lv*2);ans=a*b+c;txt=`${a} × ${b} + ${c}`;tm=1.25}
+  else if(op==='tri'){a=R(20,60+g*6);b=R(11,40+g*4);c=R(8,30+g*3);if(Math.random()<.5){if(c>=a+b)c=R(5,a+b-5);ans=a+b-c;txt=`${a} + ${b} − ${c}`}else{ans=a-b+c;if(ans<0){a+=b;ans=a-b+c}txt=`${a} − ${b} + ${c}`}tm=1.35}
+  else if(op==='tri2'){a=R(4,12+Math.floor(g/2));b=R(4,12+Math.floor(g/2));c=R(10,60+g*4);if(Math.random()<.5){ans=a*b-c;if(ans<0){c=R(5,a*b-1);ans=a*b-c}txt=`${a} × ${b} − ${c}`}else{ans=c-a*b;if(ans<0){c+=a*b;ans=c-a*b}txt=`${c} − ${a} × ${b}`}tm=1.5}
+  else if(op==='big'){a=R(12,Math.min(19+g*2,49));b=R(3,Math.min(6+Math.floor(g/2),9));ans=a*b;txt=`${a} × ${b}`;tm=1.4}
+  else{ // par
+    a=R(3,12+g);b=R(3,12+g);c=R(3,Math.min(5+Math.floor(g/2),12));
+    if(Math.random()<.5){ans=(a+b)*c;txt=`(${a} + ${b}) × ${c}`}else{if(a<=b)a+=b;ans=(a-b)*c;txt=`(${a} − ${b}) × ${c}`}
+    tm=1.6}
+  const q={txt,ans,tm};
+  // 함정 보기: 높은 단계일수록 정답과 아주 비슷해요
+  const offs=lv<3?[1,-1,10,-10,2,-2,3,-3,5,-5]:lv<7?[1,-1,10,-10,2,-2,1,-1]:[1,-1,2,-2,10,-10,9,-9,11,-11,1,-1];
+  const swap=(n)=>{const s=String(n);if(s.length<2)return n;const t=s[1]+s[0]+s.slice(2);return +t};
+  const near=()=>{let v=ans+pick(offs);if(lv>=6&&Math.random()<.25){const w=swap(ans);if(w!==ans)v=w}return v};
   if(boss){
-    const s=new Set([ans]),offs=[1,-1,2,-2,10,-10,5,-5,3,-3,20,-20];
-    // 함정 보기: 자주 하는 실수 위주
-    while(s.size<4){const v=ans+pick(offs);if(v>=0)s.add(v)}
+    const s=new Set([ans]);let guard=0;
+    while(s.size<4){const v=guard++<80?near():ans+R(4,25);if(v>=0)s.add(v)}
     q.choices=[...s].sort(()=>Math.random()-.5);
   }else{
     q.isRight=Math.random()<.5;
     if(q.isRight)q.shown=ans;
-    else{let v=ans+pick([1,-1,10,-10,2,-2,3,-3]);if(v<0||v===ans)v=ans+4;q.shown=v}
+    else{let v=near();if(v<0||v===ans)v=ans+4;q.shown=v}
   }
   return q;
 }
@@ -195,8 +211,9 @@ function startGame(){
   },600);sfx('tick');
 }
 function timeFor(boss){
-  const base=[4600,4000,3400][diff];
-  const t=Math.max(2000,base-S.level*200);
+  const base=[4800,4200,3600][diff], floor=[2400,2000,1700][diff];
+  let t=Math.max(floor,base-S.level*220);
+  t*=Math.min(1.6,(S.q&&S.q.tm)||1);           // 계산이 복잡하면 시간을 조금 더 줘요
   return boss?t*1.7:t;
 }
 function nextQ(){
@@ -212,7 +229,7 @@ function nextQ(){
   const m=$('mode');
   if(S.boss){
     sfx('boss');
-    m.textContent='👑 BOSS · 정답 +보너스, 하트 회복!';m.className='badge boss';
+    m.textContent='👑 BOSS · 점수 3배!';m.className='badge boss';
     q.textContent=`${S.q.txt} = ?`;$('sub').textContent='정답을 골라요!';
     const box=$('choices');box.innerHTML='';
     S.q.choices.forEach(v=>{const b=document.createElement('button');b.className='btn ch';b.textContent=v;b.onclick=()=>answerChoice(b,v);box.appendChild(b)});
@@ -258,7 +275,6 @@ function right(){
   sfx('ok',S.combo);buzz(15);
   $('card').classList.add('ok');mascot(S.combo);
   burst(`+${pts}`,S.combo>=3?['🔥','✨','⭐']:['✨','⭐']);
-  if(S.boss&&S.lives<3){S.lives++;$('sub').textContent='💖 하트 회복!'}
   if(S.combo%5===0&&S.freezeReady<2){S.freezeReady++;sfx('ice');$('sub').textContent='❄️ 시간 얼리기 획득!'}
   if(S.level>oldLv){$('sub').textContent=`🎉 ${S.level}단계 돌입!`}
   ui(true);
