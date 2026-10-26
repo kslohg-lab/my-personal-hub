@@ -88,6 +88,22 @@ service cloud.firestore {
       allow update: if okScore(id) && request.resource.data.score >= resource.data.score;
       allow delete: if false;
     }
+    match /toolData/{id} {   // 도구 공유 저장소(가족 투표 등): 문서 id = 도구id__이메일앞부분, 가족 모두 읽고 각자 자기 것만 씀
+      function okTool(sid) {
+        return isFamily()
+          && sid.matches('[a-z0-9-]+__[a-z]+')
+          && request.auth.token.email == sid.split('__')[1] + '@family-hub.app'
+          && request.resource.data.keys().hasOnly(['tool', 'uid', 'name', 'data', 'at'])
+          && request.resource.data.tool == sid.split('__')[0]
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.data is map
+          && request.resource.data.at is timestamp;
+      }
+      allow read: if isFamily();
+      allow create, update: if okTool(id);
+      allow delete: if false;
+    }
     match /videos/{doc} {
       allow read: if isFamily();
       allow create: if isFamily() && request.resource.data.uid == request.auth.uid;

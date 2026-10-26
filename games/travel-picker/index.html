@@ -25,6 +25,20 @@ button{border:1px solid #cbd5e1;background:white;color:var(--ink);border-radius:
 .cardfoot{border-top:1px solid #eef1f5;padding:12px 15px;display:flex;justify-content:space-between;align-items:center;gap:8px}.comparelabel{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;cursor:pointer}.comparelabel input{accent-color:var(--blue);width:16px;height:16px}.detailsbtn{padding:7px 9px;font-size:12px}
 .comparepanel{display:none;background:#fff;border:2px solid #bfd0ff;border-radius:16px;padding:16px;margin:18px 0}.comparepanel.show{display:block}.comparepanel h2{margin:0 0 10px;font-size:20px}.comparetable{overflow-x:auto}.comparetable table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}.comparetable th,.comparetable td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}.comparetable th{background:#f5f7ff}
 .modalback{display:none;position:fixed;inset:0;background:#11182799;z-index:10;padding:20px;align-items:center;justify-content:center}.modalback.open{display:flex}.modal{background:white;border-radius:18px;max-width:760px;width:100%;max-height:90vh;overflow:auto;padding:22px;position:relative}.modal h2{margin:0 40px 4px 0}.close{position:absolute;right:15px;top:15px}.modal img{width:100%;max-height:270px;object-fit:cover;border-radius:12px;margin:14px 0}.modalgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modalbox{background:#f6f8fb;border-radius:12px;padding:12px;font-size:13px}.empty{padding:40px;text-align:center;background:white;border-radius:16px;color:var(--muted);grid-column:1/-1}
+
+/* ---- 가족 투표 (v2) ---- */
+.votepanel{background:#fff;border:2px solid #ffd9a0;border-radius:16px;padding:16px;margin:0 0 18px}
+.votehead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.votehead h2{margin:0;font-size:20px}#voteStatus{font-size:12px;font-weight:700;color:#8a520d;background:#fff4e0;border-radius:8px;padding:4px 9px}
+.votehelp{font-size:13px;color:var(--muted);margin:6px 0 12px}.votewarn{font-size:12px;color:#b45309;background:#fff7ed;border-radius:8px;padding:7px 10px;margin:0 0 10px}
+.mypicks{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.pick{display:flex;align-items:center;gap:8px;background:#fffaf0;border:1px solid #ffe3b3;border-radius:10px;padding:7px 10px;font-size:14px}.pick .medal{font-size:18px}.pick .nm{flex:1;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pick button{padding:5px 9px;font-size:13px}
+.pickempty{font-size:13px;color:var(--muted);background:#f6f8fb;border-radius:10px;padding:10px 12px}
+.leader{font-size:15px;font-weight:850;background:#eef6ff;color:#1f4ea8;border-radius:10px;padding:10px 12px;margin:2px 0 8px}.leader.done{background:#e8f6ee;color:#18794e}
+.vrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #eef1f5;padding:8px 2px;font-size:14px;cursor:pointer}.vrow b.rk{width:46px;color:#a65c00}.vrow .vn{font-weight:800}.vrow .vs{font-size:12px;color:var(--muted)}.vrow .vv{font-size:12px;color:#44536a;flex-basis:100%;padding-left:54px}
+.votebtns{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.votebtn{padding:7px 11px;font-size:12px;border-color:#ffc778;background:#fff8ea;color:#8a520d}.votebtn.on{background:#ff9f1c;border-color:#ff9f1c;color:#fff}
+.voters{font-size:12px;color:#7c4a03;background:#fff4e0;border-radius:8px;padding:5px 8px}
+.cardfoot{flex-wrap:wrap}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#202a35;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;max-width:90vw;text-align:center}#toast.on{opacity:1}
 footer{font-size:12px;color:var(--muted);margin-top:24px;line-height:1.7}
 @media(max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.controls{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){header{padding:24px 18px}.wrap{padding:16px 12px 34px}.kpis{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.photo{height:200px}.modalgrid{grid-template-columns:1fr}}
@@ -42,6 +56,15 @@ footer{font-size:12px;color:var(--muted);margin-top:24px;line-height:1.7}
     <div class="kpi"><b>4인 가족</b><span>성인 2명 + 자녀 2명</span></div>
     <div class="kpi"><b id="selectedCount">0 / 3</b><span>비교 목록에 담은 여행지</span></div>
   </div>
+
+  <section class="votepanel" id="votePanel" aria-label="가족 투표">
+    <div class="votehead"><h2>🗳 가족 투표</h2><span id="voteStatus"></span></div>
+    <p class="votehelp" id="voteHelp"></p>
+    <div id="voteWarn"></div>
+    <div class="mypicks" id="myPicks"></div>
+    <div id="voteResults"></div>
+    <div class="votebtns"><button id="voteClear" type="button">내 선택 모두 지우기</button></div>
+  </section>
 
   <section class="controls" aria-label="여행지 필터">
     <div class="field"><label for="search">여행지 검색</label><input id="search" type="search" placeholder="예: 디즈니, 바다, 쇼핑, 일본"></div>
@@ -72,6 +95,7 @@ footer{font-size:12px;color:var(--muted);margin-top:24px;line-height:1.7}
     • 사진은 외부 이미지 서비스에서 불러옵니다. 인터넷 연결이 필요하며, 일부 사진은 대표 이미지로 실제 방문 장소와 다를 수 있습니다. 이 도구는 예약 가격을 실시간 조회하지 않습니다.
   </footer>
 </main>
+<div id="toast" role="status"></div>
 <div class="modalback" id="modalback" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal"><button class="close" id="closeModal" aria-label="닫기">닫기 ✕</button><div id="modalContent"></div></div>
 </div>
@@ -116,6 +140,7 @@ function card(d){
  <div class="cardbody">
  <div class="topline"><h2>${d.name}</h2><span class="grade ${gradeClass(d.grade)}">${d.grade}급</span></div>
  <div><div class="price">${money(cost(d).min)}~${money(cost(d).max)} <small>/ 가족 4인</small></div><div class="stars">${stars(Math.round(d.rating))} <span style="color:#687582"> ${d.rating.toFixed(1)} / 5</span></div></div>
+ ${votersLine(d)}
  <div class="desc">${d.desc}</div>
  <div class="tags">${d.theme.map(t=>`<span class="tag">${themeNames[t]}</span>`).join("")}</div>
  <div class="scoregrid">
@@ -127,7 +152,7 @@ function card(d){
  <div class="places"><b>추천 장소</b><br>${d.places.join(" · ")}</div>
  <div class="proscons"><div class="pros"><b>✓ 장점</b><ul>${d.pros.map(x=>`<li>${x}</li>`).join("")}</ul></div><div class="cons"><b>! 고려할 점</b><ul>${d.cons.map(x=>`<li>${x}</li>`).join("")}</ul></div></div>
  </div>
- <div class="cardfoot"><label class="comparelabel"><input type="checkbox" ${selected.has(d.id)?"checked":""} onchange="toggleCompare(${d.id},this.checked)"> 비교 목록에 담기</label><button class="detailsbtn" onclick="showDetails(${d.id})">상세 보기 ↗</button></div>
+ <div class="cardfoot"><label class="comparelabel"><input type="checkbox" ${selected.has(d.id)?"checked":""} onchange="toggleCompare(${d.id},this.checked)"> 비교 목록에 담기</label>${voteButton(d)}<button class="detailsbtn" onclick="showDetails(${d.id})">상세 보기 ↗</button></div>
  </article>`;
 }
 function filtered(){
@@ -142,9 +167,10 @@ function render(){
  $("resultText").textContent=`조건에 맞는 여행지 ${list.length}곳 · 전체 ${destinations.length}곳`;
  $("budgetLabel").textContent=money(+$("budget").value); $("selectedCount").textContent=`${selected.size} / 3`;
  $("compareBtn").textContent=selected.size?`선택한 ${selected.size}곳 비교`:"선택한 여행지 비교";
+ renderVote();
 }
 function toggleCompare(id,checked){
- if(checked){if(selected.size>=3){alert("한 번에 최대 3곳까지 비교할 수 있습니다.");render();return}selected.add(id)}else selected.delete(id);
+ if(checked){if(selected.size>=3){toast("한 번에 최대 3곳까지 비교할 수 있어요");render();return}selected.add(id)}else selected.delete(id);
  render(); if(selected.size)renderCompare();
 }
 function renderCompare(){
@@ -155,18 +181,110 @@ function renderCompare(){
 }
 function showDetails(id){
  const d=destinations.find(x=>x.id===id);
- $("modalContent").innerHTML=`<h2 id="modalTitle">${d.name} 가족여행</h2><p style="margin:0;color:#687582">${d.country} · 추천 등급 ${d.grade} · 종합 별점 ${d.rating.toFixed(1)}/5</p><img src="${imgUrl(d)}" alt="${d.name} 대표 이미지"><div class="modalgrid"><div class="modalbox"><b>예상 경비</b><p>${money(d.min)}~${money(d.max)} / 4인 가족</p><b>비행시간</b><p>직항 편도 약 ${d.flight}시간</p><b>추천 장소</b><p>${d.places.join(" · ")}</p></div><div class="modalbox"><b>장점</b><ul>${d.pros.map(x=>`<li>${x}</li>`).join("")}</ul><b>고려할 점</b><ul>${d.cons.map(x=>`<li>${x}</li>`).join("")}</ul></div></div><p style="font-size:13px;color:#687582">예산은 실시간 견적이 아닌 계획용 추정치입니다. 예약 전 항공편·숙소·입장권을 확인해 주세요.</p><button class="primary" onclick="toggleFromModal(${d.id})">${selected.has(d.id)?"비교 목록에서 빼기":"비교 목록에 담기"}</button>`;
+ $("modalContent").innerHTML=`<h2 id="modalTitle">${d.name} 가족여행</h2><p style="margin:0;color:#687582">${d.country} · 추천 등급 ${d.grade} · 종합 별점 ${d.rating.toFixed(1)}/5</p><img src="${imgUrl(d)}" alt="${d.name} 대표 이미지"><div class="modalgrid"><div class="modalbox"><b>예상 경비</b><p>${money(d.min)}~${money(d.max)} / 4인 가족</p><b>비행시간</b><p>직항 편도 약 ${d.flight}시간</p><b>추천 장소</b><p>${d.places.join(" · ")}</p></div><div class="modalbox"><b>장점</b><ul>${d.pros.map(x=>`<li>${x}</li>`).join("")}</ul><b>고려할 점</b><ul>${d.cons.map(x=>`<li>${x}</li>`).join("")}</ul></div></div><p style="font-size:13px;color:#687582">예산은 실시간 견적이 아닌 계획용 추정치입니다. 예약 전 항공편·숙소·입장권을 확인해 주세요.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" onclick="toggleFromModal(${d.id})">${selected.has(d.id)?"비교 목록에서 빼기":"비교 목록에 담기"}</button><button class="votebtn ${myPicks.includes(d.id)?"on":""}" style="font-size:13px;padding:9px 13px" onclick="voteFromModal(${d.id})">${myPicks.includes(d.id)?"🗳 투표에서 빼기":"🗳 투표 담기"}</button></div>`;
  $("modalback").classList.add("open");
 }
 function toggleFromModal(id){toggleCompare(id,!selected.has(id));showDetails(id)}
+function voteFromModal(id){toggleVote(id);showDetails(id)}
 ["search","budget","flight","style","sort","gradeFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));
 $("duration").addEventListener("change",render);
 $("reset").addEventListener("click",()=>{$("search").value="";$("budget").value=250;$("flight").value=7;$("style").value="all";$("sort").value="grade";$("gradeFilter").value="all";selected.clear();$("duration").value=3;render();$("comparePanel").classList.remove("show")});
-$("compareBtn").addEventListener("click",()=>{if(!selected.size){alert("비교할 여행지 카드의 체크박스를 먼저 선택해 주세요.");return}renderCompare();$("comparePanel").scrollIntoView({behavior:"smooth",block:"start"})});
+$("compareBtn").addEventListener("click",()=>{if(!selected.size){toast("비교할 여행지 카드의 체크박스를 먼저 선택해 주세요");return}renderCompare();$("comparePanel").scrollIntoView({behavior:"smooth",block:"start"})});
 $("printBtn").addEventListener("click",()=>window.print());
 $("closeModal").addEventListener("click",()=>$("modalback").classList.remove("open"));
 $("modalback").addEventListener("click",e=>{if(e.target===$("modalback"))$("modalback").classList.remove("open")});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")$("modalback").classList.remove("open")});
+/* ================= 가족 투표 (v2) =================
+   - 사람마다 최대 3곳을 순서대로 고름 (1순위 3점 · 2순위 2점 · 3순위 1점).
+   - 허브 안에서 열리면 parent.hubShared(허브 공유 저장소, toolData/travel-vote__아이디)로 가족과 함께 집계.
+   - 허브 밖(파일 단독 열기)이거나 공유 저장소가 안 되면 이 폰에만 저장하고 나 혼자 투표.
+   - 내가 1곳 이상 고르기 전에는 다른 사람의 선택을 보여주지 않음 (서로 따라 고르지 않게). */
+const TOOL="travel-vote", LSKEY="travelVoteV1", MEDAL=["🥇","🥈","🥉"];
+const hub=(()=>{try{const h=window.parent!==window?window.parent.hubShared:null;return h&&h.ready&&h.me?h:null}catch(e){return null}})();
+const meId=hub?hub.me.id:"me", meName=hub?hub.me.name:"나";
+const validId=id=>Number.isInteger(id)&&destinations.some(d=>d.id===id);
+const cleanPicks=a=>Array.isArray(a)?[...new Set(a.map(Number))].filter(validId).slice(0,3):[];
+let myPicks=[], others={}, pending=0, voteErr="", synced=!hub;
+try{myPicks=cleanPicks(JSON.parse(localStorage.getItem(LSKEY)||"{}").picks)}catch(e){}
+const nameOf=id=>(destinations.find(d=>d.id===id)||{}).name||"";
+let toastT=null;
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove("on"),2200)}
+function allVotes(){const o={...others};o[meId]={name:meName,picks:myPicks};return o}
+function voteRows(){
+ const m=new Map();
+ Object.values(allVotes()).forEach(v=>v.picks.forEach((id,i)=>{const r=m.get(id)||{id,score:0,voters:[],firsts:0};r.score+=3-i;r.voters.push({name:v.name,rank:i+1});if(i===0)r.firsts++;m.set(id,r)}));
+ const rows=[...m.values()].sort((a,b)=>b.score-a.score||b.voters.length-a.voters.length||b.firsts-a.firsts||a.id-b.id);
+ rows.forEach((r,i)=>{const p=rows[i-1];r.rank=p&&p.score===r.score&&p.voters.length===r.voters.length&&p.firsts===r.firsts?p.rank:i+1});
+ return rows;
+}
+function votersLine(d){
+ if(!myPicks.length)return"";
+ const v=Object.values(allVotes()).map(x=>({n:x.name,i:x.picks.indexOf(d.id)})).filter(x=>x.i>=0).sort((a,b)=>a.i-b.i);
+ return v.length?`<div class="voters">${v.map(x=>MEDAL[x.i]+x.n).join(" · ")}</div>`:"";
+}
+function voteButton(d){
+ const i=myPicks.indexOf(d.id);
+ return `<button type="button" class="votebtn ${i>=0?"on":""}" data-vote="${d.id}">${i>=0?MEDAL[i]+" "+(i+1)+"순위 · 빼기":"🗳 투표 담기"}</button>`;
+}
+function commit(){
+ try{localStorage.setItem(LSKEY,JSON.stringify({picks:myPicks}))}catch(e){}
+ if(hub){
+  pending++;
+  Promise.resolve(hub.save(TOOL,{picks:myPicks.slice()})).then(()=>{voteErr=""},e=>{voteErr="저장 실패 ("+((e&&(e.code||e.message))||"오류")+")";toast("가족에게 저장하지 못했어요")}).then(()=>{pending--;render()});
+ }
+ render();
+}
+function toggleVote(id){
+ const i=myPicks.indexOf(id);
+ if(i>=0)myPicks.splice(i,1);
+ else if(myPicks.length>=3){toast("3곳까지 고를 수 있어요. 하나를 빼고 담아 주세요.");return}
+ else myPicks.push(id);
+ commit();
+}
+function movePick(i,dir){const j=i+dir;if(j<0||j>=myPicks.length)return;[myPicks[i],myPicks[j]]=[myPicks[j],myPicks[i]];commit()}
+function renderVote(){
+ const total=hub&&hub.members?hub.members.length:1;
+ const votes=allVotes(), voted=Object.values(votes).filter(v=>v.picks.length);
+ $("voteStatus").textContent=hub?`투표한 사람 ${voted.length}/${total}명`:"나 혼자 투표 중";
+ $("voteHelp").textContent="가고 싶은 곳을 최대 3곳, 순서대로 골라요. 1순위는 3점, 2순위는 2점, 3순위는 1점이에요. 카드 아래 [투표 담기]를 누르세요.";
+ const warn=[];
+ if(!hub)warn.push("지금은 가족과 연결되지 않아 이 폰에만 저장돼요. 허브 앱의 게임·도구 탭에서 열면 가족과 함께 투표할 수 있어요.");
+ else if(voteErr)warn.push("⚠ "+voteErr+(/permission/.test(voteErr)?" — Firestore 규칙에 toolData(도구 공유 저장소) 규칙이 들어갔는지 확인해 주세요.":""));
+ $("voteWarn").innerHTML=warn.map(w=>`<div class="votewarn">${w}</div>`).join("");
+ $("myPicks").innerHTML=myPicks.length?myPicks.map((id,i)=>`<div class="pick"><span class="medal">${MEDAL[i]}</span><span class="nm">${nameOf(id)}</span><button type="button" data-up="${i}" ${i===0?"disabled":""} aria-label="순위 올리기">▲</button><button type="button" data-down="${i}" ${i===myPicks.length-1?"disabled":""} aria-label="순위 내리기">▼</button><button type="button" data-rm="${i}" aria-label="빼기">✕</button></div>`).join(""):`<div class="pickempty">아직 고른 곳이 없어요. 마음에 드는 여행지 카드의 [🗳 투표 담기]를 눌러 보세요.</div>`;
+ $("voteClear").style.display=myPicks.length?"":"none";
+ if(!myPicks.length){$("voteResults").innerHTML=hub?`<div class="pickempty">내 선택을 1곳 이상 담으면 가족 투표 결과가 보여요. (다른 사람 선택을 보고 따라 고르지 않게 해 둔 거예요 😉)</div>`:"";return}
+ const rows=voteRows();
+ const allDone=hub&&voted.length>=total;
+ const top=rows.filter(r=>r.rank===1);
+ let lead="";
+ if(rows.length){
+  const names=top.map(r=>nameOf(r.id)).join(", ");
+  lead=allDone?(top.length>1?`<div class="leader">가족 모두 투표 완료! 공동 1위: ${names}<br><span style="font-weight:500;font-size:13px">동점이에요. 가족회의로 정해 봐요 👨‍👩‍👧‍👧</span></div>`:`<div class="leader done">🎉 가족 모두 투표 완료! 우리 가족의 선택: ${names}</div>`)
+   :`<div class="leader">${hub?`투표 진행 중 (${voted.length}/${total}명) · `:""}지금 1위: ${names}</div>`;
+ }
+ $("voteResults").innerHTML=lead+rows.slice(0,6).map(r=>`<div class="vrow" data-detail="${r.id}"><b class="rk">${r.rank}위</b><span class="vn">${nameOf(r.id)}</span><span class="vs">${r.score}점 · ${r.voters.length}명</span><span class="vv">${r.voters.sort((a,b)=>a.rank-b.rank).map(v=>MEDAL[v.rank-1]+v.name).join(" · ")}</span></div>`).join("");
+}
+$("cards").addEventListener("click",e=>{const b=e.target.closest("[data-vote]");if(b)toggleVote(+b.dataset.vote)});
+$("myPicks").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.up!==undefined)movePick(+b.dataset.up,-1);else if(b.dataset.down!==undefined)movePick(+b.dataset.down,1);else if(b.dataset.rm!==undefined){myPicks.splice(+b.dataset.rm,1);commit()}});
+$("voteResults").addEventListener("click",e=>{const r=e.target.closest("[data-detail]");if(r)showDetails(+r.dataset.detail)});
+$("voteClear").addEventListener("click",()=>{myPicks=[];commit()});
+if(hub){
+ try{
+  hub.watch(TOOL,list=>{
+   const o={};let mine=null;
+   (list||[]).forEach(x=>{const picks=cleanPicks(x&&x.data&&x.data.picks);if(x.id===meId)mine=picks;else o[x.id]={name:x.name,picks}});
+   others=o;
+   if(pending===0){
+    if(mine){myPicks=mine;try{localStorage.setItem(LSKEY,JSON.stringify({picks:myPicks}))}catch(e){}}
+    else if(!synced&&myPicks.length)commit();   // 이 폰에만 있던 선택을 가족 저장소에 올림
+   }
+   synced=true;voteErr="";render();
+  },e=>{voteErr="가족 투표를 불러오지 못했어요 ("+((e&&(e.code||e.message))||"오류")+")";render()});
+ }catch(e){voteErr="가족 투표 연결 실패";}
+}
+
 render();
 </script>
 </body>
