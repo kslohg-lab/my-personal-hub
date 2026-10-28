@@ -14,7 +14,7 @@ const GAMES = [
   { id: 'animal-run',    cat: 'game', title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 8, cost: 1 },
   { id: 'claw-machine',  cat: 'game', title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요', cost: 1 },
   { id: 'bungeoppang',   cat: 'game', title: '붕어빵 타이쿤',           desc: '붕어빵을 구워 팔고 가게를 키워요', v: 1, cost: 1 },
-  { id: 'bungeoppang-shop', cat: 'game', title: '붕어빵 가게', desc: '내 가게를 꾸미고 키워요! 단골도 모아요', v: 2, cost: 1 },
+  { id: 'bungeoppang-shop', cat: 'game', title: '붕어빵 가게', desc: '내 가게를 꾸미고 키워요! 단골도 모아요', v: 3, cost: 1 },
   { id: 'bungeoppang2', cat: 'game', title: '붕어빵 서바이벌',         desc: '컷트라인을 못 넘으면 탈락! 몇 단계까지 갈까요', v: 1, cost: 1 },
   { id: 'ice-cream',     cat: 'game', title: '아이스크림 가게 타이쿤',  desc: '주문대로 아이스크림을 쌓아 팔고 가게를 키워요', v: 1, cost: 1 },
   { id: 'chess',         cat: 'game', title: '체스',                    desc: '컴퓨터와 겨루거나 둘이서 대결해요', v: 1, cost: 1 },
