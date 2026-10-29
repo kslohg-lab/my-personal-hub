@@ -1,243 +1,103 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>내 아지트 (My Family Hub)</title>
-<meta name="theme-color" content="#0f172a">
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>🔥 붕어빵 챌린지</title>
+<meta name="description" content="컷트라인을 못 넘으면 탈락! 친구들과 이번 주 순위를 겨뤄 보세요 🐟">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="붕어빵 챌린지">
+<meta property="og:title" content="🔥 붕어빵 챌린지">
+<meta property="og:description" content="컷트라인을 못 넘으면 탈락! 몇 단계까지 갈 수 있을까? 친구랑 이번 주 순위를 겨루고, 나만의 붕어빵 가게도 꾸며 보세요 🐟">
+<meta property="og:image" content="https://bungeoppang-shop.vercel.app/og.jpg?v=2">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://bungeoppang-shop.vercel.app/">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffd9a0">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="가족 아지트">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<link rel="stylesheet" href="css/app.css?v=1.15">
-</head>
-<body class="bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
-
-<!-- 아이콘 스프라이트 -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
-  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
-  <symbol id="i-game" viewBox="0 0 24 24"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258A4 4 0 0 0 17.32 5z"/></symbol>
-  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18"/><rect width="18" height="18" x="3" y="4" rx="2"/></symbol>
-  <symbol id="i-img" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
-  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
-  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
-  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
-  <symbol id="i-yt" viewBox="0 0 24 24"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></symbol>
-  <symbol id="i-ig" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/></symbol>
-</svg>
-
-<!-- 사진 확대 -->
-<div id="lightbox" class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4" hidden>
-  <img id="lbImg" alt="" class="max-w-full max-h-full rounded-lg">
+<meta name="apple-mobile-web-app-title" content="붕어빵 가게">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐟%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#fff1dc;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#3a2a22}}
+:root[data-theme="dark"]{--bg:#3a2a22}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--bg);overflow:hidden;position:relative;font-family:"Jua","Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:#5a3a22;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+#box{position:absolute;left:0;top:0;width:450px;height:800px;transform-origin:0 0;overflow:hidden;border-radius:16px;background:#ffe9c9}
+canvas{position:absolute;inset:0;width:450px;height:800px;touch-action:none}
+.ov{position:absolute;inset:0;display:none}
+button{font:inherit;color:#5a3a22;border:0;border-radius:18px;background:#fff;box-shadow:0 4px 0 #e0c4a0;cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #e0c4a0}
+#menu{background:linear-gradient(#ffd9a0,#fff1dc)}
+.card{position:absolute;left:25px;top:70px;width:400px;box-sizing:border-box;padding:18px;background:#fff;border-radius:28px;text-align:center}
+.card h2{margin:4px 0 10px;font-size:30px;font-weight:400}
+.sh{background:rgba(60,35,20,.55)}
+.big{width:100%;height:58px;font-size:23px;margin-top:10px;background:#ffc94a;box-shadow:0 4px 0 #d9a020}
+.big.alt{background:#bfe8ff;box-shadow:0 4px 0 #8cc0e0}
+.big.sm{height:48px;font-size:19px;background:#fff;box-shadow:0 4px 0 #e0c4a0}
+.big.no{background:#eee;color:#aaa;box-shadow:0 4px 0 #d8d8d8}
+.pill{display:inline-block;background:#fff3d6;border-radius:20px;padding:6px 14px;font-size:18px;margin:2px}
+#home{position:absolute;right:4px;top:4px;width:48px;height:48px;font-size:24px;display:none;opacity:.9;padding:0}
+#toast{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);background:#5a3a22;color:#fff;padding:9px 18px;border-radius:20px;font-size:18px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;max-width:420px}
+#shl{height:380px;overflow-y:auto;touch-action:pan-y;text-align:left}
+.it{display:flex;align-items:center;gap:10px;background:#fff6e6;border-radius:18px;padding:8px 10px;margin-bottom:8px}
+.it b{font-size:30px;font-weight:400;width:40px;text-align:center}
+.it div{flex:1;font-size:15px;line-height:1.25}.it div span{font-size:19px}
+.it button{width:104px;height:48px;font-size:17px;padding:0}
+.it button.no{background:#eee;color:#aaa;box-shadow:0 4px 0 #d8d8d8}
+.it small{opacity:.7;font-size:13px}.it.rec{background:#fff1b8;outline:3px solid #ffc94a}.it .why{color:#c0601a;font-weight:400;font-size:14px}
+.sum{background:#fff6e6;border-radius:16px;padding:8px 12px;font-size:16px;line-height:1.5;text-align:left;margin-bottom:8px}
+.ht{margin:8px 0 4px;font-size:16px;text-align:left}
+.card input{width:100%;box-sizing:border-box;height:56px;border:3px solid #f0c890;border-radius:16px;font:inherit;font-size:24px;text-align:center;color:#5a3a22;background:#fffaf0;margin:8px 0 4px;user-select:text;-webkit-user-select:text;touch-action:auto;outline:none}
+.card input:focus{border-color:#ffc94a}
+.err{color:#d03030;font-size:16px;min-height:22px}
+.tabs{display:flex;gap:8px;margin:0 0 6px}.tab{flex:1;height:44px;font-size:19px;box-shadow:0 3px 0 #e0c4a0}.tab.on{background:#ffc94a;box-shadow:0 3px 0 #d9a020}
+#lbl{height:540px;overflow-y:auto;touch-action:pan-y;text-align:left}
+.lr{display:flex;align-items:center;gap:8px;background:#fff6e6;border-radius:14px;padding:7px 10px;margin-bottom:6px;font-size:19px}
+.lr.me{background:#ffe9a8;outline:3px solid #ffc94a}
+.lr b{width:40px;text-align:center;font-weight:400;font-size:22px}.lr .ln{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lr .lv{font-size:12px;background:#ff7a45;color:#fff;border-radius:10px;padding:2px 7px;white-space:nowrap;animation:lvp 1.2s infinite}@keyframes lvp{50%{opacity:.55}}
+.lr .ls{text-align:right;line-height:1.1}.lr .ls i{font-style:normal;display:block}.lr .ls small{font-size:13px;opacity:.7}
+#ver{font-size:13px;opacity:.6;margin-top:8px}
+.hl{position:relative;z-index:30;box-shadow:0 0 0 4px #ffc94a,0 0 18px 6px rgba(255,201,74,.8)!important;animation:hlp 1s infinite}@keyframes hlp{50%{box-shadow:0 0 0 6px #ffe066,0 0 26px 10px rgba(255,201,74,.9)}}
+#toast{z-index:40}
+#bk{display:flex;flex-direction:column;align-items:center;justify-content:center;height:64px;margin-top:10px;border-radius:18px;text-decoration:none;color:#1f5a4a;background:linear-gradient(#b8f0dc,#8fdcc2);box-shadow:0 4px 0 #5fb89a}
+#bk span{font-size:23px;line-height:1.1}#bk small{font-size:14px;opacity:.8;margin-top:2px}
+#bk:active{transform:translateY(3px);box-shadow:0 1px 0 #5fb89a}
+</style></head><body>
+<div id="box">
+ <canvas id="cv" width="450" height="800"></canvas>
+ <button id="home">⏸️</button>
+ <div id="menu" class="ov">
+  <div class="card" style="top:22px"><button id="mapp" style="position:absolute;right:12px;top:12px;height:36px;padding:0 12px;font-size:15px;background:#d6f2e4;box-shadow:0 3px 0 #8fc8a8;color:#1f5a4a">📲 앱 설치</button><div style="font-size:64px;line-height:1.1">🔥</div><h2>붕어빵 챌린지</h2>
+   <div id="mw"></div><p id="mi" style="font-size:16px;line-height:1.5;margin:8px 0 0"></p>
+   <button id="m1" class="big"></button><button id="m5" class="big alt"></button><a id="bk" href="shop.html"><span>🏪 내 가게 가기</span><small>꾸미고 키우는 나만의 가게</small></a>
+   <button id="m6" class="big sm">🏆 순위표</button><button id="m7" class="big sm">📤 친구에게 자랑하기</button><button id="m4" class="big sm">📖 규칙 · 🏅 내 기록</button><button id="m3" class="big sm">⚙️ 설정</button><div id="ver"></div></div>
+ </div>
+ <div id="shop" class="ov sh"><div class="card" style="top:14px;height:772px;padding:12px"><h2 id="st" style="margin:0 0 4px;font-size:26px"></h2><div id="ss" class="sum"></div><div id="sw" style="margin-bottom:4px"></div><div style="display:flex;gap:8px;margin-bottom:6px"><button id="sm1" class="big sm" style="margin:0;flex:1;height:42px;font-size:17px">🏆 순위표</button><button id="sm2" class="big sm" style="margin:0;flex:1;height:42px;font-size:17px">🏠 메뉴로</button></div><div id="shl"></div><button id="s1" class="big" style="height:56px;margin-top:6px"></button></div></div>
+ <div id="over" class="ov sh"><div class="card" style="top:30px"><h2 id="ot"></h2><div id="obd" style="font-size:18px;line-height:1.55"></div><div id="ork" style="font-size:20px;margin-top:6px;min-height:26px"></div><button id="o5" class="big"></button><button id="o1" class="big">🔁 다시 도전</button><button id="o6" class="big alt">📤 결과 자랑하기</button><button id="o4" class="big sm">🏆 순위표 보기</button><button id="o3" class="big sm">🏠 처음으로</button></div></div>
+ <div id="rv" class="ov sh"><div class="card" style="top:110px"><div style="font-size:54px">💥</div><h2 id="rvt">컷트라인에 못 미쳤어요</h2><div id="rvb" class="sum"></div><button id="rv1" class="big"></button><button id="rv2" class="big sm">그만할래요</button></div></div>
+ <div id="pause" class="ov sh"><div class="card" style="top:200px"><h2>⏸️ 잠깐 멈췄어요</h2><button id="p1" class="big">▶ 계속하기</button><button id="p2" class="big sm">🏳️ 포기하고 처음으로</button></div></div>
+ <div id="set" class="ov sh"><div class="card" style="top:180px"><h2>⚙️ 설정</h2><button id="sk" class="big sm"></button><button id="sn" class="big sm"></button><button id="sin" class="big sm">📲 앱으로 설치</button><button id="sxf" class="big sm">📦 기록 옮기기</button><button id="snw" class="big sm">📢 새 소식</button><button id="rs" class="big sm">🗑️ 기록·저장 지우기</button><button id="sc" class="big sm">닫기</button></div></div>
+ <div id="how" class="ov sh"><div class="card" style="top:24px;height:752px;padding:14px"><h2 style="margin:0 0 6px;font-size:28px">📖 규칙 · 🏅 기록</h2><div style="display:flex;gap:8px;margin:0 0 8px"><button id="hd" class="big" style="margin:0;flex:1;height:50px;font-size:18px">▶ 따라하기 영상</button><button id="ht" class="big alt" style="margin:0;flex:1;height:50px;font-size:18px">👆 직접 해보기</button></div><div id="hw" style="height:562px;overflow-y:auto;touch-action:pan-y;text-align:left;font-size:16px;line-height:1.55"></div><button id="hx" class="big sm" style="margin-top:6px;height:48px">닫기</button></div></div>
+ <div id="nick" class="ov sh"><div class="card" style="top:150px"><div style="font-size:60px">🙂</div><h2 id="nkh" style="font-size:24px"></h2><input id="nki" maxlength="10" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="닉네임 (10글자까지)"><div id="nke" class="err"></div><p style="font-size:14px;margin:4px 0 0;opacity:.75">로그인은 필요 없어요. 순위표에 이 이름이 보여요.</p><button id="nk1" class="big">✅ 정했어요</button><button id="nkx" class="big sm">취소</button></div></div>
+ <div id="lb" class="ov sh"><div class="card" style="top:24px;height:752px;padding:14px"><h2 style="margin:0 0 6px;font-size:28px">🏆 순위표</h2><div class="tabs"><button id="lbt0" class="tab">이번 주</button><button id="lbt1" class="tab">지난 주</button></div><div id="lbh" class="ht" style="margin:2px 0 6px;text-align:center"></div><div id="lbl"></div><div style="display:flex;gap:8px;margin-top:6px"><button id="lbr" class="big sm" style="width:35%;height:48px">🔄 새로고침</button><button id="lbx" class="big sm" style="flex:1;height:48px">닫기</button></div></div></div>
+ <div id="dm" class="ov" style="pointer-events:none"><button id="dmx" style="position:absolute;right:8px;top:8px;height:44px;padding:0 14px;font-size:17px;pointer-events:auto;z-index:3">✕ 그만 보기</button></div>
+ <div id="tour" class="ov" style="background:rgba(40,24,14,.55);z-index:20"><div id="tcap" class="card" style="top:auto;bottom:24px;padding:14px"><div id="ttx" style="font-size:19px;line-height:1.5;min-height:58px"></div><div style="display:flex;gap:8px;margin-top:8px"><button id="tsk" class="big sm" style="margin:0;flex:1">건너뛰기</button><button id="tnx" class="big" style="margin:0;flex:1.4"></button></div><div id="tdot" style="margin-top:8px;font-size:13px;opacity:.6"></div></div></div>
+ <div id="chl" class="ov sh" style="z-index:25"><div class="card" style="top:120px;background:linear-gradient(#fff3d6,#fff)"><div style="font-size:60px;line-height:1.1">💌</div><h2 id="chlt" style="font-size:25px;margin:6px 0"></h2><div id="chlb" class="sum" style="text-align:center;font-size:19px"></div><button id="chl1" class="big">⚔️ 도전하기</button><button id="chl2" class="big sm">메뉴 먼저 볼게요</button></div></div>
+ <div id="toast"></div>
 </div>
-
-<!-- 로그인 -->
-<div id="lockScreen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-6">
-  <div class="w-full max-w-sm bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl text-center space-y-6">
-    <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/30 rounded-2xl mx-auto flex items-center justify-center text-indigo-400">
-      <svg class="ic ic-lg"><use href="#i-lock"/></svg>
-    </div>
-    <div>
-      <h2 class="text-xl font-bold text-slate-100 mb-1">가족 아지트</h2>
-      <p id="loginSub" class="text-xs text-slate-400">연결 확인 중...</p>
-    </div>
-    <div id="loginForm" hidden>
-      <div id="loginStep1">
-        <p class="text-xs text-slate-400 mb-3">누구세요?</p>
-        <div id="loginNames" class="grid grid-cols-2 gap-3"></div>
-      </div>
-      <div id="loginStep2" class="space-y-3" hidden>
-        <div id="loginPickName" class="text-lg font-bold text-indigo-400"></div>
-        <input type="password" id="loginPw" autocomplete="current-password" placeholder="비밀번호" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-lg text-slate-100 focus:outline-none focus:border-indigo-500">
-        <p id="loginErr" class="text-xs text-red-400" hidden></p>
-        <button id="loginBtn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-600/30">입장하기</button>
-        <button id="loginBack" class="text-xs text-slate-400 underline p-1">다른 사람 선택</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 메인 앱: 헤더 / 본문 / 하단 내비 를 세로로 쌓은 구조 (겹침 없음) -->
-<div id="mainApp" class="shell" hidden>
-  <header class="shrink-0 bg-slate-900 border-b border-slate-800 px-4 pb-3 flex items-center gap-2" style="padding-top:calc(env(safe-area-inset-top) + .75rem)">
-    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-xs text-white shadow-lg shadow-indigo-500/30">HUB</div>
-    <div>
-      <h1 class="font-bold text-sm leading-none text-slate-100">내 아지트 (My Hub)</h1>
-      <p class="text-[10px] text-slate-400">PWA Family Web App</p>
-    </div>
-    <button id="logoutBtn" class="ml-auto text-[11px] text-slate-400 border border-slate-700 rounded-lg px-2 py-1"><span id="userLabel"></span> · 로그아웃</button>
-  </header>
-
-  <main class="flex-1 min-h-0 relative">
-    <!-- 1. 홈 -->
-    <section id="tab-home" class="tab active">
-      <div class="col space-y-6">
-        <div id="todayBox" class="bg-gradient-to-br from-indigo-900/50 via-slate-900 to-purple-900/30 p-5 rounded-2xl border border-indigo-500/20 shadow-xl">
-          <span class="text-xs font-semibold text-indigo-400 bg-indigo-950/80 border border-indigo-500/30 px-2.5 py-1 rounded-full">🚀 Welcome Back!</span>
-          <h2 class="text-xl font-bold text-slate-100 mt-3 mb-1">우리 가족 디지털 공간</h2>
-          <p class="text-xs text-slate-400">가족 실시간 채팅, 사진 공유, 스케줄 관리를 한곳에서 즐겨보세요.</p>
-        </div>
-        <div id="homeUpcoming" hidden>
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5"><svg class="ic ic-sm text-indigo-400"><use href="#i-cal"/></svg> 다가오는 일정</h3>
-            <button id="homeCal" class="text-xs text-indigo-400 font-semibold px-2 py-1">달력 보기</button>
-          </div>
-          <div id="homeEvents" class="space-y-2"></div>
-        </div>
-        <div id="videoSection">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-1.5"><svg class="ic ic-sm text-red-500"><use href="#i-yt"/></svg> 우리 가족 영상</h3>
-            <button id="vidAddToggle" class="text-xs text-indigo-400 font-semibold px-2 py-1">+ 영상 추가</button>
-          </div>
-          <div id="vidForm" class="space-y-2 mb-3 bg-slate-900 border border-slate-800 rounded-xl p-3" hidden>
-            <input id="vidUrl" type="url" inputmode="url" autocomplete="off" placeholder="유튜브 링크를 붙여 넣으세요" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-            <input id="vidTitle" type="text" maxlength="80" autocomplete="off" placeholder="제목 (예: 첫 가족 영상)" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-            <p id="vidErr" class="text-xs text-red-400" hidden></p>
-            <div class="flex gap-2">
-              <button id="vidSave" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-bold">추가</button>
-              <button id="vidCancel" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-sm">취소</button>
-            </div>
-          </div>
-          <div id="vidList" class="space-y-3"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. 가족 채팅 -->
-    <section id="tab-chat" class="tab">
-      <div class="col chatcol">
-        <div class="mb-2 flex justify-between items-center shrink-0">
-          <div>
-            <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2"><svg class="ic text-indigo-400"><use href="#i-chat"/></svg> 가족 채팅방</h2>
-            <p class="text-xs text-slate-400">실시간 대화와 사진을 공유하세요.</p>
-          </div>
-          <span id="chatSender" class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-indigo-400 font-bold"></span>
-        </div>
-        <div id="chatStatus" class="text-[10px] mb-1 shrink-0 text-slate-500">● 연결 중...</div>
-        <div id="chatDetail" class="text-[10px] mb-1 shrink-0 text-amber-300 break-words"></div>
-        <div id="chatMessages" class="flex-1 min-h-0 bg-slate-900/60 border border-slate-800 rounded-2xl p-4 overflow-y-auto hide-scrollbar mb-3">
-          <div class="text-center text-slate-500 text-xs py-8">메시지를 불러오는 중입니다...</div>
-        </div>
-        <div class="flex gap-2 items-center shrink-0">
-          <label class="cursor-pointer bg-slate-900 hover:bg-slate-800 border border-slate-700 text-indigo-400 p-2.5 rounded-xl flex items-center justify-center transition-all">
-            <svg class="ic"><use href="#i-img"/></svg>
-            <input type="file" id="imgInput" accept="image/*" class="hidden">
-          </label>
-          <input type="text" id="chatMessage" autocomplete="off" placeholder="메시지를 입력하세요..." class="flex-1 min-w-0 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-          <button id="sendBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl flex items-center justify-center transition-all"><svg class="ic ic-sm"><use href="#i-send"/></svg></button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. 게임·도구: 목록 / 전체 화면 플레이어(iframe) -->
-    <section id="tab-games" class="tab">
-      <div id="gameList" class="col space-y-4">
-        <div>
-          <h2 class="text-lg font-bold text-slate-100">게임 · 도구</h2>
-          <p class="text-xs text-slate-400">골라서 바로 써보세요</p>
-        </div>
-        <div id="tkBar" class="flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2" hidden>
-          <div id="tkLabel" class="text-sm text-slate-200 min-w-0"></div>
-          <button id="tkToggle" class="shrink-0 text-xs text-indigo-400 font-semibold px-2 py-1">내역</button>
-        </div>
-        <div id="tkPanel" class="space-y-3 bg-slate-900 border border-slate-800 rounded-xl p-3" hidden></div>
-        <div id="sbBar" class="flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2" hidden>
-          <div class="text-sm text-slate-200 min-w-0">🏆 가족 최고 기록</div>
-          <button id="sbToggle" class="shrink-0 text-xs text-indigo-400 font-semibold px-2 py-1">보기</button>
-        </div>
-        <div id="sbPanel" class="space-y-3 bg-slate-900 border border-slate-800 rounded-xl p-3 whitespace-pre-line" hidden></div>
-        <div id="gameRecent"></div>
-        <div id="gameCards" class="space-y-3"></div>
-        <div class="pt-4 mt-2 border-t border-slate-800 space-y-2">
-          <h3 class="text-sm font-bold text-slate-300">🌐 친구들과 함께</h3>
-          <a id="pubLink" href="https://kslohg-lab.github.io/bungeoppang/" target="_blank" rel="noopener" class="flex items-center gap-3 bg-slate-900 border border-slate-800 hover:border-indigo-500/60 rounded-2xl p-3 transition-all">
-            <span class="text-3xl shrink-0">🐟</span>
-            <span class="min-w-0 flex-1"><span class="block text-sm font-bold text-slate-100">붕어빵 서바이벌 (공개판)</span><span class="block text-xs text-slate-400">새 창으로 열려요 · 닉네임만 정하고 이번 주 순위 대결</span></span>
-            <span class="text-slate-500 shrink-0">↗</span>
-          </a>
-        </div>
-      </div>
-
-      <div id="gamePlayer" class="fixed inset-0 z-40 bg-black" hidden>
-        <iframe id="gpFrame" title="game" allow="autoplay; fullscreen" style="position:absolute;left:0;top:0;width:100%;height:100%;border:0;background:#fff;transform-origin:0 0"></iframe>
-        <div id="gpBar" hidden style="position:fixed;left:0;right:0;top:0;z-index:45;height:calc(48px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);background:#0f172a;border-bottom:1px solid #1e293b">
-          <div id="gpBarTitle" style="height:48px;line-height:48px;padding-left:56px;padding-right:12px;font-size:14px;font-weight:700;color:#f1f5f9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-        </div>
-        <button id="gpBack" aria-label="목록으로" class="fixed left-2 z-50 w-10 h-10 rounded-full bg-black/50 text-white text-lg font-bold backdrop-blur" style="top:calc(env(safe-area-inset-top) + 8px)">←</button>
-        <button id="gpFlip" aria-label="방향 뒤집기" class="fixed left-2 z-50 px-3 h-8 rounded-full bg-black/50 text-white text-xs font-semibold backdrop-blur" style="top:calc(env(safe-area-inset-top) + 56px)" hidden>↻ 방향</button>
-      </div>
-    </section>
-
-    <!-- 4. 일정 -->
-    <section id="tab-planner" class="tab">
-      <div class="col space-y-4">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="text-lg font-bold text-slate-100">가족 일정</h2>
-          <div id="plannerSubs" class="flex bg-slate-900 border border-slate-800 rounded-xl p-0.5 text-xs font-semibold" hidden>
-            <button id="subCal" class="px-3 py-1 rounded-lg text-slate-400">📅 달력</button>
-            <button id="subBoard" class="px-3 py-1 rounded-lg text-slate-400">✅ 할 일</button>
-          </div>
-        </div>
-
-        <!-- 달력 (js/calendar.js가 켜 줌) -->
-        <div id="calView" class="space-y-3" hidden>
-          <div class="flex items-center justify-between">
-            <button id="calPrev" aria-label="이전 달" class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-lg leading-none">‹</button>
-            <div id="calTitle" class="text-base font-bold text-slate-100"></div>
-            <div class="flex gap-1">
-              <button id="calToday" class="px-2 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs">오늘</button>
-              <button id="calNext" aria-label="다음 달" class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-lg leading-none">›</button>
-            </div>
-          </div>
-          <div class="grid grid-cols-7 text-center text-[11px] text-slate-500">
-            <span class="text-rose-400">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="text-sky-400">토</span>
-          </div>
-          <div id="calGrid" class="grid grid-cols-7 gap-1"></div>
-          <div class="flex items-center justify-between pt-1">
-            <h3 id="calDayTitle" class="text-sm font-bold text-slate-200"></h3>
-            <button id="calAdd" class="text-xs text-indigo-400 font-semibold px-2 py-1">+ 일정 추가</button>
-          </div>
-          <div id="calForm" class="space-y-2 bg-slate-900 border border-slate-800 rounded-xl p-3" hidden></div>
-          <div id="calDayList" class="space-y-2"></div>
-        </div>
-
-        <!-- 할 일 보드 (할 일/요청) -->
-        <div id="boardView" class="space-y-4">
-          <div>
-            <p class="text-xs text-slate-400">가족이 함께 보는 할 일 목록이에요. 받는 사람을 고르고, 글을 눌러 답글을 남겨요.</p>
-            <p id="todoCount" class="text-xs text-indigo-400 mt-1"></p>
-          </div>
-          <div class="flex gap-2">
-            <select id="todoTo" aria-label="받는 사람" class="shrink-0 w-[4.5rem] bg-slate-900 border border-slate-800 rounded-xl px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"></select>
-            <input type="text" id="todoInput" autocomplete="off" placeholder="새 할 일 추가..." class="flex-1 min-w-0 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
-            <button id="todoAdd" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl text-sm font-semibold transition-all">추가</button>
-          </div>
-          <ul id="todoList" class="space-y-2"></ul>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <nav id="bottomNav" class="shrink-0 bg-slate-900 border-t border-slate-800" style="padding-bottom:env(safe-area-inset-bottom)">
-    <div class="max-w-md mx-auto grid grid-cols-4">
-      <button data-tab="home" class="flex flex-col items-center gap-1 py-2 text-indigo-400"><svg class="ic"><use href="#i-home"/></svg><span class="text-[10px] font-medium">홈</span></button>
-      <button data-tab="chat" class="flex flex-col items-center gap-1 py-2 text-slate-400"><span class="relative"><svg class="ic"><use href="#i-chat"/></svg><span id="chatBadge" hidden class="absolute -top-1 -right-3 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-4 text-center"></span></span><span class="text-[10px] font-medium">가족채팅</span></button>
-      <button data-tab="games" class="flex flex-col items-center gap-1 py-2 text-slate-400"><svg class="ic"><use href="#i-game"/></svg><span class="text-[10px] font-medium">게임·도구</span></button>
-      <button data-tab="planner" class="flex flex-col items-center gap-1 py-2 text-slate-400"><svg class="ic"><use href="#i-cal"/></svg><span class="text-[10px] font-medium">일정</span></button>
-    </div>
-  </nav>
-</div>
-
-<!-- ① 일반 스크립트: Firebase와 무관 (화면 전환, 탭, 게임). Firebase가 실패해도 항상 동작 -->
-<script src="js/core.js?v=1.15"></script>
-<script src="js/games.js?v=1.32"></script>
-
-<!-- ② 모듈 스크립트: Firebase 로그인/채팅/일정/영상. 진입점은 main.js -->
-<script type="module" src="js/main.js?v=1.30"></script>
-</body>
-</html>
+<script src="js/sim.js?v=8"></script>
+<script src="js/art.js?v=13"></script>
+<script src="js/filter.js?v=1"></script>
+<script src="js/share.js?v=2"></script>
+<script src="js/news.js?v=7"></script>
+<script src="js/install.js?v=2"></script>
+<script src="js/challenge.js?v=19"></script>
+<script type="module" src="js/lb.js?v=7"></script>
+<script type="module" src="js/xfer.js?v=1"></script>
+</body></html>
