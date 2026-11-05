@@ -246,8 +246,9 @@ const MAS=[{n:'없음',e:'➖',p:0},{n:'돼지 저금통',e:'🐖',p:8000,g:0},{
 const SLOTS=[{k:'sign',n:'간판',L:SIGN},{k:'wall',n:'벽',L:WALL},{k:'floor',n:'바닥',L:FLOOR},{k:'lamp',n:'조명',L:LAMP},{k:'cnt',n:'카운터',L:CNT},{k:'mas',n:'장식',L:MAS}];
 const GR=B.GR;
 const charmOf=it=>{const v=it.p>0?it.p:(it.st?it.st*4000:0);return v>0?Math.floor(Math.log2(v/800+1)):0};
-const DEF=()=>({v:1,name:'',seed:(Math.random()*4294967296)>>>0,coins:80000,day:1,up:{knife:0,grill:0,fridge:0,aging:0,kind:0},stock:[],served:0,days:0,stars:0,dex:{},dexS:{},dexAll:0,cutN:{},cutS:{},own:{sign:[0],wall:[0],floor:[0],lamp:[0],cnt:[0],mas:[0]},eq:{sign:0,wall:0,floor:0,lamp:0,cnt:0,mas:0},avg:0,bestNet:0,bestCombo:0,snd:true});
+const DEF=()=>({v:1,name:'',seed:(Math.random()*4294967296)>>>0,coins:150000,day:1,up:{knife:0,grill:0,fridge:0,aging:0,kind:0},stock:[{c:5,g:1000,a:0},{c:6,g:500,a:0},{c:8,g:500,a:0},{c:0,g:500,a:0}],gift:1,served:0,days:0,stars:0,dex:{},dexS:{},dexAll:0,cutN:{},cutS:{},own:{sign:[0],wall:[0],floor:[0],lamp:[0],cnt:[0],mas:[0]},eq:{sign:0,wall:0,floor:0,lamp:0,cnt:0,mas:0},avg:0,bestNet:0,bestCombo:0,snd:true});
 let save=DEF();try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&typeof o==='object'){save=Object.assign(DEF(),o);save.up=Object.assign(DEF().up,o.up);save.own=Object.assign(DEF().own,o.own);save.eq=Object.assign(DEF().eq,o.eq);if(!save.dex)save.dex={};if(!save.dexS)save.dexS={};if(!save.cutN)save.cutN={};if(!save.cutS)save.cutS={};if(!Array.isArray(save.stock))save.stock=[]}}catch(e){}
+if(!save.gift){save.gift=1;if(!save.days)save.coins+=100000}
 const store=()=>{try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}};
 const grade=()=>B.gradeOf(save.served);
 const eqIt=(k,pv)=>{const sl=SLOTS.find(x=>x.k===k);const id=pv&&pv.k===k?pv.id:save.eq[k];return sl.L[id]||sl.L[0]};
