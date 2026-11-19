@@ -153,17 +153,18 @@ function derive(g){
  const score={};P.forEach(id=>score[id]=0);
  const hist=[];let last=null;
  const base=()=>({g,P,n,T,dur,D,score,hist,last});
+ const stop=P.find(id=>D(id).end)||'';   // 누군가 '게임 끝내기'를 누르면 지금 점수로 끝
  for(let t=0;t<T;t++){
   const dr=P[t%n];
   if(sk.has('t:'+t)){hist.push({t,dr,skip:1});continue}
   const tm=(D(dr).tm||{})[t];
-  if(!tm||!(tm.st>0))return {...base(),ph:'choose',t,dr};
+  if(!tm||!(tm.st>0))return stop?{...base(),ph:'end',stopped:stop}:{...base(),ph:'choose',t,dr};
   const w=WORDS[((tm.w-hash(g.id+':'+t))%L+L)%L], st=tm.st, guessers=P.filter(x=>x!==dr);
   const feed=[],corr=[];
   guessers.forEach(id=>{let got=false;(((D(id).gs||{})[t])||[]).forEach(x=>{if(!x||typeof x.x!=='string')return;const ok=!got&&norm(x.x)===norm(w)&&x.a<=st+dur+3000;if(ok){got=true;corr.push({id,a:x.a})}feed.push({id,x:x.x,a:x.a||0,ok})})});
   corr.sort((a,b)=>a.a-b.a);feed.sort((a,b)=>a.a-b.a);
   const now=Date.now(), cur1={t,dr,w,st,feed,corr,guessers,left:Math.max(0,st+dur-now)};
-  if(!(corr.length===guessers.length||tm.e||now>st+dur))return {...base(),ph:'draw',...cur1};
+  if(!(corr.length===guessers.length||tm.e||now>st+dur))return stop?{...base(),ph:'end',stopped:stop}:{...base(),ph:'draw',...cur1};
   const pts={};corr.forEach((c,k)=>{pts[c.id]=[3,2,1][k]||1});if(corr.length)pts[dr]=corr.length;
   Object.keys(pts).forEach(id=>score[id]+=pts[id]);
   last={...cur1,pts,gave:!!tm.e};hist.push(last);
@@ -171,6 +172,7 @@ function derive(g){
  return {...base(),ph:'end'};
 }
 function record(s){
+ if(s.stopped)return;
  const b=LS.get('cm_rec',{wins:{},done:[]});if(b.done.includes(s.g.id))return;
  const mx=Math.max(...s.P.map(id=>s.score[id]));s.P.filter(id=>s.score[id]===mx&&mx>0).forEach(id=>b.wins[id]=(b.wins[id]||0)+1);
  b.done=[...b.done,s.g.id].slice(-40);LS.set('cm_rec',b);
@@ -312,16 +314,18 @@ function render(){
   if(ME===s.dr){ph+=`<div class="card"><h2>✏️ 내 차례! 그릴 단어를 골라요</h2><div class="opts">${optionsFor(g,s.t).map(i=>`<button data-pick="${i}">${esc(WORDS[i])}</button>`).join('')}</div><div class="small" style="text-align:center;margin-top:8px">고르는 순간 ${s.dur/1000}초 타이머가 시작돼요</div></div>`}
   else{ph+=`<div class="card" style="text-align:center"><div style="font-size:19px"><span class="wait">🤔</span> ${esc(nameOf(s.dr))}님이 단어를 고르는 중</div>${me&&since(tk)>WAIT_CHOOSE?`<button class="big gray" data-act="skip">⏭ ${esc(nameOf(s.dr))}님 차례 넘기기</button>`:''}</div>`}
   ph+=`<div class="card"><h2>🏅 점수</h2>${scoreRow(s)}</div>`;
+  if(me)ph+=`<button class="big gray" data-act="stop" style="margin-top:14px">🛑 게임 끝내기</button>`;
  }else if(s.ph==='draw'){
   if(iGot)ph+=`<div class="card" style="text-align:center;font-size:19px">🎉 정답! 다른 사람들을 기다리는 중</div>`;
   ph+=`<div class="card"><h2>💬 답 (${s.corr.length}/${s.guessers.length}명 정답)</h2>${feedHTML(s)}</div>`;
   if(ME===s.dr)ph+=`<button class="big gray" data-act="giveup">🏳️ 너무 어려워요, 넘기기</button>`;
   ph+=`<div class="card"><h2>🏅 점수</h2>${scoreRow(s)}</div>`;
+  if(me)ph+=`<button class="big gray" data-act="stop" style="margin-top:14px">🛑 게임 끝내기</button>`;
  }else{
   record(s);
   const order=s.P.slice().sort((a,b)=>s.score[b]-s.score[a]),mx=s.score[order[0]];
   ph+=lastCard(s);
-  ph+=`<div class="card res"><div style="font-size:56px">🏆</div><div style="font-size:24px">${order.filter(id=>s.score[id]===mx).map(nameOf).map(esc).join(', ')}님 우승!</div>${order.map((id,i)=>`<div class="row"><div class="av">${['🥇','🥈','🥉'][i]||avOf(id)}</div><div class="nm">${esc(nameOf(id))}</div><b>${s.score[id]}점</b></div>`).join('')}
+  ph+=`<div class="card res"><div style="font-size:56px">🏆</div>${s.stopped?`<div class="small">🛑 ${esc(nameOf(s.stopped))}님이 중간에 끝냈어요 · 지금까지 점수</div>`:''}<div style="font-size:24px">${mx>0?order.filter(id=>s.score[id]===mx).map(nameOf).map(esc).join(', ')+'님 우승!':'게임 끝!'}</div>${order.map((id,i)=>`<div class="row"><div class="av">${['🥇','🥈','🥉'][i]||avOf(id)}</div><div class="nm">${esc(nameOf(id))}</div><b>${s.score[id]}점</b></div>`).join('')}
   ${me?`<button class="big" data-act="again">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`;
  }
  const fd=$('feed'),atBottom=!fd||fd.scrollTop+fd.clientHeight>=fd.scrollHeight-8;
@@ -340,6 +344,7 @@ function act(a,el){
  else if(a==='again'&&s&&me){startGame(s.P)}
  else if(a==='watch'&&g){setSeen(g.id,'watch');render()}
  else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
+ else if(a==='stop'&&s&&s.ph!=='end'&&me){if(confirm('게임을 끝낼까요? 모두의 화면이 결과 화면으로 바뀌어요')){const p=myP(g);p.end=1;cur=null;commit()}}
  else if(a==='skip'&&s&&s.ph==='choose'&&me){const p=myP(g);p.sk=[...p.sk,'t:'+s.t];commit()}
  else if(a==='giveup'&&s&&s.ph==='draw'&&ME===s.dr){if(confirm('이번 그림을 넘길까요?')){const p=myP(g);p.tm[s.t]={...p.tm[s.t],e:1};commit()}}
  else if(a==='undo'&&s&&ME===s.dr&&mine.d){mine.d.s=myStrokes().slice(0,-1);paint(liveList());syncDrawing();save()}
@@ -390,7 +395,7 @@ hub.watch(TOOL,list=>{
  if(!cur)render();
 },e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
 setInterval(()=>{
- if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){const g=current();if(!g||derive(g).ph==='end'||(seen[g.id]&&seen[g.id].out)){mine.lob=Date.now();save()}}
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){mine.lob=Date.now();save()}   // 게임 중에도 '참가' 표시 유지 (끝내고 바로 다시 시작할 수 있게)
  if(!cur)render();
 },1000);
 window.addEventListener('resize',()=>{drawnKey='';if(!cur)render()});

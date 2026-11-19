@@ -22,9 +22,9 @@ const GAMES = [
   { id: 'sudoku',        cat: 'game', title: '스도쿠',                  desc: '숫자 퍼즐 · 4×4부터 9×9, 오늘의 퍼즐도 있어요', v: 1, cost: 1 },
   { id: 'memory-match',  cat: 'game', title: '짝 맞추기',               desc: '같은 그림 두 장을 찾는 기억력 게임', v: 1, cost: 1 },
   { id: 'proverb',       cat: 'game', title: '속담 맞추기',             desc: '속담을 맞히고 도감을 채워요',       v: 1, cost: 1 },
-  { id: 'word-mafia',    cat: 'game', title: '단어 마피아',             desc: '가족이 각자 폰으로! 단어를 모르는 마피아를 찾아요', v: 1 },
-  { id: 'just-one',      cat: 'game', title: '저스트 원',               desc: '가족 협동! 겹치지 않는 힌트로 정답을 맞혀요', v: 1 },
-  { id: 'catch-mind',    cat: 'game', title: '캐치마인드',              desc: '한 명이 그리면 다 같이 맞혀요! 각자 폰으로', v: 1 },
+  { id: 'word-mafia',    cat: 'game', title: '단어 마피아',             desc: '가족이 각자 폰으로! 단어를 모르는 마피아를 찾아요', v: 2 },
+  { id: 'just-one',      cat: 'game', title: '저스트 원',               desc: '가족 협동! 겹치지 않는 힌트로 정답을 맞혀요', v: 2 },
+  { id: 'catch-mind',    cat: 'game', title: '캐치마인드',              desc: '한 명이 그리면 다 같이 맞혀요! 각자 폰으로', v: 2 },
   { id: 'travel-picker', cat: 'tool', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요', v: 2 },
   { id: 'h1-golf',       cat: 'tool', title: 'H1 골프맵',               desc: '화성 H1 출발 1시간 이내 골프장 35곳', v: 1 }
 ];

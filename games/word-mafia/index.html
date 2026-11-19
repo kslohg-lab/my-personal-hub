@@ -158,32 +158,34 @@ function derive(g){
   else{if(!turn)turn={id,r};slots.push({id,r,wait:1})}
  }
  const base={g,P,n,mafia,word,wi,cat,slots,turn,D,cl};
- if(turn)return {...base,ph:'hint'};
+ const stop=P.find(id=>D(id).end)||'', halt=o=>stop?{...o,ph:'end',stopped:stop}:o;   // 누군가 '게임 끝내기'를 누르면 바로 공개
+ if(turn)return halt({...base,ph:'hint'});
  const tally=(key,cands)=>{const c={};let votes=[];P.forEach(id=>{const v=D(id)[key];if(v&&cands.includes(v)&&v!==id){c[v]=(c[v]||0)+1;votes.push([id,v])}});const mx=Math.max(0,...Object.values(c));return {c,votes,top:mx>0?cands.filter(x=>c[x]===mx):[]}};
  const v1=tally('v',P);
- if(v1.votes.length<n&&cl<1)return {...base,ph:'vote',v1};
+ if(v1.votes.length<n&&cl<1)return halt({...base,ph:'vote',v1});
  let acc=null,v2=null,re=null;
  if(v1.top.length===1)acc=v1.top[0];
  else if(v1.top.length>1){
   re=v1.top;v2=tally('v2',re);
-  if(v2.votes.length<n&&cl<2)return {...base,ph:'revote',v1,re,v2};
+  if(v2.votes.length<n&&cl<2)return halt({...base,ph:'revote',v1,re,v2});
   if(v2.top.length===1)acc=v2.top[0];
  }
  const out={...base,v1,v2,re,acc};
  if(!acc)return {...out,ph:'end',win:'mafia',why:'nocatch'};
  if(acc!==mafia)return {...out,ph:'end',win:'mafia',why:'wrong'};
  const gs=D(mafia).gs;
- if(!(gs>=0)&&cl<3)return {...out,ph:'guess'};
+ if(!(gs>=0)&&cl<3)return halt({...out,ph:'guess'});
  const gw=gs>=0?cat.w[g.cd[gs]]:null, ok=gw===word;
  return {...out,ph:'end',win:ok?'mafia':'citizen',why:ok?'guessed':'caught',gw};
 }
 function points(s){
- const pt={};
+ const pt={};if(s.stopped)return pt;
  if(s.win==='mafia')pt[s.mafia]=s.why==='guessed'?2:3;
  else s.P.forEach(id=>{if(id!==s.mafia)pt[id]=1});
  return pt;
 }
 function record(s){
+ if(s.stopped)return;
  let sc=LS.get('wm_score',{pts:{},done:[]});
  if(sc.done.includes(s.g.id))return;
  const pt=points(s);Object.keys(pt).forEach(id=>sc.pts[id]=(sc.pts[id]||0)+pt[id]);
@@ -298,6 +300,7 @@ function renderGame(s){
   }
   h+=hintBoard(s);
  }
+ if(me)h+=`<button class="big gray" data-act="stop" style="margin-top:18px">🛑 게임 끝내기</button>`;
  return h;
 }
 function renderEnd(s){
@@ -305,10 +308,10 @@ function renderEnd(s){
  const cw=s.win==='citizen', pt=points(s), myPt=pt[ME]||0;
  const why={nocatch:'아무도 지목되지 않아서 마피아가 숨어 버렸어요!',wrong:`${esc(nameOf(s.acc))}님을 지목했지만… 마피아가 아니었어요!`,guessed:`잡혔지만 단어 "<b>${esc(s.gw)}</b>"를 맞혀서 살아남았어요!`,caught:`잡혔고, 단어도 ${s.gw?`"${esc(s.gw)}"로 `:''}틀렸어요!`}[s.why];
  const votes=(t,v)=>v&&v.votes.length?`<div class="small" style="margin-top:6px">${t}: ${v.votes.map(([a,b])=>`${esc(nameOf(a))}→${esc(nameOf(b))}`).join(' · ')}</div>`:'';
- let h=`<h1>🕵️ 단어 마피아</h1><div class="card res"><div class="em">${cw?'🎉':'🕵️'}</div><div class="t">${cw?'시민 승리!':'마피아 승리!'}</div>
- <p>마피아는 <b style="color:#d84a4a">${avOf(s.mafia)} ${esc(nameOf(s.mafia))}</b>님</p><p>단어는 <b style="color:#c0592a;font-size:24px">${esc(s.word)}</b> (${esc(s.cat.n)})</p><p>${why}</p>
+ let h=`<h1>🕵️ 단어 마피아</h1><div class="card res"><div class="em">${s.stopped?'🛑':cw?'🎉':'🕵️'}</div><div class="t">${s.stopped?'게임을 끝냈어요':cw?'시민 승리!':'마피아 승리!'}</div>
+ <p>마피아는 <b style="color:#d84a4a">${avOf(s.mafia)} ${esc(nameOf(s.mafia))}</b>님</p><p>단어는 <b style="color:#c0592a;font-size:24px">${esc(s.word)}</b> (${esc(s.cat.n)})</p><p>${s.stopped?`${esc(nameOf(s.stopped))}님이 중간에 끝냈어요 (점수 없음)`:why}</p>
  ${votes('투표',s.v1)}${votes('다시 투표',s.v2)}
- ${s.P.includes(ME)?`<p style="margin-top:10px">${myPt?`🎁 나는 <b>+${myPt}점</b>!`:'이번엔 점수 없음 😢'}</p>`:''}
+ ${s.P.includes(ME)&&!s.stopped?`<p style="margin-top:10px">${myPt?`🎁 나는 <b>+${myPt}점</b>!`:'이번엔 점수 없음 😢'}</p>`:''}
  ${s.P.includes(ME)?`<button class="big" data-act="again">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`+hintBoard(s);
  return h;
 }
@@ -339,6 +342,7 @@ function act(a,el){
  else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
  else if(a==='reveal'&&g){setSeen(g.id,'peek');render()}
  else if(a==='ok'&&g){setSeen(g.id,'role');render()}
+ else if(a==='stop'&&s&&s.ph!=='end'&&s.P.includes(ME)){if(confirm('게임을 끝낼까요? 모두의 화면이 결과 화면으로 바뀌어요')){const p=myP(g);p.end=1;commit()}}
  else if(a==='peek'){showWord=!showWord;render()}
  else if(a==='hint'&&s&&s.ph==='hint'&&s.turn.id===ME){sendHint(s)}
  else if(a==='skip'&&s&&s.ph==='hint'&&s.P.includes(ME)){const p=myP(g);p.sk=[...(p.sk||[]),s.turn.id+':'+s.turn.r];commit()}
@@ -367,7 +371,7 @@ hub.watch(TOOL,list=>{
 },e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
 // 대기실에 있는 동안 '참가' 표시가 꺼지지 않게 가끔 새로 고침 + 건너뛰기 버튼 시간 확인
 setInterval(()=>{
- if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){const g=current();if(!g||derive(g).ph==='end'||(seen[g.id]&&seen[g.id].out)){mine.lob=Date.now();save()}}
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){mine.lob=Date.now();save()}   // 게임 중에도 '참가' 표시 유지 (끝내고 바로 다시 시작할 수 있게)
  if(document.activeElement&&document.activeElement.id==='hintIn')return;
  render();
 },5000);

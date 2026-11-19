@@ -146,6 +146,7 @@ function derive(g){
  const D=id=>{const p=dataOf(id).p;return p&&p.gid===g.id?p:{}};
  const sk=new Set();P.forEach(id=>(D(id).sk||[]).forEach(x=>sk.add(x)));
  const hist=[];let ci=0,score=0;
+ const stop=P.find(id=>D(id).end)||'', halt=o=>stop?{g,P,n,K,D,ph:'end',score,hist,total:g.d.length,stopped:stop}:o;   // 누군가 '게임 끝내기'를 누르면 지금까지 기록으로 끝
  for(let r=0;r<200;r++){
   if(ci>=g.d.length)return {g,P,n,K,D,ph:'end',score,hist,total:g.d.length};
   const gu=P[r%n], givers=P.filter(x=>x!==gu), w=wordAt(ci);
@@ -154,24 +155,25 @@ function derive(g){
    if(Array.isArray(c)&&c.length)c.forEach((t,j)=>{if(typeof t==='string'&&t)clues.push({id,j,t,key:id+'.'+j})});
    else if(!sk.has('c:'+id+':'+r))missing.push(id)});
   const base={g,P,n,K,D,r,ci,gu,givers,w,clues,score,hist,total:g.d.length};
-  if(missing.length)return {...base,ph:'clue',missing};
+  if(missing.length)return halt({...base,ph:'clue',missing});
   const cnt={};clues.forEach(c=>{const k=norm(c.t);cnt[k]=(cnt[k]||0)+1});
   const marks={};givers.forEach(id=>((D(id).x||{})[r]||[]).forEach(k=>{marks[k]=marks[k]||id}));
   clues.forEach(c=>{c.dup=cnt[norm(c.t)]>1;c.bad=bad(w,c.t);c.mk=marks[c.key]||'';c.out=c.dup||c.bad||!!c.mk});
   const notOk=givers.filter(id=>!(D(id).ok||{})[r]&&!sk.has('o:'+id+':'+r));
-  if(notOk.length)return {...base,ph:'check',notOk};
+  if(notOk.length)return halt({...base,ph:'check',notOk});
   const gs=(D(gu).gs||{})[r], forced=sk.has('g:'+gu+':'+r);
-  if(typeof gs!=='string'&&!forced)return {...base,ph:'guess'};
+  if(typeof gs!=='string'&&!forced)return halt({...base,ph:'guess'});
   const pass=forced||gs==='', acc=givers.find(id=>(D(id).acc||{})[r]);
   const right=!pass&&(norm(gs)===norm(w)||!!acc), wrong=!pass&&!right;
   const res={r,ci,gu,w,gs:pass?'':gs,right,wrong,pass,acc:acc||'',clues};
-  if(!P.some(id=>(D(id).nx||{})[r]))return {...base,ph:'result',res};
+  if(!P.some(id=>(D(id).nx||{})[r]))return halt({...base,ph:'result',res});
   if(right)score++;
   hist.push(res);ci+=wrong?2:1;
  }
  return {g,P,n,K,D,ph:'end',score,hist,total:g.d.length};
 }
 function record(s){
+ if(s.stopped)return;
  const b=LS.get('jo_best',{});const key=String(s.total);
  if(!b.done)b.done=[];if(b.done.includes(s.g.id))return;
  b.done=[...b.done,s.g.id].slice(-40);b[key]=Math.max(b[key]||0,s.score);LS.set('jo_best',b);
@@ -304,12 +306,13 @@ function renderPlay(s){
   ${me?`<button class="big" data-act="next">다음 문제 ▶</button>`:''}</div>
   <div class="card"><h2>💬 이번 힌트</h2>${clueChips(s,false)}</div>`;
  }
+ if(me)h+=`<button class="big gray" data-act="stop" style="margin-top:18px">🛑 게임 끝내기</button>`;
  return h;
 }
 function renderEnd(s){
  record(s);
  const ratio=s.total?s.score/s.total:0, msg=(RATE.find(([t])=>ratio>=t)||RATE[RATE.length-1])[1], me=s.P.includes(ME);
- let h=`<h1>☝️ 저스트 원</h1>${progress(s)}<div class="card res"><div class="em">${ratio>=.75?'🏆':ratio>=.4?'👏':'💪'}</div><div class="t">${s.total}문제 중 ${s.score}개!</div><p>${msg}</p>
+ let h=`<h1>☝️ 저스트 원</h1>${progress(s)}<div class="card res"><div class="em">${ratio>=.75?'🏆':ratio>=.4?'👏':'💪'}</div>${s.stopped?`<div class="t">🛑 게임을 끝냈어요</div><p>${esc(nameOf(s.stopped))}님이 중간에 끝냈어요<br>${s.hist.length}문제 하고 <b>${s.score}개</b> 맞혔어요</p><p class="small">사람을 바꾸려면 🏠 처음 화면에서 참가하고 다시 시작해요</p>`:`<div class="t">${s.total}문제 중 ${s.score}개!</div><p>${msg}</p>`}
  ${me?`<button class="big" data-act="again">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`;
  h+=`<div class="card"><h2>📜 이번 판 기록</h2>${s.hist.map(x=>`<div class="row"><div class="av">${x.right?'⭕':x.wrong?'✖':'–'}</div><div class="nm">${esc(x.w)} <span class="small">· ${esc(nameOf(x.gu))}${x.pass?' 패스':x.right?'':` "${esc(x.gs)}"`}</span></div></div>`).join('')}</div>`;
  return h;
@@ -340,6 +343,7 @@ function act(a,el){
  else if(a==='pass'&&s&&s.ph==='guess'&&ME===s.gu){sendGuess(s,true)}
  else if(a==='accept'&&s&&s.ph==='result'&&me&&ME!==s.gu){const p=myP(g);p.acc[s.r]=1;commit()}
  else if(a==='next'&&s&&s.ph==='result'&&me){const p=myP(g);p.nx[s.r]=1;commit()}
+ else if(a==='stop'&&s&&s.ph!=='end'&&me){if(confirm('게임을 끝낼까요? 모두의 화면이 결과 화면으로 바뀌어요')){const p=myP(g);p.end=1;commit()}}
  else if(a==='skipc'&&s&&s.ph==='clue'&&me){const p=myP(g);p.sk=[...p.sk,'c:'+el.dataset.id+':'+s.r];commit()}
  else if(a==='skipo'&&s&&s.ph==='check'&&me){const p=myP(g);p.sk=[...p.sk,'o:'+el.dataset.id+':'+s.r];commit()}
  else if(a==='skipg'&&s&&s.ph==='guess'&&me){const p=myP(g);p.sk=[...p.sk,'g:'+s.gu+':'+s.r];commit()}
@@ -363,7 +367,7 @@ hub.watch(TOOL,list=>{
  render();
 },e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
 setInterval(()=>{
- if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){const g=current();if(!g||derive(g).ph==='end'||(seen[g.id]&&seen[g.id].out)){mine.lob=Date.now();save()}}
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){mine.lob=Date.now();save()}   // 게임 중에도 '참가' 표시 유지 (끝내고 바로 다시 시작할 수 있게)
  const a=document.activeElement;if(a&&a.tagName==='INPUT')return;
  render();
 },5000);
