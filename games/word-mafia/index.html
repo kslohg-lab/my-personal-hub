@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>단어 마피아</title>
+<style>
+:root{--bg:#fff1dc;--ink:#4a3320;--sub:#8a6a4a;--line:#e6d3b0;--pri:#ffcf5a;--pri2:#d6a020;--red:#ff6b6b;--grn:#5cc46a;--card:#fffdf7}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body{overflow-y:auto;overscroll-behavior:contain}
+#app{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+h1{font-size:26px;margin:4px 0 2px;text-align:center}
+.sub{color:var(--sub);font-size:14px;text-align:center;margin:0 0 12px;font-weight:600;line-height:1.5}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:14px;margin:10px 0}
+.card h2{font-size:18px;margin:0 0 10px}
+button{font:inherit;color:var(--ink);border:0;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+button:disabled{opacity:.45;transform:none}
+.big{width:100%;height:56px;font-size:20px;margin-top:10px;background:var(--pri);box-shadow:0 4px 0 var(--pri2)}
+.big.alt{background:#cdebc4;box-shadow:0 4px 0 #98c58c}
+.big.gray{background:#fff;box-shadow:0 4px 0 var(--line)}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:2px dashed #f0e2c8}
+.row:last-child{border-bottom:0}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:#ffe9bd;flex:none}
+.nm{flex:1;font-size:17px}
+.tag{font-size:13px;padding:4px 10px;border-radius:99px;background:#f2e6d0;color:var(--sub)}
+.tag.on{background:#d6f3d0;color:#2f8a3c}
+.tag.turn{background:#ffe08a;color:#8a5a00;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 12px;font-size:15px;border-radius:99px}
+.chip.on{background:var(--pri);box-shadow:0 3px 0 var(--pri2)}
+.lbl{font-size:14px;color:var(--sub);margin:10px 0 6px}
+.role{text-align:center;padding:24px 14px}
+.role .em{font-size:72px;line-height:1}
+.role .w{font-size:40px;margin:10px 0;color:#c0592a}
+.role .t{font-size:22px;margin:8px 0}
+.role p{color:var(--sub);font-weight:600;line-height:1.6;margin:8px 0}
+.cover{height:220px;border-radius:22px;background:repeating-linear-gradient(45deg,#ffe2b0,#ffe2b0 14px,#ffd590 14px,#ffd590 28px);display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:22px;border:3px solid #e8b860;cursor:pointer}
+.top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.pill{background:#fff;border:2px solid var(--line);border-radius:99px;padding:6px 12px;font-size:15px}
+.hint{display:flex;gap:8px;align-items:flex-start;padding:7px 2px}
+.hint .who{flex:none;min-width:52px;color:var(--sub);font-size:15px;padding-top:3px}
+.bub{background:#fff;border:2px solid var(--line);border-radius:14px 14px 14px 4px;padding:7px 12px;font-size:18px;word-break:break-all}
+.bub.me{background:#fff6dc;border-color:#f0c860}
+.bub.sk{color:#b9a58a;font-size:14px;background:transparent;border-style:dashed}
+.rd{font-size:13px;color:var(--sub);margin:8px 0 2px}
+input[type=text]{width:100%;height:56px;font:inherit;font-size:20px;border:3px solid #f0c860;border-radius:16px;padding:0 14px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text;outline:none}
+.err{color:#d84a4a;font-size:14px;margin-top:6px;min-height:18px}
+.vote{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vote button{height:74px;font-size:19px}
+.vote button.on{background:#ffd0d0;box-shadow:0 4px 0 #e89a9a}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid button{height:56px;font-size:17px;padding:0 4px}
+.grid button.on{background:var(--pri);box-shadow:0 4px 0 var(--pri2)}
+.res{text-align:center}
+.res .em{font-size:64px}
+.res .t{font-size:28px;margin:6px 0}
+.res p{margin:6px 0;font-size:17px;line-height:1.5}
+.small{font-size:13px;color:var(--sub);font-weight:600;line-height:1.6}
+.rules li{margin:5px 0}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:#4a3320;color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.wait{display:inline-block;animation:bob 1.2s infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.score{display:flex;justify-content:space-around;text-align:center}
+.score b{display:block;font-size:24px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+/* 단어 마피아 (가족 각자 폰으로)
+   - 마피아 1명만 단어를 몰라요. 모두 차례대로 힌트 한마디 → 투표로 마피아를 찾고, 들킨 마피아는 단어를 맞히면 살아남아요.
+   - 허브 공유 저장소 parent.hubShared (toolData/word-mafia__아이디) 사용: 각자 자기 문서만 씀, 가족 모두 읽음 → Firestore 규칙 변경 없음.
+   - 게임 시작한 사람 문서의 g = 판 정보(참가자·순서·주제·단어·마피아). 나머지 진행(힌트·투표·정답)은 각자 문서의 p 에 쓰고,
+     모든 폰이 같은 규칙으로 계산(derive)해서 같은 화면을 봄. 진행자가 나가도 게임이 멈추지 않음. */
+(()=>{
+const TOOL='word-mafia';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rint=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rint(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const CATS=[
+ {n:'동물',e:'🐾',w:'강아지,고양이,토끼,코끼리,기린,사자,호랑이,원숭이,펭귄,돌고래,상어,거북이,다람쥐,판다,캥거루,하마,악어,부엉이,낙타,얼룩말,고슴도치,문어,나비,개구리'},
+ {n:'음식',e:'🍜',w:'김치찌개,떡볶이,피자,햄버거,라면,짜장면,김밥,치킨,삼겹살,초밥,비빔밥,된장찌개,돈가스,스파게티,떡국,만두,카레,샌드위치,핫도그,팥빙수,붕어빵,아이스크림,케이크,도넛'},
+ {n:'과일·채소',e:'🍎',w:'사과,바나나,딸기,수박,포도,귤,복숭아,배,참외,파인애플,망고,키위,체리,레몬,감,토마토,당근,오이,감자,고구마,양파,옥수수,브로콜리,버섯'},
+ {n:'장소',e:'🏙️',w:'학교,병원,도서관,놀이공원,수영장,영화관,편의점,공항,지하철역,경찰서,소방서,미용실,마트,캠핑장,바닷가,동물원,박물관,빵집,찜질방,키즈카페,문구점,노래방,놀이터,호텔'},
+ {n:'직업',e:'🧑‍🍳',w:'선생님,의사,간호사,경찰관,소방관,요리사,가수,배우,유튜버,운동선수,과학자,우주비행사,파일럿,택배기사,미용사,제빵사,농부,화가,작가,기자,수의사,치과의사,변호사,프로게이머'},
+ {n:'탈것',e:'🚗',w:'자동차,버스,기차,비행기,배,자전거,오토바이,헬리콥터,택시,지하철,트럭,구급차,소방차,경찰차,킥보드,잠수함,로켓,열기구,요트,유모차,스케이트보드,케이블카,트랙터,캠핑카'},
+ {n:'집 안 물건',e:'🛋️',w:'냉장고,세탁기,텔레비전,소파,침대,베개,칫솔,치약,우산,거울,시계,의자,책상,컴퓨터,휴대폰,전자레인지,청소기,선풍기,에어컨,리모컨,수건,가위,냄비,숟가락'},
+ {n:'운동·놀이',e:'⚽',w:'축구,야구,농구,배구,수영,태권도,피구,줄넘기,배드민턴,탁구,스키,스케이트,볼링,골프,달리기,숨바꼭질,술래잡기,보드게임,윷놀이,제기차기,팽이,공기놀이,레고,퍼즐'},
+ {n:'자연·날씨',e:'🌈',w:'바다,산,강,구름,무지개,눈사람,번개,태풍,비,해,달,별,화산,사막,폭포,동굴,섬,숲,바람,안개,우박,얼음,모래,파도'},
+ {n:'학교생활',e:'🏫',w:'급식,숙제,시험,운동회,소풍,교과서,필통,연필,지우개,칠판,방학,수학여행,받아쓰기,짝꿍,반장,체육복,알림장,색연필,리코더,실내화,현장학습,학예회,졸업식,책가방'}
+].map(c=>({...c,w:c.w.split(',')}));
+const AV={dad:'👨',mom:'👩',chaea:'👧',jia:'🧒'};
+const FRESH=10*60*1000, STALE=3*60*60*1000, SKIP_AFTER=40000;
+
+/* ---------- 허브 연결 ---------- */
+const hub=(()=>{try{const h=window.parent!==window?window.parent.hubShared:null;return h&&h.ready&&h.me?h:null}catch(e){return null}})();
+const app=$('app');
+if(!hub){
+ app.innerHTML=`<h1>🕵️ 단어 마피아</h1><div class="card role"><div class="em">📱</div><div class="t">가족 허브에서 열어 주세요</div><p>가족이 각자 자기 폰으로 함께 하는 게임이에요.<br>허브에 로그인한 상태에서 게임 목록의 <b>단어 마피아</b>를 눌러 주세요.</p></div>`;
+ return;
+}
+const ME=hub.me.id;
+const MEMBERS=(hub.members||[]).map(m=>({id:m.id,name:m.name}));
+let docs={}, mine={}, synced=false, connErr='';
+let ui=LS.get('wm_ui',{cat:-1,r:2});
+let seen=LS.get('wm_seen',{});      // gid → {role:1, out:1}
+const turnAt={};                    // 이 폰에서 지금 차례를 처음 본 시각
+let pick=null, guessPick=-1, showWord=false, hintErr='', busy=false, lastTurnKey='', curGid='';
+
+const nameOf=id=>{const m=MEMBERS.find(x=>x.id===id);return m?m.name:(docs[id]&&docs[id].name)||id};
+const avOf=id=>AV[id]||'🙂';
+const dataOf=id=>id===ME?mine:((docs[id]&&docs[id].data)||{});
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+function setSeen(gid,k){seen[gid]={...(seen[gid]||{}),[k]:1};const ks=Object.keys(seen);if(ks.length>40)ks.slice(0,ks.length-40).forEach(x=>delete seen[x]);LS.set('wm_seen',seen)}
+function save(){
+ const copy=JSON.parse(JSON.stringify(mine));
+ return Promise.resolve(hub.save(TOOL,copy)).catch(e=>{toast('저장하지 못했어요. 인터넷을 확인해 주세요');console.error(e)});
+}
+function commit(){save();render()}
+
+/* ---------- 판 계산 ---------- */
+const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))%9973;return h};
+function current(){
+ let best=null;
+ const ids=new Set([...Object.keys(docs),ME]);
+ ids.forEach(id=>{const g=dataOf(id).g;if(g&&g.id&&Array.isArray(g.pl)&&g.pl.length>=3&&CATS[g.c]&&(!best||g.at>best.at))best=g});
+ if(!best||Date.now()-best.at>STALE)return null;
+ return best;
+}
+function joined(){
+ const now=Date.now();
+ return MEMBERS.filter(m=>{const d=dataOf(m.id);return d.lob&&now-d.lob<FRESH}).map(m=>m.id);
+}
+function bad(word,h){
+ const n=s=>s.replace(/\s+/g,'').toLowerCase();
+ if(word.length>=2)return n(h).includes(n(word));
+ return h.split(/\s+/).some(t=>t.replace(/[^가-힣a-z0-9]/gi,'')===word);
+}
+function derive(g){
+ const P=g.pl,n=P.length,k=hash(g.id),cat=CATS[g.c],L=cat.w.length;
+ const mafia=P[((g.m-k)%n+n)%n], wi=((g.w-k)%L+L)%L, word=cat.w[wi];
+ const D=id=>{const p=dataOf(id).p;return p&&p.gid===g.id?p:{}};
+ const host=D(g.host), cl=host.cl||0;
+ const skips=new Set();P.forEach(id=>(D(id).sk||[]).forEach(x=>skips.add(x)));
+ const slots=[];let turn=null;
+ for(let r=0;r<(g.r||2);r++)for(const id of P){
+  const h=(D(id).h||[])[r];
+  if(typeof h==='string'&&h)slots.push({id,r,t:h});
+  else if(skips.has(id+':'+r))slots.push({id,r,skip:1});
+  else{if(!turn)turn={id,r};slots.push({id,r,wait:1})}
+ }
+ const base={g,P,n,mafia,word,wi,cat,slots,turn,D,cl};
+ if(turn)return {...base,ph:'hint'};
+ const tally=(key,cands)=>{const c={};let votes=[];P.forEach(id=>{const v=D(id)[key];if(v&&cands.includes(v)&&v!==id){c[v]=(c[v]||0)+1;votes.push([id,v])}});const mx=Math.max(0,...Object.values(c));return {c,votes,top:mx>0?cands.filter(x=>c[x]===mx):[]}};
+ const v1=tally('v',P);
+ if(v1.votes.length<n&&cl<1)return {...base,ph:'vote',v1};
+ let acc=null,v2=null,re=null;
+ if(v1.top.length===1)acc=v1.top[0];
+ else if(v1.top.length>1){
+  re=v1.top;v2=tally('v2',re);
+  if(v2.votes.length<n&&cl<2)return {...base,ph:'revote',v1,re,v2};
+  if(v2.top.length===1)acc=v2.top[0];
+ }
+ const out={...base,v1,v2,re,acc};
+ if(!acc)return {...out,ph:'end',win:'mafia',why:'nocatch'};
+ if(acc!==mafia)return {...out,ph:'end',win:'mafia',why:'wrong'};
+ const gs=D(mafia).gs;
+ if(!(gs>=0)&&cl<3)return {...out,ph:'guess'};
+ const gw=gs>=0?cat.w[g.cd[gs]]:null, ok=gw===word;
+ return {...out,ph:'end',win:ok?'mafia':'citizen',why:ok?'guessed':'caught',gw};
+}
+function points(s){
+ const pt={};
+ if(s.win==='mafia')pt[s.mafia]=s.why==='guessed'?2:3;
+ else s.P.forEach(id=>{if(id!==s.mafia)pt[id]=1});
+ return pt;
+}
+function record(s){
+ let sc=LS.get('wm_score',{pts:{},done:[]});
+ if(sc.done.includes(s.g.id))return;
+ const pt=points(s);Object.keys(pt).forEach(id=>sc.pts[id]=(sc.pts[id]||0)+pt[id]);
+ sc.done=[...sc.done,s.g.id].slice(-60);LS.set('wm_score',sc);
+}
+
+/* ---------- 행동 ---------- */
+const newP=gid=>({gid,h:[],v:'',v2:'',gs:-1,cl:0,sk:[]});
+function myP(g){if(!mine.p||mine.p.gid!==g.id)mine.p=newP(g.id);return mine.p}
+function startGame(players){
+ if(busy)return;
+ const pl=shuffle(players);
+ const ci=ui.cat>=0&&CATS[ui.cat]?ui.cat:rint(CATS.length), cat=CATS[ci], L=cat.w.length;
+ const recent=LS.get('wm_recent',[]);
+ let pool=[...Array(L).keys()].filter(i=>!recent.includes(cat.n+':'+cat.w[i]));if(!pool.length)pool=[...Array(L).keys()];
+ const wi=pool[rint(pool.length)], mi=1+rint(pl.length-1);   // 마피아는 첫 번째로 힌트를 말하지 않게
+ LS.set('wm_recent',[...recent,cat.n+':'+cat.w[wi]].slice(-60));
+ const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), k=hash(id);
+ const cd=shuffle([wi,...shuffle([...Array(L).keys()].filter(i=>i!==wi)).slice(0,11)]);
+ mine.g={id,at:Date.now(),host:ME,pl,m:(mi+k)%pl.length,c:ci,w:(wi+k)%L,cd,r:ui.r};
+ mine.p=newP(id);mine.lob=Date.now();
+ pick=null;guessPick=-1;showWord=false;hintErr='';
+ commit();
+}
+function sendHint(s){
+ const inp=$('hintIn');if(!inp)return;
+ const t=inp.value.trim().replace(/\s+/g,' ');
+ if(!t){hintErr='힌트를 한마디 적어 주세요';render();return}
+ if(t.length>20){hintErr='20자까지 쓸 수 있어요';render();return}
+ if(ME!==s.mafia&&bad(s.word,t)){hintErr='앗! 단어가 들어 있어요. 다른 말로 설명해 주세요 🙊';render();return}
+ const p=myP(s.g);p.h=p.h||[];while(p.h.length<s.turn.r)p.h.push(null);p.h[s.turn.r]=t;
+ hintErr='';inp.value='';commit();
+}
+
+/* ---------- 화면 ---------- */
+function header(s,spec){
+ const me=s.P.includes(ME);
+ return `<div class="top"><span class="pill">${s.cat.e} 주제: ${esc(s.cat.n)}</span>${me?`<button class="pill" data-act="peek">${ME===s.mafia?'🕵️ 나는 마피아':showWord?'🔑 '+esc(s.word):'🔑 내 단어 보기'}</button>`:`<span class="pill">👀 구경 중</span>`}</div>`;
+}
+function hintBoard(s,upto){
+ let h='',r=-1;
+ for(const x of s.slots){
+  if(x.wait&&!(s.turn&&x.id===s.turn.id&&x.r===s.turn.r))continue;
+  if(x.r!==r){r=x.r;h+=`<div class="rd">${r+1}바퀴</div>`}
+  const mine1=x.id===ME;
+  h+=`<div class="hint"><span class="who">${avOf(x.id)} ${esc(nameOf(x.id))}</span>${x.skip?`<span class="bub sk">건너뜀</span>`:x.wait?`<span class="tag turn">✍️ 생각 중…</span>`:`<span class="bub${mine1?' me':''}">${esc(x.t)}</span>`}</div>`;
+ }
+ return `<div class="card"><h2>💬 힌트</h2>${h||'<div class="small">아직 힌트가 없어요</div>'}</div>`;
+}
+function renderLobby(g){
+ const J=joined(), amIn=J.includes(ME), sc=LS.get('wm_score',{pts:{}});
+ const live=g&&!(seen[g.id]&&seen[g.id].out)&&derive(g).ph!=='end';
+ let h=`<h1>🕵️ 단어 마피아</h1><p class="sub">마피아만 단어를 몰라요!<br>단어를 말하지 말고 힌트로 서로를 찾아내요</p>`;
+ if(live)h+=`<div class="card"><h2>🎲 지금 진행 중인 판이 있어요</h2><div class="small">${g.pl.map(nameOf).map(esc).join(' · ')}</div><button class="big gray" data-act="watch">👀 구경하기</button></div>`;
+ h+=`<div class="card"><h2>👨‍👩‍👧‍👧 참가할 사람 <span class="small">(3명 이상)</span></h2>`;
+ MEMBERS.forEach(m=>{const on=J.includes(m.id);h+=`<div class="row"><div class="av">${avOf(m.id)}</div><div class="nm">${esc(m.name)}${m.id===ME?' <span class="small">(나)</span>':''}</div><span class="tag${on?' on':''}">${on?'참가 ✅':'아직'}</span></div>`});
+ h+=`<button class="big ${amIn?'gray':'alt'}" data-act="join">${amIn?'참가 취소':'🙋 나도 참가!'}</button></div>`;
+ h+=`<div class="card"><h2>⚙️ 설정</h2><div class="lbl">주제</div><div class="chips"><button class="chip${ui.cat<0?' on':''}" data-cat="-1">🎲 랜덤</button>${CATS.map((c,i)=>`<button class="chip${ui.cat===i?' on':''}" data-cat="${i}">${c.e} ${esc(c.n)}</button>`).join('')}</div>
+ <div class="lbl">힌트는 몇 바퀴?</div><div class="chips">${[1,2,3].map(r=>`<button class="chip${ui.r===r?' on':''}" data-r="${r}">${r}바퀴</button>`).join('')}</div>
+ <button class="big" data-act="start" ${amIn&&J.length>=3?'':'disabled'}>🚀 게임 시작 (${J.length}명)</button>
+ ${amIn&&J.length<3?`<div class="small" style="text-align:center;margin-top:6px">가족이 각자 폰에서 <b>나도 참가!</b>를 누르면 시작할 수 있어요</div>`:''}</div>`;
+ const tot=MEMBERS.filter(m=>sc.pts[m.id]);
+ h+=`<div class="card"><h2>🏆 이 폰의 점수판 <button class="chip" style="float:right;padding:4px 10px;font-size:13px" data-act="reset">처음부터</button></h2>${tot.length?`<div class="score">${MEMBERS.map(m=>`<div>${avOf(m.id)}<b>${sc.pts[m.id]||0}</b><span class="small">${esc(m.name)}</span></div>`).join('')}</div>`:'<div class="small">아직 점수가 없어요. 마피아가 이기면 +3 (단어를 맞혀서 살아남으면 +2), 시민이 이기면 시민 모두 +1</div>'}</div>`;
+ h+=`<div class="card"><h2>📖 규칙</h2><ol class="rules small">
+ <li>시작하면 각자 폰에 <b>단어</b>가 나와요. 딱 한 명, <b>마피아</b>만 주제만 알고 단어는 몰라요.</li>
+ <li>정해진 순서대로 한 명씩 <b>힌트 한마디</b>를 적어요. 단어를 그대로 쓰면 안 돼요!</li>
+ <li>힌트가 다 돌면 <b>누가 단어를 모르는지</b> 투표해요. 동점이면 한 번 더 투표해요.</li>
+ <li>마피아가 잡히면 단어 맞히기 기회! 12개 중에 정답을 고르면 <b>마피아가 살아남아요</b>.</li>
+ <li>마피아 팁: 다른 사람 힌트를 잘 듣고 아는 척하세요 😎 · 시민 팁: 너무 쉬운 힌트는 마피아에게 정답을 알려줘요!</li></ol></div>`;
+ return h;
+}
+function renderRole(s){
+ const maf=ME===s.mafia;
+ if(!(seen[s.g.id]&&seen[s.g.id].peek))
+  return `<h1>🕵️ 단어 마피아</h1><p class="sub">새 판이 시작됐어요! 다른 사람이 못 보게 하고 눌러 주세요</p><div class="cover" data-act="reveal">🤫<div style="margin-top:8px">눌러서 내 역할 보기</div></div>`;
+ return `<h1>🕵️ 단어 마피아</h1><div class="card role">${maf?
+  `<div class="em">🕵️</div><div class="t">당신은 <b style="color:#d84a4a">마피아</b>!</div><div class="pill" style="display:inline-block">${s.cat.e} 주제: ${esc(s.cat.n)}</div><p>단어는 몰라요. 다른 사람 힌트를 잘 듣고<br>아는 척 힌트를 말해서 들키지 마세요!<br>들키더라도 단어를 맞히면 살아남아요 💪</p>`:
+  `<div class="em">${s.cat.e}</div><div class="t">주제: ${esc(s.cat.n)}</div><div class="w">${esc(s.word)}</div><p>이 단어를 <b>직접 말하면 안 돼요!</b><br>마피아가 눈치채지 못하게 살짝 돌려서 힌트를 주세요.</p>`}
+ <div class="small">순서: ${s.P.map(id=>esc(nameOf(id))).join(' → ')}</div>
+ <button class="big" data-act="ok">확인했어요 👍</button></div>`;
+}
+function renderGame(s){
+ const me=s.P.includes(ME);
+ let h=`<h1>🕵️ 단어 마피아</h1>`+header(s);
+ if(s.ph==='hint'){
+  const tk=s.g.id+s.turn.id+s.turn.r;
+  if(!turnAt[tk])turnAt[tk]=Date.now();
+  if(tk!==lastTurnKey){lastTurnKey=tk;if(s.turn.id===ME){try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}
+  h+=hintBoard(s);
+  if(s.turn.id===ME){
+   h+=`<div class="card"><h2>✍️ 내 차례! 힌트 한마디 (${s.turn.r+1}바퀴)</h2><input type="text" id="hintIn" maxlength="20" placeholder="${ME===s.mafia?'아는 척 힌트를 적어요':'단어를 말하지 말고 힌트를'}" autocomplete="off"><div class="err">${esc(hintErr)}</div><button class="big" data-act="hint">말하기 💬</button></div>`;
+  }else{
+   const late=Date.now()-turnAt[tk]>SKIP_AFTER;
+   h+=`<div class="card" style="text-align:center"><div class="t" style="font-size:20px"><span class="wait">✍️</span> ${esc(nameOf(s.turn.id))}님 차례예요</div>${me&&late?`<button class="big gray" data-act="skip">⏭ ${esc(nameOf(s.turn.id))}님 건너뛰기</button>`:''}</div>`;
+  }
+ }else if(s.ph==='vote'||s.ph==='revote'){
+  const re=s.ph==='revote', key=re?'v2':'v', cands=(re?s.re:s.P).filter(id=>id!==ME), my=me?(s.D(ME)[key]||''):'';
+  const done=(re?s.v2:s.v1).votes.length;
+  h+=`<div class="card"><h2>${re?'⚖️ 동점이에요! 둘 중에서 다시 투표':'🗳️ 누가 단어를 모를까요?'}</h2>`;
+  if(me){
+   h+=`<div class="vote">${cands.map(id=>`<button class="${(pick||my)===id?'on':''}" data-vote="${id}">${avOf(id)} ${esc(nameOf(id))}</button>`).join('')}</div>`;
+   h+=my?`<div class="small" style="text-align:center;margin-top:10px">✅ ${esc(nameOf(my))}님에게 투표했어요 (다른 사람을 누르면 바꿀 수 있어요)</div>`:`<button class="big" data-act="vote" ${pick?'':'disabled'}>투표하기</button>`;
+  }
+  h+=`<div class="small" style="text-align:center;margin-top:10px">투표 ${done}/${s.n}명 완료 <span class="wait">⏳</span></div>`;
+  if(ME===s.g.host&&done<s.n)h+=`<button class="big gray" data-act="close" data-n="${re?2:1}">⏱ 투표 마감하기 (안 한 사람 빼고 세기)</button>`;
+  h+=`</div>`+hintBoard(s);
+ }else if(s.ph==='guess'){
+  if(ME===s.mafia){
+   h+=`<div class="card"><h2>😱 들켰어요! 단어를 맞히면 살아남아요</h2><div class="grid">${s.g.cd.map((wi,i)=>`<button class="${guessPick===i?'on':''}" data-guess="${i}">${esc(s.cat.w[wi])}</button>`).join('')}</div><button class="big" data-act="guess" ${guessPick>=0?'':'disabled'}>이 단어로 할게요!</button></div>`;
+  }else{
+   h+=`<div class="card role"><div class="em">🕵️</div><div class="t">마피아는 <b style="color:#d84a4a">${esc(nameOf(s.mafia))}</b>님!</div><p>지금 단어를 맞히는 중이에요… <span class="wait">🤔</span><br>맞히면 마피아가 살아남아요</p>${ME===s.g.host?`<button class="big gray" data-act="close" data-n="3">⏱ 시간 끝! (못 맞힌 걸로)</button>`:''}</div>`;
+  }
+  h+=hintBoard(s);
+ }
+ return h;
+}
+function renderEnd(s){
+ record(s);
+ const cw=s.win==='citizen', pt=points(s), myPt=pt[ME]||0;
+ const why={nocatch:'아무도 지목되지 않아서 마피아가 숨어 버렸어요!',wrong:`${esc(nameOf(s.acc))}님을 지목했지만… 마피아가 아니었어요!`,guessed:`잡혔지만 단어 "<b>${esc(s.gw)}</b>"를 맞혀서 살아남았어요!`,caught:`잡혔고, 단어도 ${s.gw?`"${esc(s.gw)}"로 `:''}틀렸어요!`}[s.why];
+ const votes=(t,v)=>v&&v.votes.length?`<div class="small" style="margin-top:6px">${t}: ${v.votes.map(([a,b])=>`${esc(nameOf(a))}→${esc(nameOf(b))}`).join(' · ')}</div>`:'';
+ let h=`<h1>🕵️ 단어 마피아</h1><div class="card res"><div class="em">${cw?'🎉':'🕵️'}</div><div class="t">${cw?'시민 승리!':'마피아 승리!'}</div>
+ <p>마피아는 <b style="color:#d84a4a">${avOf(s.mafia)} ${esc(nameOf(s.mafia))}</b>님</p><p>단어는 <b style="color:#c0592a;font-size:24px">${esc(s.word)}</b> (${esc(s.cat.n)})</p><p>${why}</p>
+ ${votes('투표',s.v1)}${votes('다시 투표',s.v2)}
+ ${s.P.includes(ME)?`<p style="margin-top:10px">${myPt?`🎁 나는 <b>+${myPt}점</b>!`:'이번엔 점수 없음 😢'}</p>`:''}
+ ${s.P.includes(ME)?`<button class="big" data-act="again">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`+hintBoard(s);
+ return h;
+}
+function render(){
+ if(!synced){app.innerHTML=`<h1>🕵️ 단어 마피아</h1><p class="sub">${connErr?esc(connErr):'가족과 연결하는 중… <span class="wait">📡</span>'}</p>`;return}
+ const inp=$('hintIn'),val=inp?inp.value:'',foc=inp&&document.activeElement===inp;
+ const g=current(), sv=g&&seen[g.id]||{};
+ if(g&&g.id!==curGid){curGid=g.id;pick=null;guessPick=-1;showWord=false;hintErr=''}
+ let html;
+ if(!g||sv.out||(!g.pl.includes(ME)&&!sv.watch)){html=renderLobby(g)}
+ else{
+  const s=derive(g);
+  if(s.ph==='end')html=renderEnd(s);
+  else if(s.P.includes(ME)&&!sv.role)html=renderRole(s);
+  else html=renderGame(s);
+ }
+ app.innerHTML=html;
+ const ni=$('hintIn');if(ni){ni.value=val;if(foc){ni.focus();try{ni.setSelectionRange(val.length,val.length)}catch(e){}}
+  ni.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();act('hint')}})}
+}
+function act(a,el){
+ const g=current(), s=g?derive(g):null;
+ if(a==='join'){mine.lob=joined().includes(ME)?0:Date.now();commit()}
+ else if(a==='start'){const J=joined();if(J.length>=3&&J.includes(ME))startGame(J)}
+ else if(a==='again'&&s){startGame(s.P)}
+ else if(a==='reset'){if(confirm('이 폰의 점수판을 0점으로 할까요?')){LS.set('wm_score',{pts:{},done:LS.get('wm_score',{done:[]}).done||[]});render()}}
+ else if(a==='watch'&&g){setSeen(g.id,'watch');render()}
+ else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
+ else if(a==='reveal'&&g){setSeen(g.id,'peek');render()}
+ else if(a==='ok'&&g){setSeen(g.id,'role');render()}
+ else if(a==='peek'){showWord=!showWord;render()}
+ else if(a==='hint'&&s&&s.ph==='hint'&&s.turn.id===ME){sendHint(s)}
+ else if(a==='skip'&&s&&s.ph==='hint'&&s.P.includes(ME)){const p=myP(g);p.sk=[...(p.sk||[]),s.turn.id+':'+s.turn.r];commit()}
+ else if(a==='vote'&&s&&pick){const p=myP(g);p[s.ph==='revote'?'v2':'v']=pick;pick=null;commit()}
+ else if(a==='close'&&s&&ME===g.host){const n=+el.dataset.n;if(confirm(n===3?'단어 맞히기를 끝낼까요? (못 맞힌 걸로 해요)':'아직 안 한 사람은 빼고 투표를 셀까요?')){const p=myP(g);p.cl=Math.max(p.cl||0,n);commit()}}
+ else if(a==='guess'&&s&&s.ph==='guess'&&ME===s.mafia&&guessPick>=0){const p=myP(g);p.gs=guessPick;commit()}
+}
+app.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act],[data-cat],[data-r],[data-vote],[data-guess]');if(!b||b.disabled)return;
+ if(b.dataset.cat!=null){ui.cat=+b.dataset.cat;LS.set('wm_ui',ui);render();return}
+ if(b.dataset.r!=null){ui.r=+b.dataset.r;LS.set('wm_ui',ui);render();return}
+ if(b.dataset.vote!=null){
+  const g=current(),s=g&&derive(g);if(!s||!s.P.includes(ME))return;
+  const key=s.ph==='revote'?'v2':'v', p=myP(g);
+  if(p[key]){p[key]=b.dataset.vote;commit()}else{pick=b.dataset.vote;render()}
+  return}
+ if(b.dataset.guess!=null){guessPick=+b.dataset.guess;render();return}
+ act(b.dataset.act,b);
+});
+
+/* ---------- 연결 ---------- */
+hub.watch(TOOL,list=>{
+ const d={};(list||[]).forEach(x=>{if(x&&x.id)d[x.id]=x});docs=d;
+ if(!synced){synced=true;mine=JSON.parse(JSON.stringify((docs[ME]&&docs[ME].data)||{}));}
+ render();
+},e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
+// 대기실에 있는 동안 '참가' 표시가 꺼지지 않게 가끔 새로 고침 + 건너뛰기 버튼 시간 확인
+setInterval(()=>{
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){const g=current();if(!g||derive(g).ph==='end'||(seen[g.id]&&seen[g.id].out)){mine.lob=Date.now();save()}}
+ if(document.activeElement&&document.activeElement.id==='hintIn')return;
+ render();
+},5000);
+setTimeout(()=>{if(!synced){connErr='연결이 늦어요. 인터넷을 확인해 주세요.';render()}},10000);
+render();
+})();
+</script>
+</body>
+</html>
