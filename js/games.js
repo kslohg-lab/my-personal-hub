@@ -25,9 +25,12 @@ const GAMES = [
   { id: 'word-mafia',    cat: 'game', title: '단어 마피아',             desc: '가족이 각자 폰으로! 단어를 모르는 마피아를 찾아요', v: 2 },
   { id: 'just-one',      cat: 'game', title: '저스트 원',               desc: '가족 협동! 겹치지 않는 힌트로 정답을 맞혀요', v: 2 },
   { id: 'catch-mind',    cat: 'game', title: '캐치마인드',              desc: '한 명이 그리면 다 같이 맞혀요! 각자 폰으로', v: 2 },
-  { id: 'same-mind',     cat: 'game', title: '이심전심',                desc: '같은 질문, 같은 답이면 점수! 마음이 통할까?', v: 1 },
-  { id: 'ito',           cat: 'game', title: '숫자 텔레파시',           desc: '비밀 숫자를 말로 표현해서 작은 순서대로! 협동', v: 1 },
-  { id: 'who-most',      cat: 'game', title: '누가 제일?',              desc: '우리 가족 중 누가 제일 ○○할까? 투표하고 칭호 받기', v: 1 },
+  { id: 'same-mind',     cat: 'game', title: '이심전심',                desc: '같은 질문, 같은 답이면 점수! 마음이 통할까?', v: 2 },
+  { id: 'ito',           cat: 'game', title: '숫자 텔레파시',           desc: '비밀 숫자를 말로 표현해서 작은 순서대로! 협동', v: 2 },
+  { id: 'who-most',      cat: 'game', title: '누가 제일?',              desc: '우리 가족 중 누가 제일 ○○할까? 투표하고 칭호 받기', v: 2 },
+  { id: 'draw-relay',    cat: 'game', title: '그림 릴레이',             desc: '단어→그림→맞히기→그림… 돌고 나면 웃음 폭발', v: 1 },
+  { id: 'truth-lie',     cat: 'game', title: '진실 혹은 거짓',          desc: '내 이야기 3개 중 거짓말 하나! 찾아낼 수 있을까?', v: 1 },
+  { id: 'undercover',    cat: 'game', title: '언더커버',                desc: '나만 비슷한 다른 단어? 나도 모르는 스파이 찾기', v: 1 },
   { id: 'travel-picker', cat: 'tool', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요', v: 2 },
   { id: 'h1-golf',       cat: 'tool', title: 'H1 골프맵',               desc: '화성 H1 출발 1시간 이내 골프장 35곳', v: 1 }
 ];

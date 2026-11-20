@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>언더커버</title>
+<style>
+:root{--bg:#eef1f6;--ink:#2a3140;--sub:#6a7488;--line:#d3d9e4;--soft:#e2e7f0;--pri:#9ec5ff;--pri2:#5f8fd6;--card:#fbfcfe}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body{overflow-y:auto;overscroll-behavior:contain}
+#app{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+h1{font-size:26px;margin:4px 0 2px;text-align:center}
+.sub{color:var(--sub);font-size:14px;text-align:center;margin:0 0 12px;font-weight:600;line-height:1.5}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:14px;margin:10px 0}
+.card h2{font-size:18px;margin:0 0 10px}
+button{font:inherit;color:var(--ink);border:0;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+button:disabled{opacity:.45;transform:none}
+.big{width:100%;height:56px;font-size:20px;margin-top:10px;background:var(--pri);box-shadow:0 4px 0 var(--pri2)}
+.big.alt{background:#c9ecc4;box-shadow:0 4px 0 #92c58a}
+.big.gray{background:#fff;box-shadow:0 4px 0 var(--line)}
+.two{display:flex;gap:10px}.two .big{flex:1}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:2px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--soft);flex:none}
+.nm{flex:1;font-size:17px}
+.tag{font-size:13px;padding:4px 10px;border-radius:99px;background:var(--soft);color:var(--sub)}
+.tag.on{background:#d6f3d0;color:#2f8a3c}
+.tag.turn{background:#ffe08a;color:#8a5a00;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 12px;font-size:15px;border-radius:99px}
+.chip.on{background:var(--pri);box-shadow:0 3px 0 var(--pri2)}
+.lbl{font-size:14px;color:var(--sub);margin:10px 0 6px}
+.small{font-size:13px;color:var(--sub);font-weight:600;line-height:1.6}
+.rules li{margin:5px 0}
+.q{text-align:center;font-size:24px;line-height:1.45;padding:18px 10px;word-break:keep-all}
+.q .k{display:block;font-size:14px;color:var(--sub);margin-bottom:6px}
+input[type=text]{width:100%;height:56px;font:inherit;font-size:20px;border:3px solid var(--pri);border-radius:16px;padding:0 14px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text;outline:none;margin-top:6px}
+.err{color:#d84a4a;font-size:14px;margin-top:6px;min-height:18px}
+.res{text-align:center}
+.res .em{font-size:60px}
+.res .t{font-size:26px;margin:6px 0}
+.res p{margin:6px 0;font-size:17px;line-height:1.5}
+.score{display:flex;justify-content:space-around;text-align:center;flex-wrap:wrap;gap:6px}
+.score div{min-width:64px}
+.score b{display:block;font-size:24px}
+.wait{display:inline-block;animation:bob 1.2s infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.mw{text-align:center;padding:16px 10px}.mw .w{font-size:40px;color:#2f62b0;margin:4px 0}.hint{display:flex;gap:8px;align-items:flex-start;padding:7px 2px}.hint .who{flex:none;min-width:58px;color:var(--sub);font-size:15px;padding-top:3px}.bub{background:#fff;border:2px solid var(--line);border-radius:14px 14px 14px 4px;padding:7px 12px;font-size:18px;word-break:break-all}.bub.me{background:#eaf2ff;border-color:#9ec5ff}.bub.sk{color:#aab;font-size:14px;background:transparent;border-style:dashed}.rd{font-size:13px;color:var(--sub);margin:8px 0 2px}.vote{display:grid;grid-template-columns:1fr 1fr;gap:10px}.vote button{height:72px;font-size:19px}.vote button.on{background:#ffd0d0;box-shadow:0 4px 0 #e89a9a}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+/* 언더커버 — 가족 파티 게임 (각자 폰으로)
+   _dev/party/build.py 가 _dev/party/kit_template.html + _dev/party/<게임>.js 를 합쳐 만든 파일이에요. 고칠 땐 그쪽을 고치고 다시 만드세요.
+   공통 뼈대(파티 키트): 허브 공유 저장소 parent.hubShared(toolData/<게임id>__아이디)에 각자 자기 문서만 쓰고 가족 모두 읽음 → Firestore 규칙 변경 없음.
+   시작한 사람 문서의 g = 판 정보, 진행은 각자 문서의 p. 모든 폰이 GAME.derive 로 같은 상태를 계산하므로 진행자가 없어도 됨. */
+(()=>{
+const CFG={"tool": "undercover", "title": "언더커버", "emoji": "🕶️", "min": 3, "sub": "모두 단어를 받지만, 한 명만 <b>비슷한 다른 단어</b>!<br>그런데… 그게 나일 수도 있어요 😱", "rules": ["각자 폰에 단어가 나와요. 딱 한 명(언더커버)만 비슷하지만 <b>다른 단어</b>를 받아요. 예) 사과 vs 배", "<b>내가 언더커버인지는 아무도 몰라요!</b> 다른 사람 힌트를 듣고 눈치채야 해요.", "순서대로 한 명씩 힌트 한마디. 내 단어를 그대로 쓰면 안 돼요.", "힌트가 다 돌면 언더커버라고 생각되는 사람에게 투표해요. 동점이면 동점자끼리 한 번 더!", "언더커버가 뽑히면 나머지 모두 +1, 다른 사람이 뽑히면 언더커버 +3."], "ui": {"r": 2}};
+const TOOL=CFG.tool;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rint=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rint(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const AV={dad:'👨',mom:'👩',chaea:'👧',jia:'🧒'};
+const FRESH=10*60*1000, STALE=3*60*60*1000;
+const app=$('app');
+const hub=(()=>{try{const h=window.parent!==window?window.parent.hubShared:null;return h&&h.ready&&h.me?h:null}catch(e){return null}})();
+if(!hub){
+ app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><div class="card res"><div class="em">📱</div><div class="t">가족 허브에서 열어 주세요</div><p class="small">가족이 각자 자기 폰으로 함께 하는 게임이에요.<br>허브에 로그인한 상태에서 게임 목록의 <b>${CFG.title}</b>을(를) 눌러 주세요.</p></div>`;
+ return;
+}
+const ME=hub.me.id;
+const MEMBERS=(hub.members||[]).map(m=>({id:m.id,name:m.name}));
+let docs={}, mine={}, synced=false, connErr='';
+let ui=Object.assign({},CFG.ui,LS.get(TOOL+'_ui',{}));
+let seen=LS.get(TOOL+'_seen',{});
+const firstAt={};
+let curGid='', errMsg='', lastKey='';
+
+const nameOf=id=>{const m=MEMBERS.find(x=>x.id===id);return m?m.name:(docs[id]&&docs[id].name)||id};
+const avOf=id=>AV[id]||'🙂';
+const who=id=>`${avOf(id)} ${esc(nameOf(id))}`;
+const dataOf=id=>id===ME?mine:((docs[id]&&docs[id].data)||{});
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+function setSeen(gid,k){seen[gid]={...(seen[gid]||{}),[k]:1};const ks=Object.keys(seen);if(ks.length>40)ks.slice(0,ks.length-40).forEach(x=>delete seen[x]);LS.set(TOOL+'_seen',seen)}
+function save(){return Promise.resolve(hub.save(TOOL,JSON.parse(JSON.stringify(mine)))).catch(e=>{toast('저장하지 못했어요. 인터넷을 확인해 주세요');console.error(e)})}
+function commit(){save();render()}
+function setErr(m){errMsg=m;render()}
+const since=k=>{if(!firstAt[k])firstAt[k]=Date.now();return Date.now()-firstAt[k]};
+const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))%9973;return h};
+const norm=t=>String(t||'').replace(/[\s.,!?~'"·]+/g,'').toLowerCase();
+function current(){
+ let best=null;
+ new Set([...Object.keys(docs),ME]).forEach(id=>{const g=dataOf(id).g;if(g&&g.id&&Array.isArray(g.pl)&&g.pl.length>=CFG.min&&(!best||g.at>best.at))best=g});
+ return best&&Date.now()-best.at<STALE?best:null;
+}
+function joined(){const now=Date.now();return MEMBERS.filter(m=>{const d=dataOf(m.id);return d.lob&&now-d.lob<FRESH}).map(m=>m.id)}
+const Dof=g=>id=>{const p=dataOf(id).p;return p&&p.gid===g.id?p:{}};
+const stopOf=(g,D)=>g.pl.find(id=>D(id).end)||'';
+const anyFlag=(P,D,key,r)=>P.some(id=>(D(id)[key]||{})[r]);
+function myP(g){if(!mine.p||mine.p.gid!==g.id)mine.p={gid:g.id};(GAME.maps||[]).forEach(k=>{if(!mine.p[k]||typeof mine.p[k]!=='object'||Array.isArray(mine.p[k]))mine.p[k]={}});if(!Array.isArray(mine.p.sk))mine.p.sk=[];return mine.p}
+const skipsOf=(P,D)=>{const s=new Set();P.forEach(id=>(D(id).sk||[]).forEach(x=>s.add(x)));return s};
+function waitBtn(key,ms,list,code,label){ // 오래 멈춘 사람 기다리지 않기
+ if(since(key)<ms)return '';
+ return list.filter(id=>id!==ME).map(id=>`<button class="big gray" data-act="skip" data-k="${esc(code(id))}">⏭ ${esc(nameOf(id))}님 ${label||'기다리지 않기'}</button>`).join('');
+}
+function startGame(players){
+ const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ mine.g={id,at:Date.now(),host:ME,pl:shuffle(players),...GAME.setup(players.length,id,ui)};
+ mine.p={gid:id};myP(mine.g);mine.lob=Date.now();errMsg='';
+ commit();
+}
+function lobbyHTML(g){
+ const J=joined(), amIn=J.includes(ME);
+ const live=g&&!(seen[g.id]&&seen[g.id].out)&&GAME.derive(g).ph!=='end';
+ let h=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${CFG.sub}</p>`;
+ if(live)h+=`<div class="card"><h2>🎲 지금 진행 중인 판이 있어요</h2><div class="small">${g.pl.map(nameOf).map(esc).join(' · ')}</div><button class="big gray" data-act="watch">👀 구경하기</button></div>`;
+ h+=`<div class="card"><h2>👨‍👩‍👧‍👧 참가할 사람 <span class="small">(${CFG.min}명 이상)</span></h2>`;
+ MEMBERS.forEach(m=>{const on=J.includes(m.id);h+=`<div class="row"><div class="av">${avOf(m.id)}</div><div class="nm">${esc(m.name)}${m.id===ME?' <span class="small">(나)</span>':''}</div><span class="tag${on?' on':''}">${on?'참가 ✅':'아직'}</span></div>`});
+ h+=`<button class="big ${amIn?'gray':'alt'}" data-act="join">${amIn?'참가 취소':'🙋 나도 참가!'}</button></div>`;
+ h+=`<div class="card"><h2>⚙️ 설정</h2>${GAME.settings(ui)}
+ <button class="big" data-act="start" ${amIn&&J.length>=CFG.min?'':'disabled'}>🚀 게임 시작 (${J.length}명)</button>
+ ${amIn&&J.length<CFG.min?`<div class="small" style="text-align:center;margin-top:6px">가족이 각자 폰에서 <b>나도 참가!</b>를 누르면 시작할 수 있어요</div>`:''}</div>`;
+ if(GAME.recordHTML)h+=GAME.recordHTML();
+ h+=`<div class="card"><h2>📖 규칙</h2><ol class="rules small">${CFG.rules.map(r=>`<li>${r}</li>`).join('')}</ol></div>`;
+ return h;
+}
+const opt=(key,val,label)=>`<button class="chip${ui[key]===val?' on':''}" data-set="${key}" data-v="${val}">${label}</button>`;
+function render(){
+ if(!synced){app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${connErr?esc(connErr):'가족과 연결하는 중… <span class="wait">📡</span>'}</p>`;return}
+ const ins=[...document.querySelectorAll('input[type=text]')].map(e=>({id:e.id,v:e.value,f:document.activeElement===e}));
+ const g=current(), sv=g&&seen[g.id]||{};
+ if(g&&g.id!==curGid){curGid=g.id;errMsg='';GAME.reset&&GAME.reset()}
+ let html;
+ if(!g||sv.out||(!g.pl.includes(ME)&&!sv.watch))html=lobbyHTML(g);
+ else{
+  const s=GAME.derive(g), me=s.P.includes(ME);
+  const key=g.id+':'+s.ph+':'+(s.r==null?'':s.r);
+  if(key!==lastKey){lastKey=key;errMsg='';if(GAME.buzz&&GAME.buzz(s)){try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}
+  html=`<h1>${CFG.emoji} ${CFG.title}</h1>`;
+  if(s.ph==='end'){
+   if(GAME.record)GAME.record(s);
+   if(s.stopped)html+=`<div class="card res"><div class="em">🛑</div><div class="t">게임을 끝냈어요</div><p>${esc(nameOf(s.stopped))}님이 중간에 끝냈어요</p><p class="small">사람을 바꾸려면 🏠 처음 화면에서 참가하고 다시 시작해요</p></div>`;
+   html+=GAME.end(s)+`<div class="card">${me?`<button class="big" data-act="again" style="margin-top:0">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`;
+  }else{
+   html+=GAME.play(s,key,me);
+   if(me)html+=`<button class="big gray" data-act="stop" style="margin-top:18px">🛑 게임 끝내기</button>`;
+  }
+ }
+ const changed=app.__h!==html;   // 바뀐 게 있을 때만 화면을 새로 그림 (그림판·입력칸이 흔들리지 않게)
+ if(changed){
+  app.innerHTML=html;app.__h=html;
+  ins.forEach(o=>{const e=$(o.id);if(e){e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(o.v.length,o.v.length)}catch(x){}}}});
+  document.querySelectorAll('input[data-enter]').forEach(e=>e.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&!ev.isComposing){ev.preventDefault();act(e.dataset.enter,e)}}));
+ }
+ if(GAME.after)GAME.after(changed);
+}
+const busy=()=>!!(GAME.busy&&GAME.busy());   // 그림 그리는 중에는 화면을 새로 그리지 않음
+function act(a,el){
+ const g=current(), s=g?GAME.derive(g):null, me=!!(s&&s.P.includes(ME));
+ if(a==='join'){mine.lob=joined().includes(ME)?0:Date.now();commit()}
+ else if(a==='start'){const J=joined();if(J.length>=CFG.min&&J.includes(ME))startGame(J)}
+ else if(a==='again'&&s&&me){startGame(s.P)}
+ else if(a==='watch'&&g){setSeen(g.id,'watch');render()}
+ else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
+ else if(a==='stop'&&s&&s.ph!=='end'&&me){if(confirm('게임을 끝낼까요? 모두의 화면이 결과 화면으로 바뀌어요')){myP(g).end=1;commit()}}
+ else if(a==='skip'&&s&&s.ph!=='end'&&me){const p=myP(g);p.sk=[...p.sk,el.dataset.k];commit()}
+ else if(g&&s&&s.ph!=='end')GAME.act(a,el,g,s,me);
+}
+
+/* ===== 공용 그림 도구 (획: 색·굵기 2글자 + 좌표마다 4글자, 좌표 0~1000) ===== */
+const B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const PCOL=['#2b2b2b','#e84a4a','#ff9a3c','#ffd23f','#3cb371','#3a8ee6','#8e5ad6','#8b5a2b','#ff8fc0','#ffffff'];
+const PWID=[6,14,30];
+const penc=v=>{v=Math.max(0,Math.min(4095,Math.round(v*4.095)));return B64[v>>6]+B64[v&63]};
+const pdec=(s,i)=>((B64.indexOf(s[i])<<6)|B64.indexOf(s[i+1]))/4.095;
+const strokeStr=st=>B64[st.c]+B64[st.w]+st.p.map(([x,y])=>penc(x)+penc(y)).join('');
+function fitCanvas(cv){const r=cv.getBoundingClientRect();if(!r.width)return;const px=Math.round(r.width*(window.devicePixelRatio||1));if(cv.width!==px){cv.width=px;cv.height=px}}
+function paintStrokes(cv,list){
+ const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);
+ const k=cv.width/1000;
+ (list||[]).forEach(s=>{
+  if(typeof s!=='string'||s.length<6)return;
+  const c=PCOL[B64.indexOf(s[0])]||PCOL[0],w=(PWID[B64.indexOf(s[1])]||PWID[1])*k;
+  cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=w;cx.lineCap='round';cx.lineJoin='round';
+  const pts=[];for(let i=2;i+3<s.length;i+=4)pts.push([pdec(s,i)*k,pdec(s,i+2)*k]);
+  if(pts.length===1){cx.beginPath();cx.arc(pts[0][0],pts[0][1],w/2,0,7);cx.fill();return}
+  cx.beginPath();cx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;cx.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
+  const e=pts[pts.length-1];cx.lineTo(e[0],e[1]);cx.stroke();
+ });
+}
+
+/* ===== 게임 규칙 (GAME) ===== */
+const PAIRS=('사과|배;고양이|호랑이;피자|햄버거;우유|요구르트;바다|강;의사|간호사;축구|농구;연필|볼펜;자전거|오토바이;눈|비;수박|참외;짜장면|짬뽕;라면|우동;버스|기차;사자|호랑이;딸기|체리;김밥|초밥;떡볶이|순대;치킨|돈가스;강아지|늑대;토끼|햄스터;펭귄|오리;비행기|헬리콥터;냉장고|세탁기;텔레비전|컴퓨터;책상|식탁;침대|소파;숟가락|젓가락;우산|비옷;모자|헬멧;장갑|양말;선생님|교수님;경찰관|소방관;가수|배우;수영|스키;피아노|기타;야구|테니스;영화관|놀이공원;학교|도서관;병원|약국;마트|편의점;여름|겨울;아침|저녁;해|달;별|달;구름|안개;산|언덕;바나나|망고;아이스크림|빙수;케이크|빵;사탕|초콜릿;콜라|사이다;커피|차;카메라|휴대폰;시계|달력;가위|칼;거울|창문;이불|베개;샴푸|비누;칫솔|치약;크리스마스|생일;설날|추석;공룡|용;로봇|외계인;유령|좀비;마법사|요정;해적|닌자;공주|왕자').split(';').map(x=>x.split('|'));
+let pick=null,showW=true;
+const GAME={
+ maps:['h'],
+ reset(){pick=null;showW=true},
+ setup(n,id,ui){
+  const pi=rint(PAIRS.length),u=1+rint(n-1),k=hash(id);   // 언더커버는 첫 번째로 말하지 않게
+  return {pi:(pi+k)%PAIRS.length,sw:rint(2),u:(u+k)%n,r:ui.r||2};
+ },
+ settings(ui){return `<div class="lbl">힌트는 몇 바퀴?</div><div class="chips">${[1,2,3].map(r=>opt('r',r,r+'바퀴')).join('')}</div>`},
+ derive(g){
+  const P=g.pl,n=P.length,D=Dof(g),stop=stopOf(g,D),sk=skipsOf(P,D),k=hash(g.id);
+  const pair=PAIRS[((g.pi-k)%PAIRS.length+PAIRS.length)%PAIRS.length],U=P[((g.u-k)%n+n)%n];
+  const maj=pair[g.sw],und=pair[1-g.sw],wordOf=id=>id===U?und:maj;
+  const slots=[];let turn=null;
+  for(let r=0;r<(g.r||2);r++)for(const id of P){
+   const h=(D(id).h||{})[r];
+   if(typeof h==='string'&&h)slots.push({id,r,t:h});
+   else if(sk.has('h:'+id+':'+r))slots.push({id,r,skip:1});
+   else{if(!turn)turn={id,r};slots.push({id,r,wait:1})}
+  }
+  const base={g,P,n,D,U,maj,und,wordOf,slots,turn},halt=o=>stop?{...o,ph:'end',stopped:stop}:o;
+  if(turn)return halt({...base,ph:'hint',r:'h'+turn.r+turn.id});
+  const tally=(key,cands)=>{const c={},votes=[];P.forEach(id=>{const v=D(id)[key];if(typeof v==='string'&&cands.includes(v)&&v!==id){c[v]=(c[v]||0)+1;votes.push([id,v])}});const mx=Math.max(0,...Object.values(c));return {c,votes,top:mx?cands.filter(x=>c[x]===mx):[]}};
+  const voted=(key)=>P.filter(id=>{const v=D(id)[key];return (typeof v==='string'&&v)||sk.has(key+':'+id)});
+  const v1=tally('v',P);
+  if(voted('v').length<n)return halt({...base,ph:'vote',v1,missing:P.filter(id=>!voted('v').includes(id))});
+  let out=null,v2=null,re=null;
+  if(v1.top.length===1)out=v1.top[0];
+  else if(v1.top.length>1){re=v1.top;v2=tally('v2',re);if(voted('v2').length<n)return halt({...base,ph:'revote',v1,re,v2,missing:P.filter(id=>!voted('v2').includes(id))});if(v2.top.length===1)out=v2.top[0]}
+  return {...base,ph:'end',v1,v2,re,out,win:out===U?'citizen':'under'};
+ },
+ buzz(s){return (s.ph==='hint'&&s.turn.id===ME)||((s.ph==='vote'||s.ph==='revote')&&s.missing.includes(ME))},
+ board(s){
+  let h='',r=-1;
+  for(const x of s.slots){
+   if(x.wait&&!(s.turn&&x.id===s.turn.id&&x.r===s.turn.r))continue;
+   if(x.r!==r){r=x.r;h+=`<div class="rd">${r+1}바퀴</div>`}
+   h+=`<div class="hint"><span class="who">${who(x.id)}</span>${x.skip?'<span class="bub sk">건너뜀</span>':x.wait?'<span class="tag turn">✍️ 생각 중…</span>':`<span class="bub${x.id===ME?' me':''}">${esc(x.t)}</span>`}</div>`;
+  }
+  return `<div class="card"><h2>💬 힌트</h2>${h||'<div class="small">아직 힌트가 없어요</div>'}</div>`;
+ },
+ play(s,key,me){
+  let h='';
+  if(me)h+=`<div class="card mw"><div class="small">🔑 내 단어 (나도 언더커버일 수 있어요!)</div>${showW?`<div class="w">${esc(s.wordOf(ME))}</div>`:'<div class="w">● ● ●</div>'}<button class="chip" data-act="peek">${showW?'🙈 가리기':'👀 보기'}</button></div>`;
+  else h+=`<div class="card mw"><div class="small">👀 구경 중</div></div>`;
+  if(s.ph==='hint'){
+   h+=GAME.board(s);
+   if(s.turn.id===ME)h+=`<div class="card"><h2>✍️ 내 차례! 힌트 한마디 (${s.turn.r+1}바퀴)</h2><input type="text" id="hin" maxlength="20" placeholder="내 단어를 말하지 말고 힌트를" autocomplete="off" data-enter="hint"><div class="err">${esc(errMsg)}</div><button class="big" data-act="hint">말하기 💬</button></div>`;
+   else{h+=`<div class="card" style="text-align:center;font-size:19px"><span class="wait">✍️</span> ${esc(nameOf(s.turn.id))}님 차례예요</div>`;if(me)h+=waitBtn(key,40000,[s.turn.id],id=>'h:'+id+':'+s.turn.r,'건너뛰기')}
+  }else{
+   const re=s.ph==='revote',key2=re?'v2':'v',cands=(re?s.re:s.P).filter(id=>id!==ME),my=me?(s.D(ME)[key2]||''):'';
+   h+=`<div class="card"><h2>${re?'⚖️ 동점! 둘 중에서 다시 투표':'🗳️ 언더커버는 누구일까요?'}</h2>${me?`<div class="vote">${cands.map(id=>`<button class="${my===id?'on':''}" data-act="vote" data-id="${id}">${who(id)}</button>`).join('')}</div>${my?`<div class="small" style="text-align:center;margin-top:8px">✅ ${esc(nameOf(my))}님에게 투표 (바꿀 수 있어요)</div>`:''}`:''}
+   <div class="small" style="text-align:center;margin-top:8px">투표 ${s.n-s.missing.length}/${s.n} <span class="wait">⏳</span></div></div>`;
+   if(me)h+=waitBtn(key,45000,s.missing,id=>key2+':'+id);
+   h+=GAME.board(s);
+  }
+  return h;
+ },
+ end(s){
+  if(s.stopped)return `<div class="card res"><p>언더커버는 <b>${who(s.U)}</b>님</p><p>단어: <b>${esc(s.maj)}</b> / 언더커버 단어: <b>${esc(s.und)}</b></p></div>`+GAME.board(s);
+  const cw=s.win==='citizen',pt=GAME.points(s);
+  const vl=(t,v)=>v&&v.votes.length?`<div class="small">${t}: ${v.votes.map(([a,b])=>`${esc(nameOf(a))}→${esc(nameOf(b))}`).join(' · ')}</div>`:'';
+  return `<div class="card res"><div class="em">${cw?'🎉':'🕶️'}</div><div class="t">${cw?'언더커버를 찾았어요!':'언더커버 승리!'}</div>
+  <p>언더커버는 <b style="color:#d84a4a">${who(s.U)}</b>님</p><p>모두의 단어 <b style="font-size:22px">${esc(s.maj)}</b> · 언더커버 단어 <b style="font-size:22px;color:#d84a4a">${esc(s.und)}</b></p>
+  <p>${s.out?`뽑힌 사람: ${who(s.out)}`:'동점이라 아무도 못 뽑았어요!'}</p>${vl('투표',s.v1)}${vl('다시 투표',s.v2)}
+  ${s.P.includes(ME)?`<p>${pt[ME]?`🎁 나는 <b>+${pt[ME]}점</b>`:'이번엔 점수 없음'}</p>`:''}</div>`+GAME.board(s);
+ },
+ points(s){const pt={};if(s.stopped)return pt;if(s.win==='under')pt[s.U]=3;else s.P.forEach(id=>{if(id!==s.U)pt[id]=1});return pt},
+ record(s){if(s.stopped)return;const b=LS.get(TOOL+'_rec',{pts:{},done:[]});if(b.done.includes(s.g.id))return;const pt=GAME.points(s);Object.keys(pt).forEach(id=>b.pts[id]=(b.pts[id]||0)+pt[id]);b.done=[...b.done,s.g.id].slice(-60);LS.set(TOOL+'_rec',b)},
+ recordHTML(){const b=LS.get(TOOL+'_rec',{pts:{}});const any=MEMBERS.some(m=>b.pts[m.id]);
+  return `<div class="card"><h2>🏆 이 폰의 점수판</h2>${any?`<div class="score">${MEMBERS.map(m=>`<div>${avOf(m.id)}<b>${b.pts[m.id]||0}</b><span class="small">${esc(m.name)}</span></div>`).join('')}</div>`:'<div class="small">아직 점수가 없어요</div>'}</div>`},
+ act(a,el,g,s,me){
+  if(a==='peek'){showW=!showW;render();return}
+  if(!me)return;const p=myP(g);
+  if(a==='hint'&&s.ph==='hint'&&s.turn.id===ME){
+   const t=(($('hin')||{}).value||'').trim().replace(/\s+/g,' ');
+   if(!t)return setErr('힌트를 한마디 적어 주세요');
+   const w=s.wordOf(ME);if(norm(t).includes(norm(w)))return setErr('앗! 내 단어가 들어 있어요 🙊');
+   p.h[s.turn.r]=t.slice(0,20);commit();
+  }
+  else if(a==='vote'&&(s.ph==='vote'||s.ph==='revote')){p[s.ph==='revote'?'v2':'v']=el.dataset.id;commit()}
+ }
+};
+
+/* ===== 연결·이벤트 ===== */
+app.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act],[data-set]');if(!b||b.disabled)return;
+ if(b.dataset.set!=null){const v=b.dataset.v;ui[b.dataset.set]=isNaN(+v)?v:+v;LS.set(TOOL+'_ui',ui);render();return}
+ act(b.dataset.act,b);
+});
+hub.watch(TOOL,list=>{
+ const d={};(list||[]).forEach(x=>{if(x&&x.id)d[x.id]=x});docs=d;
+ if(!synced){synced=true;mine=JSON.parse(JSON.stringify((docs[ME]&&docs[ME].data)||{}))}
+ if(!busy())render();
+},e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
+setInterval(()=>{
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){mine.lob=Date.now();save()}
+ const a=document.activeElement;if(a&&a.tagName==='INPUT')return;
+ if(!busy())render();
+},3000);
+setTimeout(()=>{if(!synced){connErr='연결이 늦어요. 인터넷을 확인해 주세요.';render()}},10000);
+render();
+})();
+</script>
+</body>
+</html>
