@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>{{TITLE}}</title>
+<style>
+:root{{{CSSVARS}}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body{overflow-y:auto;overscroll-behavior:contain}
+#app{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+h1{font-size:26px;margin:4px 0 2px;text-align:center}
+.sub{color:var(--sub);font-size:14px;text-align:center;margin:0 0 12px;font-weight:600;line-height:1.5}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:14px;margin:10px 0}
+.card h2{font-size:18px;margin:0 0 10px}
+button{font:inherit;color:var(--ink);border:0;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+button:disabled{opacity:.45;transform:none}
+.big{width:100%;height:56px;font-size:20px;margin-top:10px;background:var(--pri);box-shadow:0 4px 0 var(--pri2)}
+.big.alt{background:#c9ecc4;box-shadow:0 4px 0 #92c58a}
+.big.gray{background:#fff;box-shadow:0 4px 0 var(--line)}
+.two{display:flex;gap:10px}.two .big{flex:1}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:2px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--soft);flex:none}
+.nm{flex:1;font-size:17px}
+.tag{font-size:13px;padding:4px 10px;border-radius:99px;background:var(--soft);color:var(--sub)}
+.tag.on{background:#d6f3d0;color:#2f8a3c}
+.tag.turn{background:#ffe08a;color:#8a5a00;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 12px;font-size:15px;border-radius:99px}
+.chip.on{background:var(--pri);box-shadow:0 3px 0 var(--pri2)}
+.lbl{font-size:14px;color:var(--sub);margin:10px 0 6px}
+.small{font-size:13px;color:var(--sub);font-weight:600;line-height:1.6}
+.rules li{margin:5px 0}
+.q{text-align:center;font-size:24px;line-height:1.45;padding:18px 10px;word-break:keep-all}
+.q .k{display:block;font-size:14px;color:var(--sub);margin-bottom:6px}
+input[type=text]{width:100%;height:56px;font:inherit;font-size:20px;border:3px solid var(--pri);border-radius:16px;padding:0 14px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text;outline:none;margin-top:6px}
+.err{color:#d84a4a;font-size:14px;margin-top:6px;min-height:18px}
+.res{text-align:center}
+.res .em{font-size:60px}
+.res .t{font-size:26px;margin:6px 0}
+.res p{margin:6px 0;font-size:17px;line-height:1.5}
+.score{display:flex;justify-content:space-around;text-align:center;flex-wrap:wrap;gap:6px}
+.score div{min-width:64px}
+.score b{display:block;font-size:24px}
+.wait{display:inline-block;animation:bob 1.2s infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+{{EXTRACSS}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+/* {{TITLE}} — 가족 파티 게임 (각자 폰으로)
+   _dev/party/build.py 가 _dev/party/kit_template.html + _dev/party/<게임>.js 를 합쳐 만든 파일이에요. 고칠 땐 그쪽을 고치고 다시 만드세요.
+   공통 뼈대(파티 키트): 허브 공유 저장소 parent.hubShared(toolData/<게임id>__아이디)에 각자 자기 문서만 쓰고 가족 모두 읽음 → Firestore 규칙 변경 없음.
+   시작한 사람 문서의 g = 판 정보, 진행은 각자 문서의 p. 모든 폰이 GAME.derive 로 같은 상태를 계산하므로 진행자가 없어도 됨. */
+(()=>{
+const CFG={{CFG}};
+const TOOL=CFG.tool;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rint=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rint(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const AV={dad:'👨',mom:'👩',chaea:'👧',jia:'🧒'};
+const FRESH=10*60*1000, STALE=3*60*60*1000;
+const app=$('app');
+const hub=(()=>{try{const h=window.parent!==window?window.parent.hubShared:null;return h&&h.ready&&h.me?h:null}catch(e){return null}})();
+if(!hub){
+ app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><div class="card res"><div class="em">📱</div><div class="t">가족 허브에서 열어 주세요</div><p class="small">가족이 각자 자기 폰으로 함께 하는 게임이에요.<br>허브에 로그인한 상태에서 게임 목록의 <b>${CFG.title}</b>을(를) 눌러 주세요.</p></div>`;
+ return;
+}
+const ME=hub.me.id;
+const MEMBERS=(hub.members||[]).map(m=>({id:m.id,name:m.name}));
+let docs={}, mine={}, synced=false, connErr='';
+let ui=Object.assign({},CFG.ui,LS.get(TOOL+'_ui',{}));
+let seen=LS.get(TOOL+'_seen',{});
+const firstAt={};
+let curGid='', errMsg='', lastKey='';
+
+const nameOf=id=>{const m=MEMBERS.find(x=>x.id===id);return m?m.name:(docs[id]&&docs[id].name)||id};
+const avOf=id=>AV[id]||'🙂';
+const who=id=>`${avOf(id)} ${esc(nameOf(id))}`;
+const dataOf=id=>id===ME?mine:((docs[id]&&docs[id].data)||{});
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+function setSeen(gid,k){seen[gid]={...(seen[gid]||{}),[k]:1};const ks=Object.keys(seen);if(ks.length>40)ks.slice(0,ks.length-40).forEach(x=>delete seen[x]);LS.set(TOOL+'_seen',seen)}
+function save(){return Promise.resolve(hub.save(TOOL,JSON.parse(JSON.stringify(mine)))).catch(e=>{toast('저장하지 못했어요. 인터넷을 확인해 주세요');console.error(e)})}
+function commit(){save();render()}
+function setErr(m){errMsg=m;render()}
+const since=k=>{if(!firstAt[k])firstAt[k]=Date.now();return Date.now()-firstAt[k]};
+const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))%9973;return h};
+const norm=t=>String(t||'').replace(/[\s.,!?~'"·]+/g,'').toLowerCase();
+function current(){
+ let best=null;
+ new Set([...Object.keys(docs),ME]).forEach(id=>{const g=dataOf(id).g;if(g&&g.id&&Array.isArray(g.pl)&&g.pl.length>=CFG.min&&(!best||g.at>best.at))best=g});
+ return best&&Date.now()-best.at<STALE?best:null;
+}
+function joined(){const now=Date.now();return MEMBERS.filter(m=>{const d=dataOf(m.id);return d.lob&&now-d.lob<FRESH}).map(m=>m.id)}
+const Dof=g=>id=>{const p=dataOf(id).p;return p&&p.gid===g.id?p:{}};
+const stopOf=(g,D)=>g.pl.find(id=>D(id).end)||'';
+const anyFlag=(P,D,key,r)=>P.some(id=>(D(id)[key]||{})[r]);
+function myP(g){if(!mine.p||mine.p.gid!==g.id)mine.p={gid:g.id};(GAME.maps||[]).forEach(k=>{if(!mine.p[k]||typeof mine.p[k]!=='object'||Array.isArray(mine.p[k]))mine.p[k]={}});if(!Array.isArray(mine.p.sk))mine.p.sk=[];return mine.p}
+const skipsOf=(P,D)=>{const s=new Set();P.forEach(id=>(D(id).sk||[]).forEach(x=>s.add(x)));return s};
+function waitBtn(key,ms,list,code,label){ // 오래 멈춘 사람 기다리지 않기
+ if(since(key)<ms)return '';
+ return list.filter(id=>id!==ME).map(id=>`<button class="big gray" data-act="skip" data-k="${esc(code(id))}">⏭ ${esc(nameOf(id))}님 ${label||'기다리지 않기'}</button>`).join('');
+}
+function startGame(players){
+ const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ mine.g={id,at:Date.now(),host:ME,pl:shuffle(players),...GAME.setup(players.length,id,ui)};
+ mine.p={gid:id};myP(mine.g);mine.lob=Date.now();errMsg='';
+ commit();
+}
+function lobbyHTML(g){
+ const J=joined(), amIn=J.includes(ME);
+ const live=g&&!(seen[g.id]&&seen[g.id].out)&&GAME.derive(g).ph!=='end';
+ let h=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${CFG.sub}</p>`;
+ if(live)h+=`<div class="card"><h2>🎲 지금 진행 중인 판이 있어요</h2><div class="small">${g.pl.map(nameOf).map(esc).join(' · ')}</div><button class="big gray" data-act="watch">👀 구경하기</button></div>`;
+ h+=`<div class="card"><h2>👨‍👩‍👧‍👧 참가할 사람 <span class="small">(${CFG.min}명 이상)</span></h2>`;
+ MEMBERS.forEach(m=>{const on=J.includes(m.id);h+=`<div class="row"><div class="av">${avOf(m.id)}</div><div class="nm">${esc(m.name)}${m.id===ME?' <span class="small">(나)</span>':''}</div><span class="tag${on?' on':''}">${on?'참가 ✅':'아직'}</span></div>`});
+ h+=`<button class="big ${amIn?'gray':'alt'}" data-act="join">${amIn?'참가 취소':'🙋 나도 참가!'}</button></div>`;
+ h+=`<div class="card"><h2>⚙️ 설정</h2>${GAME.settings(ui)}
+ <button class="big" data-act="start" ${amIn&&J.length>=CFG.min?'':'disabled'}>🚀 게임 시작 (${J.length}명)</button>
+ ${amIn&&J.length<CFG.min?`<div class="small" style="text-align:center;margin-top:6px">가족이 각자 폰에서 <b>나도 참가!</b>를 누르면 시작할 수 있어요</div>`:''}</div>`;
+ if(GAME.recordHTML)h+=GAME.recordHTML();
+ h+=`<div class="card"><h2>📖 규칙</h2><ol class="rules small">${CFG.rules.map(r=>`<li>${r}</li>`).join('')}</ol></div>`;
+ return h;
+}
+const opt=(key,val,label)=>`<button class="chip${ui[key]===val?' on':''}" data-set="${key}" data-v="${val}">${label}</button>`;
+function render(){
+ if(!synced){app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${connErr?esc(connErr):'가족과 연결하는 중… <span class="wait">📡</span>'}</p>`;return}
+ const ins=[...document.querySelectorAll('input[type=text]')].map(e=>({id:e.id,v:e.value,f:document.activeElement===e}));
+ const g=current(), sv=g&&seen[g.id]||{};
+ if(g&&g.id!==curGid){curGid=g.id;errMsg='';GAME.reset&&GAME.reset()}
+ let html;
+ if(!g||sv.out||(!g.pl.includes(ME)&&!sv.watch))html=lobbyHTML(g);
+ else{
+  const s=GAME.derive(g), me=s.P.includes(ME);
+  const key=g.id+':'+s.ph+':'+(s.r==null?'':s.r);
+  if(key!==lastKey){lastKey=key;errMsg='';if(GAME.buzz&&GAME.buzz(s)){try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}
+  html=`<h1>${CFG.emoji} ${CFG.title}</h1>`;
+  if(s.ph==='end'){
+   if(GAME.record)GAME.record(s);
+   if(s.stopped)html+=`<div class="card res"><div class="em">🛑</div><div class="t">게임을 끝냈어요</div><p>${esc(nameOf(s.stopped))}님이 중간에 끝냈어요</p><p class="small">사람을 바꾸려면 🏠 처음 화면에서 참가하고 다시 시작해요</p></div>`;
+   html+=GAME.end(s)+`<div class="card">${me?`<button class="big" data-act="again" style="margin-top:0">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`;
+  }else{
+   html+=GAME.play(s,key,me);
+   if(me)html+=`<button class="big gray" data-act="stop" style="margin-top:18px">🛑 게임 끝내기</button>`;
+  }
+ }
+ app.innerHTML=html;
+ ins.forEach(o=>{const e=$(o.id);if(e){e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(o.v.length,o.v.length)}catch(x){}}}});
+ document.querySelectorAll('input[data-enter]').forEach(e=>e.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&!ev.isComposing){ev.preventDefault();act(e.dataset.enter,e)}}));
+}
+function act(a,el){
+ const g=current(), s=g?GAME.derive(g):null, me=!!(s&&s.P.includes(ME));
+ if(a==='join'){mine.lob=joined().includes(ME)?0:Date.now();commit()}
+ else if(a==='start'){const J=joined();if(J.length>=CFG.min&&J.includes(ME))startGame(J)}
+ else if(a==='again'&&s&&me){startGame(s.P)}
+ else if(a==='watch'&&g){setSeen(g.id,'watch');render()}
+ else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
+ else if(a==='stop'&&s&&s.ph!=='end'&&me){if(confirm('게임을 끝낼까요? 모두의 화면이 결과 화면으로 바뀌어요')){myP(g).end=1;commit()}}
+ else if(a==='skip'&&s&&s.ph!=='end'&&me){const p=myP(g);p.sk=[...p.sk,el.dataset.k];commit()}
+ else if(g&&s&&s.ph!=='end')GAME.act(a,el,g,s,me);
+}
+
+/* ===== 게임 규칙 (GAME) ===== */
+{{GAME}}
+
+/* ===== 연결·이벤트 ===== */
+app.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act],[data-set]');if(!b||b.disabled)return;
+ if(b.dataset.set!=null){const v=b.dataset.v;ui[b.dataset.set]=isNaN(+v)?v:+v;LS.set(TOOL+'_ui',ui);render();return}
+ act(b.dataset.act,b);
+});
+hub.watch(TOOL,list=>{
+ const d={};(list||[]).forEach(x=>{if(x&&x.id)d[x.id]=x});docs=d;
+ if(!synced){synced=true;mine=JSON.parse(JSON.stringify((docs[ME]&&docs[ME].data)||{}))}
+ render();
+},e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
+setInterval(()=>{
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){mine.lob=Date.now();save()}
+ const a=document.activeElement;if(a&&a.tagName==='INPUT')return;
+ render();
+},3000);
+setTimeout(()=>{if(!synced){connErr='연결이 늦어요. 인터넷을 확인해 주세요.';render()}},10000);
+render();
+})();
+</script>
+</body>
+</html>
