@@ -35,6 +35,11 @@ const GAMES = [
   { id: 'spice-market',  cat: 'game', title: '보석 시장',              desc: '먼저 팔수록 비싸게! 둘이서 하는 장사 대결 (2인)', v: 1 },
   { id: 'quilt',         cat: 'game', title: '조각보 퍼즐',            desc: '조각을 사서 이불 빈칸 채우기 퍼즐 대결 (2인)', v: 1 },
   { id: 'tile-garden',   cat: 'game', title: '타일 정원',              desc: '예쁜 타일을 골라 벽 무늬 완성하기 (2인)', v: 1 },
+  { id: 'mind-dial',     cat: 'game', title: '마음 다이얼',            desc: '"차가운↔뜨거운" 어디쯤? 한마디 힌트로 위치 맞히기', v: 1 },
+  { id: 'word-team',     cat: 'game', title: '단어 팀전',              desc: '2:2 팀 대결! 팀장 힌트로 우리 팀 단어 찾기 (4인)', v: 1 },
+  { id: 'color-guess',   cat: 'game', title: '색깔 맞히기',            desc: '색깔 이름 없이 설명하고 96가지 색 중 한 칸 맞히기', v: 1 },
+  { id: 'skull',         cat: 'game', title: '해골 블러핑',            desc: '꽃일까 해골일까? 허세와 눈치의 심리전 (3~4인)', v: 1 },
+  { id: 'fake-artist',   cat: 'game', title: '가짜 화가',              desc: '한 줄씩 이어 그리며 제시어 모르는 가짜 찾기 (3인+)', v: 1 },
   { id: 'travel-picker', cat: 'tool', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요', v: 2 },
   { id: 'h1-golf',       cat: 'tool', title: 'H1 골프맵',               desc: '화성 H1 출발 1시간 이내 골프장 35곳', v: 1 }
 ];
