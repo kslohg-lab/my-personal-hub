@@ -123,16 +123,21 @@ function lobbyHTML(g){
  const live=g&&!(seen[g.id]&&seen[g.id].out)&&GAME.derive(g).ph!=='end';
  let h=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${CFG.sub}</p>`;
  if(live)h+=`<div class="card"><h2>🎲 지금 진행 중인 판이 있어요</h2><div class="small">${g.pl.map(nameOf).map(esc).join(' · ')}</div><button class="big gray" data-act="watch">👀 구경하기</button></div>`;
- h+=`<div class="card"><h2>👨‍👩‍👧‍👧 참가할 사람 <span class="small">(${CFG.min}명 이상)</span></h2>`;
- MEMBERS.forEach(m=>{const on=J.includes(m.id);h+=`<div class="row"><div class="av">${avOf(m.id)}</div><div class="nm">${esc(m.name)}${m.id===ME?' <span class="small">(나)</span>':''}</div><span class="tag${on?' on':''}">${on?'참가 ✅':'아직'}</span></div>`});
+ const MX=CFG.max||99, pickMode=J.length>MX;   // 참가자가 최대 인원보다 많으면 같이 할 사람을 골라요
+ const team=pickMode?pickSel(J,MX):J;
+ h+=`<div class="card"><h2>👨‍👩‍👧‍👧 참가할 사람 <span class="small">(${CFG.max?CFG.min===CFG.max?CFG.min+'명':CFG.min+'~'+CFG.max+'명':CFG.min+'명 이상'})</span></h2>`;
+ MEMBERS.forEach(m=>{const on=J.includes(m.id),pk=pickMode&&team.includes(m.id);h+=`<div class="row"${pickMode&&on&&m.id!==ME?` data-act="pick1" data-id="${m.id}" style="cursor:pointer"`:''}><div class="av">${avOf(m.id)}</div><div class="nm">${esc(m.name)}${m.id===ME?' <span class="small">(나)</span>':''}</div><span class="tag${on?' on':''}">${pk?'같이 해요 🤝':on?(pickMode?'눌러서 고르기':'참가 ✅'):'아직'}</span></div>`});
+ if(pickMode&&amIn)h+=`<div class="small" style="text-align:center">참가한 사람이 많아요. 같이 할 사람을 눌러 골라요</div>`;
  h+=`<button class="big ${amIn?'gray':'alt'}" data-act="join">${amIn?'참가 취소':'🙋 나도 참가!'}</button></div>`;
  h+=`<div class="card"><h2>⚙️ 설정</h2>${GAME.settings(ui)}
- <button class="big" data-act="start" ${amIn&&J.length>=CFG.min?'':'disabled'}>🚀 게임 시작 (${J.length}명)</button>
+ <button class="big" data-act="start" ${amIn&&team.length>=CFG.min&&team.length<=MX?'':'disabled'}>🚀 게임 시작 (${team.length}명)</button>
  ${amIn&&J.length<CFG.min?`<div class="small" style="text-align:center;margin-top:6px">가족이 각자 폰에서 <b>나도 참가!</b>를 누르면 시작할 수 있어요</div>`:''}</div>`;
  if(GAME.recordHTML)h+=GAME.recordHTML();
  h+=`<div class="card"><h2>📖 규칙</h2><ol class="rules small">${CFG.rules.map(r=>`<li>${r}</li>`).join('')}</ol></div>`;
  return h;
 }
+let picked=[];
+function pickSel(J,MX){picked=picked.filter(id=>J.includes(id)&&id!==ME);while(picked.length>MX-1)picked.shift();return [ME,...picked]}
 const opt=(key,val,label)=>`<button class="chip${ui[key]===val?' on':''}" data-set="${key}" data-v="${val}">${label}</button>`;
 function render(){
  if(!synced){app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${connErr?esc(connErr):'가족과 연결하는 중… <span class="wait">📡</span>'}</p>`;return}
@@ -167,7 +172,8 @@ const busy=()=>!!(GAME.busy&&GAME.busy());   // 그림 그리는 중에는 화�
 function act(a,el){
  const g=current(), s=g?GAME.derive(g):null, me=!!(s&&s.P.includes(ME));
  if(a==='join'){mine.lob=joined().includes(ME)?0:Date.now();commit()}
- else if(a==='start'){const J=joined();if(J.length>=CFG.min&&J.includes(ME))startGame(J)}
+ else if(a==='start'){const J=joined(),MX=CFG.max||99,T=J.length>MX?pickSel(J,MX):J;if(T.length>=CFG.min&&T.length<=MX&&J.includes(ME))startGame(T)}
+ else if(a==='pick1'){const id=el.dataset.id;picked=picked.includes(id)?picked.filter(x=>x!==id):[...picked,id];render()}
  else if(a==='again'&&s&&me){startGame(s.P)}
  else if(a==='watch'&&g){setSeen(g.id,'watch');render()}
  else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
@@ -198,6 +204,12 @@ function paintStrokes(cv,list){
   const e=pts[pts.length-1];cx.lineTo(e[0],e[1]);cx.stroke();
  });
 }
+
+/* ===== 차례 게임 도구: 두 사람의 수를 번호 순서대로 합치고, 같은 씨앗이면 모든 폰에서 같은 무작위 ===== */
+function movesOf(g,D){const all=[];g.pl.forEach(id=>(D(id).m||[]).forEach(x=>{const i=String(x).indexOf('|');if(i>0)all.push({n:+String(x).slice(0,i),id,mv:String(x).slice(i+1)})}));return all.sort((a,b)=>a.n-b.n)}
+function pushMove(g,n,mv){const p=myP(g);p.m=[...(Array.isArray(p.m)?p.m:[]),n+'|'+mv];commit()}
+function rng(seed){let a=seed>>>0;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const sshuffle=(arr,r)=>{const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 
 /* ===== 게임 규칙 (GAME) ===== */
 const PAIRS=('사과|배;고양이|호랑이;피자|햄버거;우유|요구르트;바다|강;의사|간호사;축구|농구;연필|볼펜;자전거|오토바이;눈|비;수박|참외;짜장면|짬뽕;라면|우동;버스|기차;사자|호랑이;딸기|체리;김밥|초밥;떡볶이|순대;치킨|돈가스;강아지|늑대;토끼|햄스터;펭귄|오리;비행기|헬리콥터;냉장고|세탁기;텔레비전|컴퓨터;책상|식탁;침대|소파;숟가락|젓가락;우산|비옷;모자|헬멧;장갑|양말;선생님|교수님;경찰관|소방관;가수|배우;수영|스키;피아노|기타;야구|테니스;영화관|놀이공원;학교|도서관;병원|약국;마트|편의점;여름|겨울;아침|저녁;해|달;별|달;구름|안개;산|언덕;바나나|망고;아이스크림|빙수;케이크|빵;사탕|초콜릿;콜라|사이다;커피|차;카메라|휴대폰;시계|달력;가위|칼;거울|창문;이불|베개;샴푸|비누;칫솔|치약;크리스마스|생일;설날|추석;공룡|용;로봇|외계인;유령|좀비;마법사|요정;해적|닌자;공주|왕자').split(';').map(x=>x.split('|'));

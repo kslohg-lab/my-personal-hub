@@ -13,7 +13,7 @@ for fn in sorted(os.listdir(here)):
     m = re.search(r'/\*META(.*?)META\*/', src, re.S)
     meta = json.loads(m.group(1))
     game = src[m.end():].strip()
-    cfg = {k: meta[k] for k in ('tool', 'title', 'emoji', 'min', 'sub', 'rules', 'ui')}
+    cfg = {k: meta[k] for k in ('tool', 'title', 'emoji', 'min', 'max', 'sub', 'rules', 'ui') if k in meta}
     out = (tpl.replace('{{TITLE}}', meta['title'])
               .replace('{{CSSVARS}}', meta['cssvars'])
               .replace('{{EXTRACSS}}', meta.get('css', ''))

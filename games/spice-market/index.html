@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>보석 시장</title>
+<style>
+:root{--bg:#fff5e8;--ink:#4a3218;--sub:#8e6a44;--line:#f0d9b6;--soft:#fde7c4;--pri:#ffc46b;--pri2:#d6922f;--card:#fffcf6}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-weight:700;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body{overflow-y:auto;overscroll-behavior:contain}
+#app{max-width:520px;margin:0 auto;padding:14px 14px 40px}
+h1{font-size:26px;margin:4px 0 2px;text-align:center}
+.sub{color:var(--sub);font-size:14px;text-align:center;margin:0 0 12px;font-weight:600;line-height:1.5}
+.card{background:var(--card);border:3px solid var(--line);border-radius:22px;padding:14px;margin:10px 0}
+.card h2{font-size:18px;margin:0 0 10px}
+button{font:inherit;color:var(--ink);border:0;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line);cursor:pointer;touch-action:manipulation}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+button:disabled{opacity:.45;transform:none}
+.big{width:100%;height:56px;font-size:20px;margin-top:10px;background:var(--pri);box-shadow:0 4px 0 var(--pri2)}
+.big.alt{background:#c9ecc4;box-shadow:0 4px 0 #92c58a}
+.big.gray{background:#fff;box-shadow:0 4px 0 var(--line)}
+.two{display:flex;gap:10px}.two .big{flex:1}
+.row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:2px dashed var(--line)}
+.row:last-child{border-bottom:0}
+.av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--soft);flex:none}
+.nm{flex:1;font-size:17px}
+.tag{font-size:13px;padding:4px 10px;border-radius:99px;background:var(--soft);color:var(--sub)}
+.tag.on{background:#d6f3d0;color:#2f8a3c}
+.tag.turn{background:#ffe08a;color:#8a5a00;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:8px 12px;font-size:15px;border-radius:99px}
+.chip.on{background:var(--pri);box-shadow:0 3px 0 var(--pri2)}
+.lbl{font-size:14px;color:var(--sub);margin:10px 0 6px}
+.small{font-size:13px;color:var(--sub);font-weight:600;line-height:1.6}
+.rules li{margin:5px 0}
+.q{text-align:center;font-size:24px;line-height:1.45;padding:18px 10px;word-break:keep-all}
+.q .k{display:block;font-size:14px;color:var(--sub);margin-bottom:6px}
+input[type=text]{width:100%;height:56px;font:inherit;font-size:20px;border:3px solid var(--pri);border-radius:16px;padding:0 14px;background:#fff;color:var(--ink);-webkit-user-select:text;user-select:text;outline:none;margin-top:6px}
+.err{color:#d84a4a;font-size:14px;margin-top:6px;min-height:18px}
+.res{text-align:center}
+.res .em{font-size:60px}
+.res .t{font-size:26px;margin:6px 0}
+.res p{margin:6px 0;font-size:17px;line-height:1.5}
+.score{display:flex;justify-content:space-around;text-align:center;flex-wrap:wrap;gap:6px}
+.score div{min-width:64px}
+.score b{display:block;font-size:24px}
+.wait{display:inline-block;animation:bob 1.2s infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:15px;opacity:0;transition:.25s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.cards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.cd{width:58px;height:78px;border-radius:10px;font-size:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 3px 0 rgba(0,0,0,.12);padding:0}.cd small{font-size:11px;margin-top:2px}.cd.on{transform:translateY(-6px);outline:3px solid #2b6fd6}.cD{background:#ffd6e0}.cG{background:#fff0a8}.cS{background:#e6ecf2}.cC{background:#e3d6ff}.cP{background:#ffd2b0}.cL{background:#e8d2bc}.cK{background:#f5e6c8}.tk{display:flex;align-items:center;gap:6px;margin:4px 0;font-size:14px}.tk .ic{width:28px;text-align:center;font-size:20px}.tk .ts{display:flex;gap:3px;flex-wrap:wrap}.tk .ts i{font-style:normal;min-width:24px;height:24px;border-radius:12px;background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px}.tk .ts i:first-child{background:var(--pri);border-color:var(--pri2)}.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.acts .big{margin-top:0;height:52px;font-size:16px}.opp{display:flex;justify-content:space-between;align-items:center;font-size:15px}.herd{display:flex;align-items:center;gap:8px;justify-content:center;margin-top:8px}.herd button{padding:6px 12px;font-size:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+/* 보석 시장 — 가족 파티 게임 (각자 폰으로)
+   _dev/party/build.py 가 _dev/party/kit_template.html + _dev/party/<게임>.js 를 합쳐 만든 파일이에요. 고칠 땐 그쪽을 고치고 다시 만드세요.
+   공통 뼈대(파티 키트): 허브 공유 저장소 parent.hubShared(toolData/<게임id>__아이디)에 각자 자기 문서만 쓰고 가족 모두 읽음 → Firestore 규칙 변경 없음.
+   시작한 사람 문서의 g = 판 정보, 진행은 각자 문서의 p. 모든 폰이 GAME.derive 로 같은 상태를 계산하므로 진행자가 없어도 됨. */
+(()=>{
+const CFG={"tool": "spice-market", "title": "보석 시장", "emoji": "🐪", "min": 2, "max": 2, "sub": "시장에서 물건을 가져오고, 바꾸고, 모아서 팔아요!<br>둘이서 하는 장사 대결 (자이푸르 방식)", "rules": ["내 차례에 <b>한 가지</b>만 해요: ① 시장에서 물건 1장 가져오기 ② 낙타 모두 가져오기 ③ 시장 물건 2장 이상을 내 카드·낙타와 바꾸기 ④ 같은 물건 여러 장 팔기", "팔 때는 그 물건 토큰을 위에서부터 가져가요. <b>먼저 파는 사람이 비싸게</b> 팔아요! 💎🥇🥈는 2장 이상만 팔 수 있어요.", "한 번에 3장·4장·5장 이상 팔면 보너스 토큰(숫자는 비밀)을 받아요.", "손에는 물건 7장까지만. 낙타는 손 장수에 안 세요.", "물건 토큰 3종류가 다 떨어지거나 카드 더미가 바닥나면 끝! 낙타가 더 많은 사람 +5. 돈이 많은 사람이 승리."], "ui": {}};
+const TOOL=CFG.tool;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rint=n=>Math.floor(Math.random()*n);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rint(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const AV={dad:'👨',mom:'👩',chaea:'👧',jia:'🧒'};
+const FRESH=10*60*1000, STALE=3*60*60*1000;
+const app=$('app');
+const hub=(()=>{try{const h=window.parent!==window?window.parent.hubShared:null;return h&&h.ready&&h.me?h:null}catch(e){return null}})();
+if(!hub){
+ app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><div class="card res"><div class="em">📱</div><div class="t">가족 허브에서 열어 주세요</div><p class="small">가족이 각자 자기 폰으로 함께 하는 게임이에요.<br>허브에 로그인한 상태에서 게임 목록의 <b>${CFG.title}</b>을(를) 눌러 주세요.</p></div>`;
+ return;
+}
+const ME=hub.me.id;
+const MEMBERS=(hub.members||[]).map(m=>({id:m.id,name:m.name}));
+let docs={}, mine={}, synced=false, connErr='';
+let ui=Object.assign({},CFG.ui,LS.get(TOOL+'_ui',{}));
+let seen=LS.get(TOOL+'_seen',{});
+const firstAt={};
+let curGid='', errMsg='', lastKey='';
+
+const nameOf=id=>{const m=MEMBERS.find(x=>x.id===id);return m?m.name:(docs[id]&&docs[id].name)||id};
+const avOf=id=>AV[id]||'🙂';
+const who=id=>`${avOf(id)} ${esc(nameOf(id))}`;
+const dataOf=id=>id===ME?mine:((docs[id]&&docs[id].data)||{});
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2200)}
+function setSeen(gid,k){seen[gid]={...(seen[gid]||{}),[k]:1};const ks=Object.keys(seen);if(ks.length>40)ks.slice(0,ks.length-40).forEach(x=>delete seen[x]);LS.set(TOOL+'_seen',seen)}
+function save(){return Promise.resolve(hub.save(TOOL,JSON.parse(JSON.stringify(mine)))).catch(e=>{toast('저장하지 못했어요. 인터넷을 확인해 주세요');console.error(e)})}
+function commit(){save();render()}
+function setErr(m){errMsg=m;render()}
+const since=k=>{if(!firstAt[k])firstAt[k]=Date.now();return Date.now()-firstAt[k]};
+const hash=s=>{let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))%9973;return h};
+const norm=t=>String(t||'').replace(/[\s.,!?~'"·]+/g,'').toLowerCase();
+function current(){
+ let best=null;
+ new Set([...Object.keys(docs),ME]).forEach(id=>{const g=dataOf(id).g;if(g&&g.id&&Array.isArray(g.pl)&&g.pl.length>=CFG.min&&(!best||g.at>best.at))best=g});
+ return best&&Date.now()-best.at<STALE?best:null;
+}
+function joined(){const now=Date.now();return MEMBERS.filter(m=>{const d=dataOf(m.id);return d.lob&&now-d.lob<FRESH}).map(m=>m.id)}
+const Dof=g=>id=>{const p=dataOf(id).p;return p&&p.gid===g.id?p:{}};
+const stopOf=(g,D)=>g.pl.find(id=>D(id).end)||'';
+const anyFlag=(P,D,key,r)=>P.some(id=>(D(id)[key]||{})[r]);
+function myP(g){if(!mine.p||mine.p.gid!==g.id)mine.p={gid:g.id};(GAME.maps||[]).forEach(k=>{if(!mine.p[k]||typeof mine.p[k]!=='object'||Array.isArray(mine.p[k]))mine.p[k]={}});if(!Array.isArray(mine.p.sk))mine.p.sk=[];return mine.p}
+const skipsOf=(P,D)=>{const s=new Set();P.forEach(id=>(D(id).sk||[]).forEach(x=>s.add(x)));return s};
+function waitBtn(key,ms,list,code,label){ // 오래 멈춘 사람 기다리지 않기
+ if(since(key)<ms)return '';
+ return list.filter(id=>id!==ME).map(id=>`<button class="big gray" data-act="skip" data-k="${esc(code(id))}">⏭ ${esc(nameOf(id))}님 ${label||'기다리지 않기'}</button>`).join('');
+}
+function startGame(players){
+ const id='g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ mine.g={id,at:Date.now(),host:ME,pl:shuffle(players),...GAME.setup(players.length,id,ui)};
+ mine.p={gid:id};myP(mine.g);mine.lob=Date.now();errMsg='';
+ commit();
+}
+function lobbyHTML(g){
+ const J=joined(), amIn=J.includes(ME);
+ const live=g&&!(seen[g.id]&&seen[g.id].out)&&GAME.derive(g).ph!=='end';
+ let h=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${CFG.sub}</p>`;
+ if(live)h+=`<div class="card"><h2>🎲 지금 진행 중인 판이 있어요</h2><div class="small">${g.pl.map(nameOf).map(esc).join(' · ')}</div><button class="big gray" data-act="watch">👀 구경하기</button></div>`;
+ const MX=CFG.max||99, pickMode=J.length>MX;   // 참가자가 최대 인원보다 많으면 같이 할 사람을 골라요
+ const team=pickMode?pickSel(J,MX):J;
+ h+=`<div class="card"><h2>👨‍👩‍👧‍👧 참가할 사람 <span class="small">(${CFG.max?CFG.min===CFG.max?CFG.min+'명':CFG.min+'~'+CFG.max+'명':CFG.min+'명 이상'})</span></h2>`;
+ MEMBERS.forEach(m=>{const on=J.includes(m.id),pk=pickMode&&team.includes(m.id);h+=`<div class="row"${pickMode&&on&&m.id!==ME?` data-act="pick1" data-id="${m.id}" style="cursor:pointer"`:''}><div class="av">${avOf(m.id)}</div><div class="nm">${esc(m.name)}${m.id===ME?' <span class="small">(나)</span>':''}</div><span class="tag${on?' on':''}">${pk?'같이 해요 🤝':on?(pickMode?'눌러서 고르기':'참가 ✅'):'아직'}</span></div>`});
+ if(pickMode&&amIn)h+=`<div class="small" style="text-align:center">참가한 사람이 많아요. 같이 할 사람을 눌러 골라요</div>`;
+ h+=`<button class="big ${amIn?'gray':'alt'}" data-act="join">${amIn?'참가 취소':'🙋 나도 참가!'}</button></div>`;
+ h+=`<div class="card"><h2>⚙️ 설정</h2>${GAME.settings(ui)}
+ <button class="big" data-act="start" ${amIn&&team.length>=CFG.min&&team.length<=MX?'':'disabled'}>🚀 게임 시작 (${team.length}명)</button>
+ ${amIn&&J.length<CFG.min?`<div class="small" style="text-align:center;margin-top:6px">가족이 각자 폰에서 <b>나도 참가!</b>를 누르면 시작할 수 있어요</div>`:''}</div>`;
+ if(GAME.recordHTML)h+=GAME.recordHTML();
+ h+=`<div class="card"><h2>📖 규칙</h2><ol class="rules small">${CFG.rules.map(r=>`<li>${r}</li>`).join('')}</ol></div>`;
+ return h;
+}
+let picked=[];
+function pickSel(J,MX){picked=picked.filter(id=>J.includes(id)&&id!==ME);while(picked.length>MX-1)picked.shift();return [ME,...picked]}
+const opt=(key,val,label)=>`<button class="chip${ui[key]===val?' on':''}" data-set="${key}" data-v="${val}">${label}</button>`;
+function render(){
+ if(!synced){app.innerHTML=`<h1>${CFG.emoji} ${CFG.title}</h1><p class="sub">${connErr?esc(connErr):'가족과 연결하는 중… <span class="wait">📡</span>'}</p>`;return}
+ const ins=[...document.querySelectorAll('input[type=text]')].map(e=>({id:e.id,v:e.value,f:document.activeElement===e}));
+ const g=current(), sv=g&&seen[g.id]||{};
+ if(g&&g.id!==curGid){curGid=g.id;errMsg='';GAME.reset&&GAME.reset()}
+ let html;
+ if(!g||sv.out||(!g.pl.includes(ME)&&!sv.watch))html=lobbyHTML(g);
+ else{
+  const s=GAME.derive(g), me=s.P.includes(ME);
+  const key=g.id+':'+s.ph+':'+(s.r==null?'':s.r);
+  if(key!==lastKey){lastKey=key;errMsg='';if(GAME.buzz&&GAME.buzz(s)){try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}}}
+  html=`<h1>${CFG.emoji} ${CFG.title}</h1>`;
+  if(s.ph==='end'){
+   if(GAME.record)GAME.record(s);
+   if(s.stopped)html+=`<div class="card res"><div class="em">🛑</div><div class="t">게임을 끝냈어요</div><p>${esc(nameOf(s.stopped))}님이 중간에 끝냈어요</p><p class="small">사람을 바꾸려면 🏠 처음 화면에서 참가하고 다시 시작해요</p></div>`;
+   html+=GAME.end(s)+`<div class="card">${me?`<button class="big" data-act="again" style="margin-top:0">🔁 같은 사람끼리 한 판 더</button>`:''}<button class="big gray" data-act="lobby">🏠 처음 화면으로</button></div>`;
+  }else{
+   html+=GAME.play(s,key,me);
+   if(me)html+=`<button class="big gray" data-act="stop" style="margin-top:18px">🛑 게임 끝내기</button>`;
+  }
+ }
+ const changed=app.__h!==html;   // 바뀐 게 있을 때만 화면을 새로 그림 (그림판·입력칸이 흔들리지 않게)
+ if(changed){
+  app.innerHTML=html;app.__h=html;
+  ins.forEach(o=>{const e=$(o.id);if(e){e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(o.v.length,o.v.length)}catch(x){}}}});
+  document.querySelectorAll('input[data-enter]').forEach(e=>e.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&!ev.isComposing){ev.preventDefault();act(e.dataset.enter,e)}}));
+ }
+ if(GAME.after)GAME.after(changed);
+}
+const busy=()=>!!(GAME.busy&&GAME.busy());   // 그림 그리는 중에는 화면을 새로 그리지 않음
+function act(a,el){
+ const g=current(), s=g?GAME.derive(g):null, me=!!(s&&s.P.includes(ME));
+ if(a==='join'){mine.lob=joined().includes(ME)?0:Date.now();commit()}
+ else if(a==='start'){const J=joined(),MX=CFG.max||99,T=J.length>MX?pickSel(J,MX):J;if(T.length>=CFG.min&&T.length<=MX&&J.includes(ME))startGame(T)}
+ else if(a==='pick1'){const id=el.dataset.id;picked=picked.includes(id)?picked.filter(x=>x!==id):[...picked,id];render()}
+ else if(a==='again'&&s&&me){startGame(s.P)}
+ else if(a==='watch'&&g){setSeen(g.id,'watch');render()}
+ else if(a==='lobby'&&g){setSeen(g.id,'out');render()}
+ else if(a==='stop'&&s&&s.ph!=='end'&&me){if(confirm('게임을 끝낼까요? 모두의 화면이 결과 화면으로 바뀌어요')){myP(g).end=1;commit()}}
+ else if(a==='skip'&&s&&s.ph!=='end'&&me){const p=myP(g);p.sk=[...p.sk,el.dataset.k];commit()}
+ else if(g&&s&&s.ph!=='end')GAME.act(a,el,g,s,me);
+}
+
+/* ===== 공용 그림 도구 (획: 색·굵기 2글자 + 좌표마다 4글자, 좌표 0~1000) ===== */
+const B64='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+const PCOL=['#2b2b2b','#e84a4a','#ff9a3c','#ffd23f','#3cb371','#3a8ee6','#8e5ad6','#8b5a2b','#ff8fc0','#ffffff'];
+const PWID=[6,14,30];
+const penc=v=>{v=Math.max(0,Math.min(4095,Math.round(v*4.095)));return B64[v>>6]+B64[v&63]};
+const pdec=(s,i)=>((B64.indexOf(s[i])<<6)|B64.indexOf(s[i+1]))/4.095;
+const strokeStr=st=>B64[st.c]+B64[st.w]+st.p.map(([x,y])=>penc(x)+penc(y)).join('');
+function fitCanvas(cv){const r=cv.getBoundingClientRect();if(!r.width)return;const px=Math.round(r.width*(window.devicePixelRatio||1));if(cv.width!==px){cv.width=px;cv.height=px}}
+function paintStrokes(cv,list){
+ const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);
+ const k=cv.width/1000;
+ (list||[]).forEach(s=>{
+  if(typeof s!=='string'||s.length<6)return;
+  const c=PCOL[B64.indexOf(s[0])]||PCOL[0],w=(PWID[B64.indexOf(s[1])]||PWID[1])*k;
+  cx.strokeStyle=c;cx.fillStyle=c;cx.lineWidth=w;cx.lineCap='round';cx.lineJoin='round';
+  const pts=[];for(let i=2;i+3<s.length;i+=4)pts.push([pdec(s,i)*k,pdec(s,i+2)*k]);
+  if(pts.length===1){cx.beginPath();cx.arc(pts[0][0],pts[0][1],w/2,0,7);cx.fill();return}
+  cx.beginPath();cx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=1;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;cx.quadraticCurveTo(pts[i][0],pts[i][1],mx,my)}
+  const e=pts[pts.length-1];cx.lineTo(e[0],e[1]);cx.stroke();
+ });
+}
+
+/* ===== 차례 게임 도구: 두 사람의 수를 번호 순서대로 합치고, 같은 씨앗이면 모든 폰에서 같은 무작위 ===== */
+function movesOf(g,D){const all=[];g.pl.forEach(id=>(D(id).m||[]).forEach(x=>{const i=String(x).indexOf('|');if(i>0)all.push({n:+String(x).slice(0,i),id,mv:String(x).slice(i+1)})}));return all.sort((a,b)=>a.n-b.n)}
+function pushMove(g,n,mv){const p=myP(g);p.m=[...(Array.isArray(p.m)?p.m:[]),n+'|'+mv];commit()}
+function rng(seed){let a=seed>>>0;return ()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const sshuffle=(arr,r)=>{const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ===== 게임 규칙 (GAME) ===== */
+const TY=['D','G','S','C','P','L'],EM={D:'💎',G:'🥇',S:'🥈',C:'🧵',P:'🌶️',L:'👞',K:'🐪'},NM={D:'보석',G:'금',S:'은',C:'비단',P:'향신료',L:'가죽',K:'낙타'};
+const PRECIOUS='DGS',TOK={D:[7,7,5,5,5],G:[6,6,5,5,5],S:[5,5,5,5,5],C:[5,3,3,2,2,1,1],P:[5,3,3,2,2,1,1],L:[4,3,2,1,1,1,1,1,1]};
+let selM=[],selH=[],selK=0;
+const GAME={
+ reset(){selM=[];selH=[];selK=0},
+ setup(){return {seed:Math.floor(Math.random()*1e9),first:rint(2)}},
+ settings(){return `<div class="small">둘이서 한 판 (15~20분). 먼저 할 사람은 무작위로 정해요.</div>`},
+ derive(g){
+  const P=g.pl,D=Dof(g),stop=stopOf(g,D),r=rng(g.seed);
+  let deck=[];[['D',6],['G',6],['S',6],['C',8],['P',8],['L',10],['K',8]].forEach(([t,c])=>{for(let i=0;i<c;i++)deck.push(t)});
+  deck=sshuffle(deck,r);
+  const bon={3:sshuffle([3,3,2,2,2,1,1],r),4:sshuffle([6,6,5,5,4,4],r),5:sshuffle([10,10,9,8,8],r)};
+  const tok={};TY.forEach(t=>tok[t]=TOK[t].slice());
+  const market=['K','K','K',deck.pop(),deck.pop()];
+  const pl=[0,1].map(()=>({hand:[],camel:0,coins:0,bonus:[],goods:0}));
+  for(let k=0;k<5;k++)for(let q=0;q<2;q++){const c=deck.pop();if(c==='K')pl[q].camel++;else pl[q].hand.push(c)}
+  let turn=g.first||0,n=0,over=false,last='';
+  const refill=()=>{while(market.length<5&&deck.length)market.push(deck.pop());if(market.length<5)over=true};
+  const sortH=h=>h.sort((a,b)=>TY.indexOf(a)-TY.indexOf(b));
+  pl.forEach(x=>sortH(x.hand));
+  for(const m of movesOf(g,D)){
+   if(over)break;if(m.n!==n||m.id!==P[turn])continue;
+   const me=pl[turn],[k,a,b]=m.mv.split('|');let ok=false;
+   if(k==='t'){const i=+a,c=market[i];if(c&&c!=='K'&&me.hand.length<7){market.splice(i,1);me.hand.push(c);refill();ok=true;last=`${EM[c]} 1장 가져감`}}
+   else if(k==='k'){const c=market.filter(x=>x==='K').length;if(c){for(let i=market.length-1;i>=0;i--)if(market[i]==='K')market.splice(i,1);me.camel+=c;refill();ok=true;last=`🐪 ${c}마리 데려감`}}
+   else if(k==='x'){
+    const is=(a||'').split(',').filter(x=>x!=='').map(Number),gs=(b||'').split(',').filter(Boolean);
+    const take=is.map(i=>market[i]);
+    const hc={};me.hand.forEach(c=>hc[c]=(hc[c]||0)+1);const gc={};gs.forEach(c=>gc[c]=(gc[c]||0)+1);
+    const valid=is.length>=2&&is.length===gs.length&&new Set(is).size===is.length&&take.every(c=>c&&c!=='K')&&gs.every(c=>!take.includes(c))&&Object.keys(gc).every(c=>c==='K'?me.camel>=gc[c]:(hc[c]||0)>=gc[c])&&me.hand.length+is.length-(gs.length-(gc.K||0))<=7;
+    if(valid){is.slice().sort((x,y)=>y-x).forEach(i=>market.splice(i,1));gs.forEach(c=>{if(c==='K')me.camel--;else me.hand.splice(me.hand.indexOf(c),1);market.push(c)});take.forEach(c=>me.hand.push(c));ok=true;last=`${take.map(c=>EM[c]).join('')} ↔ ${gs.map(c=>EM[c]).join('')} 교환`}
+   }
+   else if(k==='s'){const t=a,c=+b,have=me.hand.filter(x=>x===t).length;
+    if(TY.includes(t)&&c>=1&&c<=have&&(c>=2||!PRECIOUS.includes(t))){
+     for(let i=0;i<c;i++)me.hand.splice(me.hand.indexOf(t),1);
+     let got=0;for(let i=0;i<c;i++){const v=tok[t].shift();if(v!=null){got+=v;me.goods++}}
+     me.coins+=got;const bk=c>=5?5:c;if(bk>=3&&bon[bk].length)me.bonus.push(bon[bk].shift());
+     ok=true;last=`${EM[t]} ${c}장 팔아서 ${got}원${bk>=3?' + 보너스':''}`;
+     if(TY.filter(x=>!tok[x].length).length>=3)over=true;
+    }
+   }
+   if(!ok)continue;
+   sortH(me.hand);n++;turn=1-turn;
+  }
+  const base={g,P,D,pl,market,tok,deck:deck.length,turn,n,last,r:n};
+  if(over){
+   const fin=pl.map(x=>({...x,total:x.coins+x.bonus.reduce((s,v)=>s+v,0)}));
+   const cw=fin[0].camel>fin[1].camel?0:fin[1].camel>fin[0].camel?1:-1;if(cw>=0)fin[cw].total+=5;
+   let w=fin[0].total>fin[1].total?0:fin[1].total>fin[0].total?1:fin[0].bonus.length!==fin[1].bonus.length?(fin[0].bonus.length>fin[1].bonus.length?0:1):fin[0].goods!==fin[1].goods?(fin[0].goods>fin[1].goods?0:1):-1;
+   return {...base,ph:'end',fin,cw,w};
+  }
+  if(stop)return {...base,ph:'end',stopped:stop,fin:pl.map(x=>({...x,total:x.coins+x.bonus.reduce((s,v)=>s+v,0)})),cw:-1,w:-1};
+  return {...base,ph:'play'};
+ },
+ buzz(s){return s.ph==='play'&&s.P[s.turn]===ME},
+ card(c,on,act,extra){return `<button class="cd c${c}${on?' on':''}" ${act?act:'disabled style="opacity:1"'}>${EM[c]}<small>${NM[c]}${extra||''}</small></button>`},
+ play(s,key,me){
+  const my=s.P.indexOf(ME),side=my<0?0:my,op=1-side,mine1=s.pl[side],opp=s.pl[op],myTurn=me&&s.turn===side;
+  let h=`<div class="card"><div class="opp"><span>${who(s.P[op])}</span><span>🂠 ${opp.hand.length}장 · 🐪 ${opp.camel} · 💰 ${opp.coins}${opp.bonus.length?` +🎁${opp.bonus.length}`:''}</span></div>${s.last?`<div class="small" style="text-align:center;margin-top:6px">방금: ${esc(s.last)}</div>`:''}</div>`;
+  h+=`<div class="card"><h2>🏪 시장 <span class="small">(남은 카드 ${s.deck}장)</span></h2><div class="cards">${s.market.map((c,i)=>GAME.card(c,selM.includes(i),myTurn&&c!=='K'?`data-act="selm" data-i="${i}"`:'')).join('')}</div></div>`;
+  h+=`<div class="card"><h2>${myTurn?'🙋 내 차례!':`<span class="wait">⏳</span> ${esc(nameOf(s.P[s.turn]))}님 차례`} · 내 손 ${mine1.hand.length}/7</h2><div class="cards">${mine1.hand.map((c,i)=>GAME.card(c,selH.includes(i),myTurn?`data-act="selh" data-i="${i}"`:'')).join('')||'<div class="small">손에 카드가 없어요</div>'}</div>
+  <div class="herd">🐪 낙타 ${mine1.camel}마리${myTurn&&mine1.camel?` · 교환에 쓸 낙타 <button data-act="kminus">−</button> <b>${selK}</b> <button data-act="kplus">+</button>`:''}</div>
+  <div class="small" style="text-align:center;margin-top:4px">💰 내 돈 ${mine1.coins}원${mine1.bonus.length?` + 🎁 보너스 ${mine1.bonus.join('·')}`:''}</div>`;
+  if(myTurn){
+   const sel=selH.map(i=>mine1.hand[i]),same=sel.length&&sel.every(c=>c===sel[0]),takeOne=selM.length===1&&!selH.length&&!selK;
+   const canSell=same&&!selM.length&&!selK&&(sel.length>=2||!PRECIOUS.includes(sel[0]));
+   const canX=selM.length>=2&&selH.length+selK===selM.length;
+   h+=`<div class="acts" style="margin-top:10px"><button class="big" data-act="take" ${takeOne&&mine1.hand.length<7?'':'disabled'}>🛒 가져오기</button><button class="big" data-act="camel" ${s.market.includes('K')?'':'disabled'}>🐪 낙타 모두</button><button class="big" data-act="swap" ${canX?'':'disabled'}>🔄 교환 (${selM.length}↔${selH.length+selK})</button><button class="big" data-act="sell" ${canSell?'':'disabled'}>💰 ${canSell?`${NM[sel[0]]} ${sel.length}장 팔기`:'팔기'}</button></div>
+   <div class="err">${esc(errMsg)}</div><div class="small" style="text-align:center">카드를 눌러서 고른 뒤 버튼을 눌러요. ${selM.length||selH.length||selK?'<button class="chip" data-act="clr">선택 지우기</button>':''}</div>`;
+  }
+  h+=`</div><div class="card"><h2>🪙 남은 토큰 (왼쪽부터 가져가요)</h2>${TY.map(t=>`<div class="tk"><span class="ic">${EM[t]}</span><span class="ts">${s.tok[t].map(v=>`<i>${v}</i>`).join('')||'<span class="small">다 팔림</span>'}</span></div>`).join('')}<div class="small">3·4·5장 팔면 보너스 토큰 / 다 떨어진 토큰 ${TY.filter(t=>!s.tok[t].length).length}/3이면 끝</div></div>`;
+  return h;
+ },
+ end(s){
+  const f=s.fin;
+  return `<div class="card res"><div class="em">${s.w<0?'🤝':s.P[s.w]===ME?'🏆':'🐪'}</div><div class="t">${s.stopped?'게임 기록':s.w<0?'무승부!':esc(nameOf(s.P[s.w]))+'님 승리!'}</div>
+  ${[0,1].map(i=>`<div class="row"><div class="av">${avOf(s.P[i])}</div><div class="nm">${esc(nameOf(s.P[i]))}<div class="small">물건 ${f[i].coins} + 보너스 ${f[i].bonus.reduce((a,v)=>a+v,0)} (${f[i].bonus.join('·')||'없음'})${s.cw===i?' + 낙타왕 5':''} · 🐪${f[i].camel}</div></div><b>${f[i].total}원</b></div>`).join('')}</div>`;
+ },
+ record(s){if(s.stopped||s.w<0)return;const b=LS.get(TOOL+'_rec',{wins:{},done:[]});if(b.done.includes(s.g.id))return;const id=s.P[s.w];b.wins[id]=(b.wins[id]||0)+1;b.done=[...b.done,s.g.id].slice(-40);LS.set(TOOL+'_rec',b)},
+ recordHTML(){const b=LS.get(TOOL+'_rec',{wins:{}});const any=MEMBERS.some(m=>b.wins[m.id]);return `<div class="card"><h2>🏆 이 폰에서 본 승리 횟수</h2>${any?`<div class="score">${MEMBERS.map(m=>`<div>${avOf(m.id)}<b>${b.wins[m.id]||0}</b><span class="small">${esc(m.name)}</span></div>`).join('')}</div>`:'<div class="small">아직 기록이 없어요</div>'}</div>`},
+ act(a,el,g,s,me){
+  if(!me||s.ph!=='play')return;const my=s.P.indexOf(ME);if(s.turn!==my)return;
+  const mine1=s.pl[my],tog=(arr,i)=>arr.includes(i)?arr.filter(x=>x!==i):[...arr,i];
+  if(a==='selm'){selM=tog(selM,+el.dataset.i);errMsg='';render()}
+  else if(a==='selh'){selH=tog(selH,+el.dataset.i);errMsg='';render()}
+  else if(a==='kplus'){selK=Math.min(mine1.camel,selK+1);render()}
+  else if(a==='kminus'){selK=Math.max(0,selK-1);render()}
+  else if(a==='clr'){GAME.reset();render()}
+  else if(a==='take'&&selM.length===1){const i=selM[0];GAME.reset();pushMove(g,s.n,'t|'+i)}
+  else if(a==='camel'){GAME.reset();pushMove(g,s.n,'k')}
+  else if(a==='sell'){const sel=selH.map(i=>mine1.hand[i]);GAME.reset();pushMove(g,s.n,'s|'+sel[0]+'|'+sel.length)}
+  else if(a==='swap'){
+   const take=selM.map(i=>s.market[i]),give=[...selH.map(i=>mine1.hand[i]),...Array(selK).fill('K')];
+   if(give.some(c=>take.includes(c)))return setErr('가져오는 것과 같은 물건은 내줄 수 없어요');
+   if(mine1.hand.length+take.length-selH.length>7)return setErr('손에는 7장까지만 들 수 있어요');
+   const mv='x|'+selM.join(',')+'|'+give.join(',');GAME.reset();pushMove(g,s.n,mv);
+  }
+ }
+};
+
+/* ===== 연결·이벤트 ===== */
+app.addEventListener('click',e=>{
+ const b=e.target.closest('[data-act],[data-set]');if(!b||b.disabled)return;
+ if(b.dataset.set!=null){const v=b.dataset.v;ui[b.dataset.set]=isNaN(+v)?v:+v;LS.set(TOOL+'_ui',ui);render();return}
+ act(b.dataset.act,b);
+});
+hub.watch(TOOL,list=>{
+ const d={};(list||[]).forEach(x=>{if(x&&x.id)d[x.id]=x});docs=d;
+ if(!synced){synced=true;mine=JSON.parse(JSON.stringify((docs[ME]&&docs[ME].data)||{}))}
+ if(!busy())render();
+},e=>{connErr='연결하지 못했어요. 인터넷을 확인하고 다시 열어 주세요.';console.error(e);render()});
+setInterval(()=>{
+ if(synced&&mine.lob&&Date.now()-mine.lob>FRESH*.6){mine.lob=Date.now();save()}
+ const a=document.activeElement;if(a&&a.tagName==='INPUT')return;
+ if(!busy())render();
+},3000);
+setTimeout(()=>{if(!synced){connErr='연결이 늦어요. 인터넷을 확인해 주세요.';render()}},10000);
+render();
+})();
+</script>
+</body>
+</html>
