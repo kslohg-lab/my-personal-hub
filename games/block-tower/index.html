@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>와르르 블록 탑</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#home{background:linear-gradient(rgba(190,228,255,.88),rgba(255,236,200,.92))}
+#home .logo{position:absolute;left:0;right:0;top:8%;text-align:center;font-size:52px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #f0a030,0 0 18px rgba(255,190,90,.6);-webkit-text-stroke:2px #d08a20;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #d08a20;margin-top:8px}
+#home .box{position:absolute;left:24px;right:24px;bottom:9%;display:flex;flex-direction:column;gap:12px}
+#home .box button.big{height:62px;font-size:24px}
+#home .who{display:flex;gap:8px;justify-content:center}
+#home .who button{height:46px;padding:0 12px;font-size:18px}
+#home .who button.on{background:#ffd25a;box-shadow:0 5px 0 #e0a92e}
+#home .lb{text-align:center;font-size:16px;color:#7a5a3a}
+#home .best{text-align:center}
+#ctl{position:absolute;left:0;right:0;bottom:0;padding:10px 16px 16px;display:none;gap:12px;pointer-events:auto}
+#ctl.on{display:flex}
+#ctl button{height:70px;font-size:26px;border-radius:24px}
+#bRot{width:96px}
+#bDrop{flex:1}
+#pbtn{left:10px;top:10px;display:none}
+#sbtn{left:12px;top:14px}
+.hint{position:absolute;left:0;right:0;bottom:104px;text-align:center;color:#fff;font-size:16px;text-shadow:0 2px 3px rgba(0,0,0,.35);pointer-events:none}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="home" class="scr"><div class="logo">와르르<br>블록 탑<small>🧱 무너뜨리지 말고 높이 높이!</small></div>
+  <div class="box"><div class="best"><span class="pill" id="hb">🏆 최고 0cm</span></div>
+   <button class="big gold" id="bSolo">🧍 혼자 높이 쌓기</button>
+   <div class="lb">같이 할 사람을 골라요 (한 폰을 돌려 가며)</div>
+   <div class="who" id="who"></div>
+   <button class="big sky" id="bMulti">👨‍👩‍👧‍👧 같이 하기</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 한 판 더</button><button id="rHome">🏠 처음</button></div></div></div>
+ <div class="hint" id="hint">👆 화면을 좌우로 끌어서 옮겨요</div>
+ <div id="ctl"><button id="bRot">⟳</button><button class="gold" id="bDrop">⬇ 놓기</button></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🧱</div><div>블록을 꺼내는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

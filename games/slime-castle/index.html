@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>슬라임 성 와르르</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#home{background:linear-gradient(rgba(150,215,255,.75),rgba(200,240,190,.85))}
+#home .logo{position:absolute;left:40px;top:40px;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #3a9a4a,0 0 18px rgba(120,220,120,.6);-webkit-text-stroke:2px #2f8a3e;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:20px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #2f8a3e;margin-top:8px}
+#home .menu{position:absolute;right:44px;top:110px;width:260px;display:flex;flex-direction:column;gap:14px}
+#home .menu button{height:64px;font-size:26px}
+#home .best{position:absolute;right:44px;top:50px;width:260px;text-align:center}
+#lv .panel{position:absolute;left:30px;right:30px;top:20px;bottom:20px;background:var(--card);border-radius:28px;padding:14px 18px}
+#lv h2{margin:0 0 10px;font-size:28px;font-weight:400;display:flex;align-items:center;gap:10px}#lv h2 span{flex:1}
+#lv .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+#lv .grid button{height:118px;font-size:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+#lv .grid button small{font-size:15px;letter-spacing:1px}
+#lv .grid button.lk{background:#ece4f2;color:#b8a8c8}
+#hudb{position:absolute;right:10px;top:10px;display:none;gap:8px;pointer-events:auto}
+#hudb button{width:50px;height:46px;font-size:22px;padding:0}
+.card{width:440px}
+.stars{font-size:52px;letter-spacing:6px;height:64px}
+.stars span{display:inline-block;filter:grayscale(1) opacity(.3);transform:scale(.4)}
+.stars span.on{filter:none;animation:pop .45s cubic-bezier(.3,1.8,.5,1) forwards}
+@keyframes pop{from{transform:scale(.2) rotate(-40deg)}to{transform:scale(1) rotate(0)}}
+#sbtn{left:12px;bottom:12px}
+#rot{position:fixed;inset:0;z-index:99;display:none;flex-direction:column;align-items:center;justify-content:center;background:#dff4ff;color:var(--ink);font-size:28px;text-align:center;line-height:1.6}#rot b{font-size:80px;font-weight:400}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="home" class="scr"><div class="logo">슬라임 성<br>와르르!<small>🟢 새총으로 구슬을 날려 성을 무너뜨려요</small></div>
+  <div class="best"><span class="pill" id="hs">⭐ 0/36</span></div>
+  <div class="menu"><button class="gold" id="bGo">▶ 이어서 하기</button><button class="sky" id="bLv">🗺️ 단계 고르기</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="lv" class="scr"><div class="panel"><h2>🗺️ 단계 고르기<span></span><button class="topbtn" style="position:static" id="lx">✖</button></h2><div class="grid" id="lg"></div></div></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pRe">🔁 다시</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div class="stars" id="rS"></div><div id="rB"></div><div class="row"><button id="rRe">🔁 다시</button><button class="gold" id="rNext">▶ 다음</button><button id="rHome">🗺️ 단계</button></div></div></div>
+ <div id="hudb"><button id="bRe">🔁</button><button id="bP">⏸️</button></div>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🟢</div><div>성을 쌓는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<div id="rot"><b>📱</b>화면을 가로로 돌려주세요</div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

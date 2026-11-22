@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>로봇 달리기 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#game canvas{display:block;width:100%;height:100%}
+#home{background:linear-gradient(rgba(40,60,120,.35),rgba(30,20,70,.65))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:52px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #2a7ad0,0 0 22px rgba(90,200,255,.8);-webkit-text-stroke:2px #1a5ab0;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#e6f6ff;text-shadow:0 2px 0 #1a5ab0;margin-top:8px}
+#home .menu{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:270px;display:flex;flex-direction:column;gap:14px}
+#home .menu button{height:66px;font-size:27px}
+#home .best{position:absolute;left:0;right:0;bottom:calc(12% + 88px);text-align:center}
+#home .how{position:absolute;left:24px;right:24px;top:calc(9% + 150px);background:rgba(255,255,255,.88);border-radius:20px;padding:12px 16px;font-size:16px;line-height:1.7;text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;pointer-events:none;padding:12px}
+#hud .row{display:flex;gap:8px;align-items:center}
+#hud .pill{font-size:19px}
+#hud .sp{flex:1}
+#hud .pw{margin-top:8px;display:flex;gap:6px}
+#hud .pw span{background:rgba(255,255,255,.9);border-radius:14px;padding:3px 10px;font-size:16px}
+#pbtn{right:12px;top:56px;display:none}
+#sbtn{left:12px;top:14px}
+#swipe{position:absolute;left:0;right:0;bottom:22%;text-align:center;color:#fff;font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,.5);pointer-events:none;transition:opacity .5s}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><div class="row"><span class="pill" id="hS">0</span><span class="sp"></span><span class="pill" id="hC">🪙 0</span></div><div class="pw" id="hP"></div></div>
+ <div id="swipe">👈 👉 밀어서 옮기기 · 👆 점프 · 👇 슬라이드</div>
+ <div id="home" class="scr"><div class="logo">로봇 달리기<br>3D<small>🤖 반짝이는 도시를 끝까지 달려요!</small></div>
+  <div class="how">👈 👉 <b>밀면</b> 옆 줄로 · 👆 <b>위로 밀면</b> 점프<br>👇 <b>아래로 밀면</b> 슬라이드 · 🪙 코인을 모아요!<br>🧲 자석 · 🚀 제트팩 · ✨ 점수 2배</div>
+  <div class="best"><span class="pill" id="hb">🏆 최고 0</span></div>
+  <div class="menu"><button class="gold" id="bGo">▶ 달리기!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시 달리기</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<script src="../lib/three.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>
