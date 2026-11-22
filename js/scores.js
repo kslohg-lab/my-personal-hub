@@ -32,7 +32,10 @@ const BOARD = [
   { id: 'claw-machine', title: '인형뽑기 · 인형 도감', icon: '🧸', unit: '종', read: () => { try { const c = (JSON.parse(ls('clawV2') || 'null') || {}).col || {}; return num(Object.keys(c).filter(k => c[k] > 0).length); } catch { return 0; } } },
   { id: 'robo-run', title: '로봇 달리기 3D', icon: '🤖', unit: '점', read: () => { try { return num((JSON.parse(ls('roboRunV1') || 'null') || {}).best); } catch { return 0; } } },
   { id: 'slime-castle', title: '슬라임 성 · 모은 별', icon: '🟢', unit: '개', read: () => { try { const s = (JSON.parse(ls('slimeCastleV1') || 'null') || {}).stars || {}; return num(Object.values(s).reduce((a, b) => a + (+b || 0), 0)); } catch { return 0; } } },
-  { id: 'block-tower', title: '블록 탑 · 혼자 쌓은 높이', icon: '🧱', unit: 'cm', read: () => { try { return num((JSON.parse(ls('blockTowerV1') || 'null') || {}).best); } catch { return 0; } } }
+  { id: 'block-tower', title: '블록 탑 · 혼자 쌓은 높이', icon: '🧱', unit: 'cm', read: () => { try { return num((JSON.parse(ls('blockTowerV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'mini-golf', title: '미니골프 · 홀인원', icon: '⛳', unit: '번', read: () => { try { return num((JSON.parse(ls('miniGolfV1') || 'null') || {}).hio); } catch { return 0; } } },
+  { id: 'neon-brick', title: '네온 벽돌깨기', icon: '💎', unit: '점', read: () => { try { return num((JSON.parse(ls('neonBrickV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'stack-3d', title: '착착 쌓기 3D', icon: '🟦', unit: '층', read: () => { try { return num((JSON.parse(ls('stack3dV1') || 'null') || {}).best); } catch { return 0; } } }
 ];
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>네온 벽돌깨기</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#home{background:linear-gradient(rgba(20,10,50,.55),rgba(10,5,30,.85))}
+#home .logo{position:absolute;left:0;right:0;top:10%;text-align:center;font-size:56px;line-height:1.05;color:#fff;text-shadow:0 0 8px #ff5ad0,0 0 24px #ff5ad0,0 0 40px #a04aff;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;color:#bff4ff;text-shadow:0 0 10px #4ad8ff;margin-top:10px}
+#home .how{position:absolute;left:30px;right:30px;top:calc(10% + 150px);background:rgba(255,255,255,.1);border:2px solid rgba(120,220,255,.5);color:#e8f8ff;border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.7;text-align:center}
+#home .menu{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:14px}
+#home .menu button{height:62px;font-size:24px}
+#home .best{text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;padding:10px 10px 0 66px;gap:8px;align-items:center;pointer-events:none}
+#hud.on{display:flex}
+#hud .pill{font-size:18px;white-space:nowrap;background:rgba(255,255,255,.12);color:#fff;border:2px solid rgba(140,230,255,.55);box-shadow:none}
+#hud .sp{flex:1}
+#hPw{position:absolute;left:0;right:0;top:56px;display:none;justify-content:center;gap:6px;pointer-events:none}
+#hPw.on{display:flex}
+#hPw span{background:rgba(255,255,255,.14);color:#fff;border-radius:12px;padding:2px 10px;font-size:15px}
+#pbtn{left:10px;top:8px;display:none}
+#sbtn{left:12px;top:14px}
+.hint{position:absolute;left:0;right:0;bottom:30px;text-align:center;color:#cfefff;font-size:17px;text-shadow:0 0 8px #3ab0ff;pointer-events:none;transition:opacity .4s}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><span class="pill" id="hL">1단계</span><span class="sp"></span><span class="pill" id="hS">0</span><span class="pill" id="hV">♥♥♥</span></div>
+ <div id="hPw"></div>
+ <div class="hint" id="hint">👆 좌우로 끌어서 움직이고, 손을 떼면 발사!</div>
+ <div id="home" class="scr"><div class="logo">네온<br>벽돌깨기<small>✨ 반짝반짝 벽돌을 모두 깨요!</small></div>
+  <div class="how">👆 아무 데나 <b>좌우로 끌면</b> 받침대가 움직여요<br>🎁 떨어지는 캡슐을 받으면 특별한 힘!<br>넓게 · 공 3개 · 레이저 · 불꽃 · 느리게 · ♥</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb">🏆 최고 0</span></div><button class="gold" id="bGo">▶ 1단계부터</button><button class="sky" id="bCont" style="display:none">⏩ 이어서</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🧱</div><div>네온을 켜는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

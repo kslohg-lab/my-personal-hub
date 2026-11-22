@@ -9,6 +9,7 @@ html,body{margin:0;height:100%;background:#2b2340;overflow:hidden;font-family:"J
 @keyframes kfade{from{opacity:0}to{opacity:1}}
 @keyframes kbob{50%{transform:translateY(-6px) rotate(-1deg)}}
 @keyframes kpop{from{transform:scale(.3)}to{transform:scale(1)}}
+@keyframes kcard{from{transform:translate(-50%,-50%) scale(.3)}to{transform:translate(-50%,-50%) scale(1)}}
 button{font:inherit;color:var(--ink);border:0;border-radius:18px;background:#fff;box-shadow:0 5px 0 #d9c3e6;cursor:pointer;touch-action:manipulation;transition:transform .08s}
 button:active{transform:translateY(4px);box-shadow:0 1px 0 #d9c3e6}
 .gold{background:linear-gradient(#ffe27a,#ffc94a);box-shadow:0 5px 0 var(--gold2)}
@@ -19,7 +20,7 @@ button:active{transform:translateY(4px);box-shadow:0 1px 0 #d9c3e6}
 .sky:active{box-shadow:0 1px 0 #6fb5e0}
 .pill{background:rgba(255,255,255,.92);border-radius:20px;padding:6px 14px;font-size:18px;box-shadow:0 3px 0 rgba(90,61,110,.18)}
 .dim{position:absolute;inset:0;background:rgba(50,25,70,.6)}
-.card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:var(--card);border-radius:30px;padding:20px 18px;text-align:center;box-shadow:0 10px 0 rgba(90,61,110,.3);animation:kpop .3s cubic-bezier(.3,1.6,.5,1)}
+.card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:var(--card);border-radius:30px;padding:20px 18px;text-align:center;box-shadow:0 10px 0 rgba(90,61,110,.3);animation:kcard .3s cubic-bezier(.3,1.6,.5,1)}
 .card h2{margin:0 0 8px;font-size:32px;font-weight:400}
 .card .row{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .card .row button{height:56px;padding:0 18px;font-size:20px}

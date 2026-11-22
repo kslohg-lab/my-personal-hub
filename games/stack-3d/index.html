@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>착착 쌓기 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+html,body{background:#7fb0e0;transition:background 1s}
+#game canvas{display:block;width:100%;height:100%}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.18),0 0 20px rgba(255,255,255,.5);animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;margin-top:10px;text-shadow:0 2px 0 rgba(0,0,0,.18)}
+#home .menu{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);width:270px;display:flex;flex-direction:column;gap:14px}
+#home .menu button{height:66px;font-size:27px}
+#home .best{text-align:center}
+#home .how{position:absolute;left:40px;right:40px;bottom:calc(11% + 140px);color:#fff;background:rgba(40,30,80,.38);border-radius:20px;padding:10px 12px;font-size:18px;line-height:1.7;text-align:center;text-shadow:0 2px 3px rgba(0,0,0,.25)}
+#score{position:absolute;left:0;right:0;top:70px;text-align:center;font-size:72px;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.15);display:none;pointer-events:none}
+#perf{position:absolute;left:0;right:0;top:160px;text-align:center;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .3s}
+#pbtn{left:12px;top:12px;display:none}
+#sbtn{left:12px;top:14px}
+.toast{top:215px}
+.tap{position:absolute;left:0;right:0;bottom:16%;text-align:center;color:#fff;font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,.3);pointer-events:none;animation:kbob 1.4s ease-in-out infinite;display:none}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="score">0</div><div id="perf">딱 맞았어요!</div><div class="tap" id="tap">👆 화면을 톡! 해서 내려놓아요</div>
+ <div id="home" class="scr"><div class="logo">착착 쌓기<br>3D<small>🟦 딱 맞춰 높이 높이!</small></div>
+  <div class="how">움직이는 블록을 <b>톡!</b> 해서 내려놓아요<br>삐져나온 부분은 잘려 나가요<br>✨ 딱 맞추면 다시 커져요</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb">🏆 최고 0층</span></div><button class="gold" id="bGo">▶ 쌓기 시작!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="card" style="top:auto;bottom:6%;transform:translate(-50%,0);animation:kfade .3s ease"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시 쌓기</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<script src="../lib/three.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>
