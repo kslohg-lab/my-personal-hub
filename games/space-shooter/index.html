@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>반짝 우주 슈팅</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+html,body{background:#0d0b26}
+#game canvas{display:block}
+#home{background:linear-gradient(rgba(20,10,60,.5),rgba(5,5,25,.85))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #5a7aff,0 0 20px rgba(255,255,255,.45);-webkit-text-stroke:2px #5a7aff;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #5a7aff;margin-top:10px}
+#home .how{position:absolute;left:30px;right:30px;top:calc(9% + 150px);background:rgba(255,255,255,.12);color:#eef;border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.7;text-align:center}
+#home .menu{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;padding:10px 10px 0 66px;gap:8px;align-items:center;pointer-events:none}
+#hud.on{display:flex}
+#hud .pill{font-size:18px;white-space:nowrap}
+#hud .pill:empty{display:none}
+#hud .sp{flex:1}
+#hud .pill{background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.35);box-shadow:none}
+#pbtn{left:10px;top:8px;display:none}
+#sbtn{left:12px;top:14px}
+#bomb{position:absolute;right:14px;bottom:18px;width:66px;height:66px;border-radius:50%;font-size:26px;padding:0;pointer-events:auto;background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.5);box-shadow:none}#bomb b{position:absolute;right:-2px;top:-4px;background:#ff5a5a;color:#fff;border-radius:10px;font-size:14px;padding:0 6px;font-weight:400}#bossbar{position:absolute;left:70px;right:20px;top:58px;height:10px;border-radius:6px;background:rgba(255,255,255,.2);overflow:hidden;display:none}#bossbar i{display:block;height:100%;background:linear-gradient(90deg,#ff3a6a,#ffb03a)}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><span class="pill" id="hA"></span><span class="sp"></span><span class="pill" id="hB"></span><span class="pill" id="hC"></span></div>
+ <button id="bomb" class="playonly" style="display:none">💣<b id="bombN">1</b></button><div id="bossbar"><i id="bossfill"></i></div>
+ <div id="home" class="scr"><div class="logo">반짝<br>우주 슈팅<small>🚀 외계 함대를 물리쳐요!</small></div>
+  <div class="how">👆 아무 데나 <b>끌면</b> 우주선이 따라와요 (총은 자동)<br>⭐ 별 캡슐 = 총 강화 · 🛡️ 방패 · 💣 폭탄<br>5파도마다 보스 등장!</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb"></span></div><button class="gold" id="bGo">▶ 시작!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🚀</div><div>엔진 예열 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

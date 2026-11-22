@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>슝슝 농구</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+html,body{background:#ffcf9a}
+#game canvas{display:block}
+#home{background:linear-gradient(rgba(255,190,120,.8),rgba(255,240,215,.92))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #d0702a,0 0 20px rgba(255,255,255,.45);-webkit-text-stroke:2px #d0702a;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #d0702a;margin-top:10px}
+#home .how{position:absolute;left:30px;right:30px;top:calc(9% + 150px);background:rgba(255,255,255,.88);color:inherit;border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.7;text-align:center}
+#home .menu{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;padding:10px 10px 0 66px;gap:8px;align-items:center;pointer-events:none}
+#hud.on{display:flex}
+#hud .pill{font-size:18px;white-space:nowrap}
+#hud .pill:empty{display:none}
+#hud .sp{flex:1}
+
+#pbtn{left:10px;top:8px;display:none}
+#sbtn{left:12px;top:14px}
+.hint{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-size:18px;text-shadow:0 2px 3px rgba(0,0,0,.45);pointer-events:none;transition:opacity .4s}#tbar{position:absolute;left:66px;right:14px;top:58px;height:10px;border-radius:6px;background:rgba(255,255,255,.5);overflow:hidden}#tbar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff7a3a,#ffd23a)}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><span class="pill" id="hA"></span><span class="sp"></span><span class="pill" id="hB"></span><span class="pill" id="hC"></span></div>
+ <div class="hint playonly" id="hint" style="display:none">👆 뒤로 당겼다 놓으면 슛!</div><div id="tbar" class="playonly" style="display:none"><i id="tfill"></i></div>
+ <div id="home" class="scr"><div class="logo">슝슝<br>농구<small>🏀 60초 동안 몇 골?</small></div>
+  <div class="how">👆 공을 <b>뒤로 당겼다 놓으면</b> 슛!<br>🔥 연속으로 넣으면 점수가 두 배<br>✨ 림에 안 닿고 쏙 = 보너스</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb"></span></div><button class="gold" id="bGo">▶ 시작!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🏀</div><div>공에 바람 넣는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

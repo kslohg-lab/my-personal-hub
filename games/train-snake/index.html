@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>꼬마 기차</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+html,body{background:#7ccf6a}
+#game canvas{display:block}
+#home{background:linear-gradient(rgba(140,220,120,.85),rgba(255,245,210,.92))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #3a8a2a,0 0 20px rgba(255,255,255,.45);-webkit-text-stroke:2px #3a8a2a;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #3a8a2a;margin-top:10px}
+#home .how{position:absolute;left:30px;right:30px;top:calc(9% + 150px);background:rgba(255,255,255,.88);color:inherit;border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.7;text-align:center}
+#home .menu{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;padding:10px 10px 0 66px;gap:8px;align-items:center;pointer-events:none}
+#hud.on{display:flex}
+#hud .pill{font-size:18px;white-space:nowrap}
+#hud .pill:empty{display:none}
+#hud .sp{flex:1}
+
+#pbtn{left:10px;top:8px;display:none}
+#sbtn{left:12px;top:14px}
+.hint{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-size:18px;text-shadow:0 2px 3px rgba(0,0,0,.4);pointer-events:none}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><span class="pill" id="hA"></span><span class="sp"></span><span class="pill" id="hB"></span><span class="pill" id="hC"></span></div>
+ <div class="hint playonly" id="hint" style="display:none">👆 밀어서 방향 바꾸기</div>
+ <div id="home" class="scr"><div class="logo">꼬마<br>기차<small>🚂 손님을 태우고 칙칙폭폭!</small></div>
+  <div class="how">👆 화면을 <b>밀어서</b> 방향을 바꿔요<br>🧍 손님을 태울수록 기차가 길어져요<br>💥 벽·바위·내 기차에 부딪히면 끝!</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb"></span></div><button class="gold" id="bGo">▶ 시작!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🚂</div><div>선로를 까는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

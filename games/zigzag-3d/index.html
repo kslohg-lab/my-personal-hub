@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>지그재그 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+html,body{background:#7fd0e8}
+#game canvas{display:block}
+#home{background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,0))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #2a8ab0,0 0 20px rgba(255,255,255,.45);-webkit-text-stroke:2px #2a8ab0;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #2a8ab0;margin-top:10px}
+#home .how{position:absolute;left:30px;right:30px;top:calc(9% + 150px);background:rgba(255,255,255,.88);color:inherit;border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.7;text-align:center}
+#home .menu{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;padding:10px 10px 0 66px;gap:8px;align-items:center;pointer-events:none}
+#hud.on{display:flex}
+#hud .pill{font-size:18px;white-space:nowrap}
+#hud .pill:empty{display:none}
+#hud .sp{flex:1}
+
+#pbtn{left:10px;top:8px;display:none}
+#sbtn{left:12px;top:14px}
+html,body{transition:background 1.2s}#game canvas{width:100%;height:100%}#score{position:absolute;left:0;right:0;top:64px;text-align:center;font-size:66px;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.15);pointer-events:none}.tap{position:absolute;left:0;right:0;bottom:16%;text-align:center;color:#fff;font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,.3);pointer-events:none;animation:kbob 1.4s ease-in-out infinite}#home{background:none}#home .how{background:rgba(30,60,90,.35);color:#fff}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><span class="pill" id="hA"></span><span class="sp"></span><span class="pill" id="hB"></span><span class="pill" id="hC"></span></div>
+ <div id="score" class="playonly" style="display:none">0</div><div class="tap playonly" id="tap" style="display:none">👆 톡! 하면 출발, 또 톡! 하면 방향이 바뀌어요</div>
+ <div id="home" class="scr"><div class="logo">지그재그<br>3D<small>⚪ 길을 따라 데굴데굴</small></div>
+  <div class="how">👆 화면을 <b>톡</b> 할 때마다 방향이 바뀌어요<br>💎 보석을 모아요<br>길 밖으로 떨어지면 끝!</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb"></span></div><button class="gold" id="bGo">▶ 시작!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">⚪</div><div>길을 놓는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/three.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

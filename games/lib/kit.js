@@ -2,7 +2,7 @@
    - 소리: 효과음·배경음악을 파일 없이 직접 합성 (KIT.AU, KIT.BGM)
    - 화면: 세로형 게임 크기 계산(KIT.size), DOM 메뉴를 캔버스에 맞추기(KIT.fitUI), 안내 문구(KIT.toast)
    - 저장: KIT.save(key, 기본값) → {data, put()}
-   쓰는 게임: block-puzzle, animal-merge, animal-survivor */
+   쓰는 게임: games/ 안의 엔진 게임 전부 (block-puzzle, animal-merge, … 그리고 v1.51의 10종은 shell/boot/ready/tex도 씀) */
 window.KIT=(()=>{'use strict';
 const R=(window.devicePixelRatio||1)>=1.5?2:1;
 const rnd=(a,b)=>a+Math.random()*(b-a),pick=a=>a[Math.floor(Math.random()*a.length)],clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),pad2=n=>String(n).padStart(2,'0');
@@ -73,5 +73,22 @@ function textures(sc){if(sc.textures.exists('dot'))return;const g=sc.make.graphi
  g.fillStyle(0xffffff,.9);g.fillCircle(32,32,30);g.fillStyle(0xffffff,1);g.fillCircle(32,32,24);g.generateTexture('glow',64,64);g.destroy()}
 function text(sc,x,y,s,size,color,stroke){return sc.add.text(x,y,s,{fontFamily:FONT,fontSize:size+'px',color:color||'#fff',stroke:stroke||'#4a2d5e',strokeThickness:Math.max(3,Math.round(size/5))}).setOrigin(.5).setResolution(R)}
 function floatText(sc,x,y,s,color,size,depth){const t=text(sc,x,y,s,size||22,color||'#fff').setDepth(depth||80).setScale(.6);sc.tweens.add({targets:t,scale:1,duration:140,ease:'Back.easeOut'});sc.tweens.add({targets:t,y:y-50,alpha:0,duration:900,delay:120,ease:'Cubic.easeOut',onComplete:()=>t.destroy()});return t}
-return {R,rnd,pick,clamp,pad2,$,IMG,FONT,save,size,fitUI,toast,fontReady,AU,BGM,textures,text,floatText};
+
+/* 공용 화면 틀: 처음 화면·일시정지·결과 버튼 연결 (게임마다 같은 id 사용)
+   o={S,SV,start(),home(),pause(on)} → {sc(id), hud(a,b,c), result(제목,html,이김), best(글)} */
+function shell(o){const sc=id=>{document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id===id));const pl=id===null,p=$('pbtn'),h=$('hud');if(p)p.style.display=pl?'block':'none';if(h)h.classList.toggle('on',pl||id==='pause');document.querySelectorAll('.playonly').forEach(e=>e.style.display=pl?'':'none')};
+ const S=o.S,SV=o.SV,sb=$('sbtn');if(sb){const u=()=>sb.textContent=S.snd?'🔊':'🔇';u();AU.on=BGM.on=!!S.snd;sb.onclick=()=>{S.snd=S.snd?0:1;AU.on=BGM.on=!!S.snd;SV.put();u();AU.init();AU.sfx('click')}}
+ const on=(id,f)=>{const e=$(id);if(e)e.onclick=ev=>{ev.stopPropagation();AU.init();AU.sfx('click');f(ev)}};
+ on('bGo',()=>o.start(0));on('bGo2',()=>o.start(1));on('pbtn',()=>{o.pause&&o.pause(true);sc('pause')});on('pGo',()=>{o.pause&&o.pause(false);sc(null)});on('pHome',()=>{o.pause&&o.pause(false);o.home()});on('rRe',()=>o.start(o.again?o.again():0));on('rHome',()=>o.home());
+ return {sc,hud(a,b,c){[['hA',a],['hB',b],['hC',c]].forEach(([i,v])=>{if(v!==undefined&&$(i))$(i).textContent=v})},
+  result(t,html,win){$('rT').textContent=t;$('rB').innerHTML=html;if(win)AU.sfx('win');sc('res')},best(t){if($('hb'))$('hb').textContent=t}}}
+/* Phaser 게임 시작: 글꼴을 기다린 뒤 장면 시작 */
+function boot(Scene,cfg){cfg=cfg||{};const g=new Phaser.Game(Object.assign({type:Phaser.AUTO,parent:'game',width:cfg.W*R,height:cfg.H*R,backgroundColor:cfg.bg||'#222',scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH},render:{antialias:true},audio:{noAudio:true},
+  scene:[{key:'boot',create(){fontReady().then(()=>this.scene.start('main'))}},Scene]},cfg.physics?{physics:cfg.physics}:{}));const ui=$('ui');ui.style.width=cfg.W+'px';ui.style.height=cfg.H+'px';return g}
+/* 장면 create 안에서: 로딩 화면 끄기 + 메뉴를 캔버스에 맞추기 + 카메라 확대 */
+function ready(sc,W,H){const l=$('load');if(l)l.style.display='none';fitUI(W);addEventListener('resize',()=>setTimeout(()=>fitUI(W),60));sc.scale.on('resize',()=>setTimeout(()=>fitUI(W),30));const c=sc.cameras.main;c.setZoom(R);c.centerOn(W/2,H/2)}
+/* 고해상도 캔버스 텍스처: 그린 크기의 R배로 만들어 setScale(1/R)로 씀 */
+function tex(sc,k,w,h,fn){if(sc.textures.exists(k))sc.textures.remove(k);const c=sc.textures.createCanvas(k,Math.ceil(w*R),Math.ceil(h*R)),x=c.getContext();x.scale(R,R);fn(x,w,h);c.refresh();return k}
+function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+return {R,rnd,pick,clamp,pad2,$,IMG,FONT,save,size,fitUI,toast,fontReady,AU,BGM,textures,text,floatText,shell,boot,ready,tex,rr};
 })();

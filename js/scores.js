@@ -35,7 +35,17 @@ const BOARD = [
   { id: 'block-tower', title: '블록 탑 · 혼자 쌓은 높이', icon: '🧱', unit: 'cm', read: () => { try { return num((JSON.parse(ls('blockTowerV1') || 'null') || {}).best); } catch { return 0; } } },
   { id: 'mini-golf', title: '미니골프 · 홀인원', icon: '⛳', unit: '번', read: () => { try { return num((JSON.parse(ls('miniGolfV1') || 'null') || {}).hio); } catch { return 0; } } },
   { id: 'neon-brick', title: '네온 벽돌깨기', icon: '💎', unit: '점', read: () => { try { return num((JSON.parse(ls('neonBrickV1') || 'null') || {}).best); } catch { return 0; } } },
-  { id: 'stack-3d', title: '착착 쌓기 3D', icon: '🟦', unit: '층', read: () => { try { return num((JSON.parse(ls('stack3dV1') || 'null') || {}).best); } catch { return 0; } } }
+  { id: 'stack-3d', title: '착착 쌓기 3D', icon: '🟦', unit: '층', read: () => { try { return num((JSON.parse(ls('stack3dV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'train-snake', title: '꼬마 기차 · 태운 손님', icon: '🚂', unit: '명', read: () => { try { return num((JSON.parse(ls('trainSnakeV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'hoop-shot', title: '슝슝 농구', icon: '🏀', unit: '점', read: () => { try { return num((JSON.parse(ls('hoopShotV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'space-shooter', title: '반짝 우주 슈팅', icon: '🚀', unit: '점', read: () => { try { return num((JSON.parse(ls('spaceShooterV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'rhythm-tiles', title: '피아노 타일 · 한 곡 최고', icon: '🎹', unit: '타일', read: () => { try { return num(Math.max(0, ...Object.values((JSON.parse(ls('rhythmTilesV1') || 'null') || {}).best || {}).map(Number))); } catch { return 0; } } },
+  { id: 'zigzag-3d', title: '지그재그 3D', icon: '⚪', unit: '점', read: () => { try { return num((JSON.parse(ls('zigzag3dV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'jelly-jump', title: '통통 점프 · 올라간 높이', icon: '🟢', unit: 'm', read: () => { try { return num((JSON.parse(ls('jellyJumpV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'fruit-slice', title: '슥삭 과일 썰기', icon: '🍉', unit: '점', read: () => { try { return num((JSON.parse(ls('fruitSliceV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'num-2048', title: '2048 사탕 숫자', icon: '🍬', unit: '점', read: () => { try { return num((JSON.parse(ls('num2048V1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'bubble-pop', title: '방울 터뜨리기 · 깬 단계', icon: '🫧', unit: '단계', read: () => { try { return num(((JSON.parse(ls('bubblePopV1') || 'null') || {}).top || 1) - 1); } catch { return 0; } } },
+  { id: 'water-sort', title: '색깔 물 정렬 · 깬 단계', icon: '🧪', unit: '단계', read: () => { try { return num(((JSON.parse(ls('waterSortV1') || 'null') || {}).level || 1) - 1); } catch { return 0; } } }
 ];
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 

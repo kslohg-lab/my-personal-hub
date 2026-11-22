@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>2048 사탕 숫자</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+html,body{background:#fbeee0}
+#game canvas{display:block}
+#home{background:linear-gradient(rgba(255,215,190,.85),rgba(255,245,235,.95))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:54px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #e0803a,0 0 20px rgba(255,255,255,.45);-webkit-text-stroke:2px #e0803a;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #e0803a;margin-top:10px}
+#home .how{position:absolute;left:30px;right:30px;top:calc(9% + 150px);background:rgba(255,255,255,.88);color:inherit;border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.7;text-align:center}
+#home .menu{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{text-align:center}
+#hud{position:absolute;left:0;right:0;top:0;display:none;padding:10px 10px 0 66px;gap:8px;align-items:center;pointer-events:none}
+#hud.on{display:flex}
+#hud .pill{font-size:18px;white-space:nowrap}
+#hud .pill:empty{display:none}
+#hud .sp{flex:1}
+
+#pbtn{left:10px;top:8px;display:none}
+#sbtn{left:12px;top:14px}
+#ctl{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:center;gap:12px;pointer-events:auto}#ctl button{height:52px;padding:0 18px;font-size:19px}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="hud"><span class="pill" id="hA"></span><span class="sp"></span><span class="pill" id="hB"></span><span class="pill" id="hC"></span></div>
+ <div id="ctl" class="playonly" style="display:none"><button id="bUndo">↩️ 되돌리기 3</button><button id="bNew">🔄 새로 하기</button></div>
+ <div id="home" class="scr"><div class="logo">2048<br>사탕 숫자<small>🍬 같은 숫자를 합쳐 2048까지!</small></div>
+  <div class="how">👆 위아래 양옆으로 <b>밀면</b> 모두 그쪽으로 쭉<br>같은 숫자가 만나면 합쳐져요<br>↩️ 되돌리기 3번</div>
+  <div class="menu"><div class="best"><span class="pill" id="hb"></span></div><button class="gold" id="bGo">▶ 새 게임</button><button class="sky" id="bGo2" style="display:none">⏩ 이어서 하기</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div><div class="row"><button class="gold" id="rRe">🔁 다시</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🍬</div><div>사탕 포장 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>
