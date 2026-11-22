@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>동물 친구 달리기 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#5a3d6e;--pink:#ff8fb8;--gold:#ffd25a;--gold2:#e0a92e;--card:#fffaf3;--bg:#ffe9f3}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#2b2340;overflow:hidden;font-family:"Jua","Noto Sans KR","Apple SD Gothic Neo",sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+#game{position:fixed;inset:0}
+#ui{position:absolute;left:0;top:0;width:800px;height:400px;transform-origin:0 0;pointer-events:none;overflow:hidden}
+.scr{position:absolute;inset:0;display:none;pointer-events:auto}
+.scr.on{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
+button{font:inherit;color:var(--ink);border:0;border-radius:18px;background:#fff;box-shadow:0 5px 0 #d9c3e6;cursor:pointer;touch-action:manipulation;transition:transform .08s}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 #d9c3e6}
+.gold{background:linear-gradient(#ffe27a,#ffc94a);box-shadow:0 5px 0 var(--gold2)}
+.gold:active{box-shadow:0 1px 0 var(--gold2)}
+.pinkb{background:linear-gradient(#ffc0d8,#ff9cc2);box-shadow:0 5px 0 #e07aa2}
+.pinkb:active{box-shadow:0 1px 0 #e07aa2}
+.sky{background:linear-gradient(#bfe9ff,#9fd9ff);box-shadow:0 5px 0 #6fb5e0}
+.sky:active{box-shadow:0 1px 0 #6fb5e0}
+.pill{background:rgba(255,255,255,.92);border-radius:20px;padding:6px 14px;font-size:18px;box-shadow:0 3px 0 rgba(90,61,110,.18)}
+/* 처음 화면 */
+#home .logo{position:absolute;left:24px;top:18px;font-size:46px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #e0709c,0 0 18px rgba(255,140,190,.6);-webkit-text-stroke:2px #c2588a;animation:bob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:22px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #c2588a;margin-top:4px}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-1deg)}}
+#home .wal{position:absolute;right:16px;top:14px;display:flex;gap:8px}
+#home .menu{position:absolute;right:24px;top:84px;width:270px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:62px;font-size:25px}
+#home .menu .row2{display:flex;gap:10px}
+#home .menu .row2 button{flex:1;height:54px;font-size:20px}
+#home .hint{position:absolute;left:26px;bottom:18px;font-size:15px;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.35)}
+/* 공통 패널 */
+.panel{position:absolute;left:20px;top:16px;right:20px;bottom:16px;background:rgba(255,250,243,.96);border-radius:28px;box-shadow:0 8px 0 rgba(90,61,110,.25);padding:14px 18px}
+.panel h2{margin:0 0 10px;font-size:28px;font-weight:400;display:flex;align-items:center;gap:10px}
+.panel h2 .sp{flex:1}
+.x{width:48px;height:44px;font-size:22px;padding:0}
+/* 스테이지 */
+#stg .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.st{height:136px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;font-size:15px;line-height:1.15;position:relative;overflow:hidden}
+.st img{height:70px;max-width:96%;object-fit:contain;margin:2px 0 4px;filter:drop-shadow(0 3px 2px rgba(0,0,0,.15))}
+.st .no{position:absolute;left:8px;top:5px;font-size:14px;color:#b08ab8}
+.st .sr{font-size:14px;letter-spacing:1px}
+.st.lk{background:#ece4f2;color:#a898b8}
+.st.lk img{filter:grayscale(1) brightness(.4);opacity:.45}
+/* 친구 */
+#chs .wrap{display:flex;gap:14px;height:290px}
+#chs .info{width:230px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
+#chs .info img{height:104px;max-width:200px;object-fit:contain;animation:bob 1.6s ease-in-out infinite;filter:drop-shadow(0 6px 4px rgba(0,0,0,.18))}
+#chs .info b{font-size:26px;font-weight:400}
+#chs .info p{margin:0;font-size:16px;line-height:1.35;min-height:44px}
+#chs .info button{width:100%;height:54px;font-size:21px;margin-top:auto}
+#chs .tabs{display:flex;gap:6px;margin-bottom:8px}
+#chs .tabs button{height:36px;padding:0 10px;font-size:16px}
+#chs .tabs button.on{background:var(--pink);color:#fff;box-shadow:0 5px 0 #d0679a}
+#chs .list{flex:1;display:flex;flex-direction:column;min-width:0}
+#chs .grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-content:start;overflow-y:auto;touch-action:pan-y;padding:4px 4px 10px}
+.cc{height:92px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;position:relative}
+.cc img{height:58px;max-width:90%;object-fit:contain}
+.cc.sel{outline:4px solid var(--pink);outline-offset:-2px}
+.cc.lk img{filter:grayscale(.9) brightness(.85);opacity:.55}
+.cc .pr{font-size:12px;color:#a07a14}
+.cc .bd{position:absolute;right:4px;top:3px;font-size:13px}
+/* 설정·결과·일시정지 */
+.dim{position:absolute;inset:0;background:rgba(50,25,70,.55)}
+.card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:520px;background:var(--card);border-radius:30px;padding:18px 20px;text-align:center;box-shadow:0 10px 0 rgba(90,61,110,.3)}
+.card h2{margin:0 0 6px;font-size:34px;font-weight:400}
+.card .row{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.card .row button{height:58px;padding:0 18px;font-size:21px}
+.stars{font-size:52px;letter-spacing:6px;height:66px}
+.stars span{display:inline-block;filter:grayscale(1) opacity(.3);transform:scale(.4)}
+.stars span.on{filter:none;animation:pop .45s cubic-bezier(.3,1.8,.5,1) forwards}
+@keyframes pop{from{transform:scale(.2) rotate(-40deg)}to{transform:scale(1) rotate(0)}}
+.rline{font-size:22px;margin:4px 0}
+.rline b{color:#e08a00;font-weight:400}
+#pbtn{position:absolute;right:10px;bottom:10px;width:50px;height:46px;font-size:22px;padding:0;opacity:.85;display:none;pointer-events:auto}
+#load{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#ffe3f1,#e0f4ff);z-index:50;font-size:26px;gap:14px}
+#load .bar{width:260px;height:18px;border-radius:10px;background:#fff;overflow:hidden;box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+#load .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff9cc2,#ffd25a);transition:width .2s}
+#load .pw{font-size:60px;animation:bob 1s ease-in-out infinite}
+#rot{position:fixed;inset:0;z-index:99;display:none;flex-direction:column;align-items:center;justify-content:center;background:#ffe3f1;color:var(--ink);font-size:28px;text-align:center;line-height:1.6}
+#rot b{font-size:80px;font-weight:400}
+.toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 22px;border-radius:20px;font-size:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.sw{display:flex;gap:10px;justify-content:center;margin:8px 0}
+.sw button{height:54px;padding:0 16px;font-size:19px}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="home" class="scr">
+  <div class="logo">동물 친구<br>달리기 2<small>💗 하트를 되찾는 대모험</small></div>
+  <div class="wal"><span class="pill" id="hc">🪙 0</span><span class="pill" id="hs">⭐ 0</span></div>
+  <div class="menu">
+   <button class="gold" id="bPlay">▶ 모험 떠나기</button>
+   <button class="sky" id="bInf">♾️ 무한 달리기</button>
+   <div class="row2"><button class="pinkb" id="bChar">🐾 친구들</button><button id="bSet">⚙️ 설정</button></div>
+  </div>
+  <div class="hint">👉 오른쪽 톡 = 점프 (두 번 톡 = 2단 점프) · 👈 왼쪽 꾹 = 슬라이드</div>
+ </div>
+ <div id="stg" class="scr"><div class="panel"><h2>🗺️ 어디로 갈까요?<span class="sp"></span><span class="pill" id="sc">⭐ 0/30</span><button class="x" data-back>✖</button></h2><div class="grid" id="sgrid"></div></div></div>
+ <div id="chs" class="scr"><div class="panel"><h2>🐾 친구들<span class="sp"></span><span class="pill" id="cc">🪙 0</span><button class="x" data-back>✖</button></h2>
+  <div class="wrap"><div class="info"><img id="ciImg" alt=""><b id="ciName"></b><p id="ciDesc"></p><button id="ciBtn" class="gold"></button></div>
+  <div class="list"><div class="tabs" id="ctabs"></div><div class="grid" id="cgrid"></div></div></div></div></div>
+ <div id="set" class="scr"><div class="dim"></div><div class="card"><h2>⚙️ 설정</h2>
+  <div class="sw"><button id="tSnd"></button><button id="tBgm"></button></div>
+  <div class="sw"><button id="tDel">🗑️ 기록 지우기</button></div>
+  <div class="row"><button class="gold" data-back>닫기</button></div></div></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐 쉬어요</h2><p style="font-size:17px;margin:6px 0 0">메뉴로 가면 이번 판은 끝나요 (모은 코인은 받아요)</p>
+  <div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pRe">🔁 다시</button><button id="pMenu">🏠 메뉴</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div class="stars" id="rS"></div><div id="rB"></div>
+  <div class="row"><button id="rRe">🔁 다시</button><button class="gold" id="rNext">▶ 다음</button><button id="rMenu">🏠 메뉴</button></div></div></div>
+ <button id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🐰</div><div>친구들을 부르는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<div id="rot"><b>📱</b>화면을 가로로 돌려주세요</div>
+<script src="phaser.min.js"></script>
+<script src="game.js"></script>
+</body></html>
