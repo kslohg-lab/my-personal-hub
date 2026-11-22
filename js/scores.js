@@ -25,7 +25,10 @@ const BOARD = [
   { id: 'memory-match', title: '짝 맞추기 · 클리어한 단계', icon: '🃏', unit: '단계', read: () => { try { return num(((JSON.parse(ls('memoryV1') || 'null') || {}).bestLevel || 1) - 1); } catch { return 0; } } },   // bestLevel = 도달한 단계 → 클리어 = -1
   { id: 'proverb', title: '속담 맞추기 · 속담 도감', icon: '📜', unit: '개', read: () => { try { const d = (JSON.parse(ls('proverbV1') || 'null') || {}).dex || {}; return num(Object.keys(d).length); } catch { return 0; } } },   // dex = {속담번호: 맞힌 횟수} → 모은 개수
   { id: 'animal-run', title: '동물 달리기 · 무한 모드', icon: '🐾', unit: 'm', read: () => { try { return num((JSON.parse(ls('animalRunV6') || 'null') || {}).best); } catch { return 0; } } },
-  { id: 'animal-dash', title: '동물 달리기 2 · 무한 달리기', icon: '🐰', unit: 'm', read: () => { try { return num((JSON.parse(ls('animalDashV1') || 'null') || {}).best); } catch { return 0; } } }
+  { id: 'animal-dash', title: '동물 달리기 2 · 무한 달리기', icon: '🐰', unit: 'm', read: () => { try { return num((JSON.parse(ls('animalDashV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'block-puzzle', title: '동물 블록 퍼즐', icon: '🧩', unit: '점', read: () => { try { return num((JSON.parse(ls('blockPuzzleV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'animal-merge', title: '동물 친구 합치기', icon: '🫧', unit: '점', read: () => { try { return num((JSON.parse(ls('animalMergeV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'animal-survivor', title: '동물 서바이벌 · 버틴 시간', icon: '⚔️', unit: '초', read: () => { try { return num((JSON.parse(ls('animalSurvivorV1') || 'null') || {}).best); } catch { return 0; } } }
 ];
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>동물 친구 서바이벌</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#home{background:linear-gradient(rgba(40,30,80,.72),rgba(90,50,120,.78))}
+#home .logo{position:absolute;left:0;right:0;top:6%;text-align:center;font-size:46px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #e05a7a,0 0 20px rgba(255,120,160,.7);-webkit-text-stroke:2px #c0406a;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:18px;-webkit-text-stroke:0;color:#ffe9f2;text-shadow:0 2px 0 #c0406a;margin-top:8px}
+#home .lbl{position:absolute;left:0;right:0;top:calc(6% + 128px);text-align:center;color:#fff;font-size:19px}
+#home .heroes{position:absolute;left:18px;right:18px;top:calc(6% + 160px);display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hc{height:128px;padding:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:16px;line-height:1.15}
+.hc img{height:62px;max-width:92%;object-fit:contain}
+.hc small{font-size:12px;color:#8a6a9a;margin-top:2px}
+.hc.sel{outline:4px solid #ffd25a;outline-offset:-2px;background:#fff8e0}
+#home .menu{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);width:280px;display:flex;flex-direction:column;gap:12px}
+#home .menu button{height:64px;font-size:26px}
+#home .best{position:absolute;left:0;right:0;bottom:calc(9% + 80px);text-align:center}
+#lvl{background:rgba(30,15,50,.62)}
+#lvl h2{position:absolute;left:0;right:0;top:12%;margin:0;text-align:center;color:#fff;font-size:38px;font-weight:400;text-shadow:0 4px 0 #c0406a;animation:kpop .35s cubic-bezier(.3,1.7,.5,1)}
+#lvl .cards{position:absolute;left:22px;right:22px;top:calc(12% + 70px);display:flex;flex-direction:column;gap:12px}
+.uc{display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;min-height:92px;animation:kpop .3s cubic-bezier(.3,1.6,.5,1) backwards}
+.uc .ic{font-size:40px;width:56px;text-align:center;flex:none}
+.uc b{font-size:21px;font-weight:400;display:block}
+.uc span{font-size:15px;color:#7a6a8a;line-height:1.3}
+.uc .lv{margin-left:auto;font-size:14px;color:#e08a00;flex:none}
+.uc.new{background:linear-gradient(#fff,#fff3cf)}
+#pbtn{left:8px;top:58px;display:none}
+#sbtn{right:12px;top:14px}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="home" class="scr"><div class="logo">동물 친구<br>서바이벌<small>⚔️ 몰려오는 장난꾸러기들을 5분 동안 막아요!</small></div>
+  <div class="lbl">누구랑 갈까요?</div><div class="heroes" id="heroes"></div>
+  <div class="best"><span class="pill" id="hb"></span></div>
+  <div class="menu"><button class="gold" id="bGo">▶ 출발!</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="lvl" class="scr"><h2 id="lvT">⬆️ 레벨 업!</h2><div class="cards" id="cards"></div></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><div id="pInfo" style="font-size:16px;line-height:1.6"></div>
+  <div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pHome">🏠 그만하기</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT"></h2><div id="rB"></div>
+  <div class="row"><button class="gold" id="rRe">🔁 다시 도전</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">⚔️</div><div>모험 준비 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

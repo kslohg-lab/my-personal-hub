@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>동물 친구 합치기</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#home{background:linear-gradient(rgba(255,236,190,.93),rgba(255,214,228,.93))}
+#home .logo{position:absolute;left:0;right:0;top:9%;text-align:center;font-size:48px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #e0889c,0 0 18px rgba(255,150,180,.6);-webkit-text-stroke:2px #d0607c;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:19px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #d0607c;margin-top:8px}
+#home .chain{position:absolute;left:20px;right:20px;top:calc(9% + 150px);display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+#home .chain div{width:56px;text-align:center;font-size:12px;line-height:1.1}
+#home .chain img{width:48px;height:48px;object-fit:contain;display:block;margin:0 auto 2px;background:#fff;border-radius:50%;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+#home .chain .no img{filter:brightness(0) opacity(.25)}
+#home .chain i{font-style:normal;color:#c07a8a;font-size:16px;align-self:center}
+#home .menu{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:270px;display:flex;flex-direction:column;gap:14px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{position:absolute;left:0;right:0;bottom:calc(12% + 86px);text-align:center}
+#pbtn{right:12px;top:14px;display:none}
+#sbtn{left:12px;top:14px}
+#shk{left:12px;top:14px;display:none;width:auto;padding:0 10px;font-size:18px}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="home" class="scr"><div class="logo">동물 친구<br>합치기<small>🫧 같은 친구끼리 부딪히면 쑥 커져요</small></div>
+  <div class="chain" id="chain"></div>
+  <div class="best"><span class="pill" id="hb">👑 최고 0</span></div>
+  <div class="menu"><button class="gold" id="bGo">▶ 시작하기</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2>
+  <div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pNew">🔁 새로 시작</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT">병이 가득 찼어요!</h2><div id="rB"></div>
+  <div class="row"><button class="gold" id="rRe">🔁 한 판 더</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button><button class="topbtn" id="shk">🫨 흔들기 3</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🐣</div><div>친구들을 모으는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

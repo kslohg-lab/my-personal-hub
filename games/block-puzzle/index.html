@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>동물 블록 퍼즐</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../lib/kit.css">
+<style>
+#home{background:linear-gradient(rgba(201,182,255,.92),rgba(243,201,240,.9) 55%,rgba(255,227,201,.95))}
+#home .pet{position:absolute;left:50%;top:calc(12% + 150px);transform:translateX(-50%);height:120px;animation:kbob 1.4s ease-in-out infinite;filter:drop-shadow(0 6px 4px rgba(0,0,0,.15))}
+#home .logo{position:absolute;left:0;right:0;top:12%;text-align:center;font-size:50px;line-height:1.05;color:#fff;text-shadow:0 4px 0 #8a6ad0,0 0 20px rgba(160,130,255,.6);-webkit-text-stroke:2px #7656c0;animation:kbob 2.4s ease-in-out infinite}
+#home .logo small{display:block;font-size:20px;-webkit-text-stroke:0;color:#fff;text-shadow:0 2px 0 #7656c0;margin-top:8px}
+#home .menu{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);width:270px;display:flex;flex-direction:column;gap:14px}
+#home .menu button{height:62px;font-size:25px}
+#home .best{position:absolute;left:0;right:0;bottom:calc(16% + 160px);text-align:center}
+#pbtn{right:12px;top:14px;display:none}
+#sbtn{left:12px;top:14px}
+</style></head><body>
+<div id="game"></div>
+<div id="ui">
+ <div id="home" class="scr"><div class="logo">동물<br>블록 퍼즐<small>🧩 줄을 채워서 펑펑 터뜨려요</small></div>
+  <img class="pet" src="../animal-run/img/ch/00.webp" alt=""><div class="best"><span class="pill" id="hb">👑 최고 0</span></div>
+  <div class="menu"><button class="gold" id="bGo">▶ 시작하기</button><button class="sky" id="bCont" style="display:none">⏩ 이어서 하기</button></div>
+  <button class="topbtn" id="sbtn">🔊</button></div>
+ <div id="pause" class="scr"><div class="dim"></div><div class="card"><h2>⏸️ 잠깐!</h2><p style="font-size:17px;margin:4px 0">지금 판은 저장돼요. 나중에 이어서 할 수 있어요.</p>
+  <div class="row"><button class="gold" id="pGo">▶ 계속</button><button id="pNew">🔁 새로 시작</button><button id="pHome">🏠 처음</button></div></div></div>
+ <div id="res" class="scr"><div class="dim"></div><div class="card"><h2 id="rT">더 놓을 곳이 없어요!</h2><div id="rB"></div>
+  <div class="row"><button class="gold" id="rRe">🔁 한 판 더</button><button id="rHome">🏠 처음</button></div></div></div>
+ <button class="topbtn" id="pbtn">⏸️</button>
+ <div class="toast" id="toast"></div>
+</div>
+<div id="load"><div class="pw">🧩</div><div>블록을 쌓는 중…</div><div class="bar"><i id="lbar"></i></div></div>
+<script src="../lib/phaser.min.js"></script>
+<script src="../lib/kit.js"></script>
+<script src="game.js"></script>
+</body></html>

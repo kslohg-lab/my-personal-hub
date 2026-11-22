@@ -1,0 +1,33 @@
+/* 허브 엔진 게임 공용 화면 스타일 (games/lib/kit.css) */
+:root{--ink:#5a3d6e;--pink:#ff8fb8;--gold2:#e0a92e;--card:#fffaf3}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#2b2340;overflow:hidden;font-family:"Jua","Noto Sans KR","Apple SD Gothic Neo",sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+#game{position:fixed;inset:0}
+#ui{position:absolute;left:0;top:0;transform-origin:0 0;pointer-events:none;overflow:hidden}
+.scr{position:absolute;inset:0;display:none;pointer-events:auto}
+.scr.on{display:block;animation:kfade .25s ease}
+@keyframes kfade{from{opacity:0}to{opacity:1}}
+@keyframes kbob{50%{transform:translateY(-6px) rotate(-1deg)}}
+@keyframes kpop{from{transform:scale(.3)}to{transform:scale(1)}}
+button{font:inherit;color:var(--ink);border:0;border-radius:18px;background:#fff;box-shadow:0 5px 0 #d9c3e6;cursor:pointer;touch-action:manipulation;transition:transform .08s}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 #d9c3e6}
+.gold{background:linear-gradient(#ffe27a,#ffc94a);box-shadow:0 5px 0 var(--gold2)}
+.gold:active{box-shadow:0 1px 0 var(--gold2)}
+.pinkb{background:linear-gradient(#ffc0d8,#ff9cc2);box-shadow:0 5px 0 #e07aa2}
+.pinkb:active{box-shadow:0 1px 0 #e07aa2}
+.sky{background:linear-gradient(#bfe9ff,#9fd9ff);box-shadow:0 5px 0 #6fb5e0}
+.sky:active{box-shadow:0 1px 0 #6fb5e0}
+.pill{background:rgba(255,255,255,.92);border-radius:20px;padding:6px 14px;font-size:18px;box-shadow:0 3px 0 rgba(90,61,110,.18)}
+.dim{position:absolute;inset:0;background:rgba(50,25,70,.6)}
+.card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:360px;background:var(--card);border-radius:30px;padding:20px 18px;text-align:center;box-shadow:0 10px 0 rgba(90,61,110,.3);animation:kpop .3s cubic-bezier(.3,1.6,.5,1)}
+.card h2{margin:0 0 8px;font-size:32px;font-weight:400}
+.card .row{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.card .row button{height:56px;padding:0 18px;font-size:20px}
+.rline{font-size:22px;margin:6px 0}
+.rline b{color:#e08a00;font-weight:400}
+.toast{position:absolute;left:50%;top:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 22px;border-radius:20px;font-size:19px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;z-index:5}
+#load{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#ffe3f1,#e0f4ff);z-index:50;font-size:24px;gap:14px}
+#load .bar{width:220px;height:16px;border-radius:10px;background:#fff;overflow:hidden}
+#load .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff9cc2,#ffd25a);transition:width .2s}
+#load .pw{font-size:56px;animation:kbob 1s ease-in-out infinite}
+.topbtn{position:absolute;width:48px;height:46px;font-size:22px;padding:0;pointer-events:auto}
