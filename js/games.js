@@ -1,49 +1,54 @@
 // 게임·도구 목록, 전체 화면 플레이어 (일반 스크립트, core.js 다음에 로드)
 
 // 게임·도구 목록 (새로 추가할 때는 여기에 한 줄 + games/폴더이름/ 에 index.html, thumb.svg 넣기)
-// cat: 'game' = AI 미니 게임 / 'tool' = 가족 도구 (분류를 바꾸려면 이 값만 바꾸면 됨)
+// cat: 아래 CATS의 id (party 다 같이 / duo 둘이서 / action 액션 / puzzle 퍼즐 / shop 가게 운영 / study 공부 / tool 가족 도구) — 분류를 바꾸려면 이 값만 바꾸면 됨
 // v: 파일을 새로 올릴 때마다 숫자를 올리면 폰이 옛 파일을 캐시에서 쓰지 않음
 // cost: 입장에 필요한 게임 티켓 수 (부모님 계정은 무료, 0이거나 없으면 무료) — 도구는 티켓 없이 무료
 const CATS = [
-  { id: 'game', title: '🎮 AI 미니 게임', sub: '게임을 골라서 바로 즐겨보세요' },
+  { id: 'party', title: '🎉 다 같이', sub: '가족이 각자 폰으로 모여서 해요' },
+  { id: 'duo', title: '👫 둘이서', sub: '둘이 마주 앉아 한 판!' },
+  { id: 'action', title: '🏃 액션', sub: '달리고 피하고 뽑고!' },
+  { id: 'puzzle', title: '🧩 퍼즐', sub: '머리를 써서 차근차근' },
+  { id: 'shop', title: '🏪 가게 운영', sub: '내 가게를 키워요' },
+  { id: 'study', title: '📚 공부', sub: '놀면서 계산·속담 실력 쑥쑥' },
   { id: 'tool', title: '🧭 가족 도구', sub: '여행·골프처럼 우리 가족이 같이 쓰는 것들' }
 ];
 const GAMES = [
-  { id: 'math-monster',  cat: 'game', title: '산수 몬스터 격파!',       desc: '계산으로 몬스터를 물리쳐요', cost: 1 },
-  { id: 'speed-math',    cat: 'game', title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결', v: 2, cost: 1 },
-  { id: 'animal-run',    cat: 'game', title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 11, cost: 1 },
-  { id: 'animal-dash',   cat: 'game', title: '동물 친구 달리기 2',      desc: '새 엔진으로 다시 만든 달리기! 보스전·보너스 타임', landscape: true, v: 1, cost: 1 },
-  { id: 'block-puzzle',  cat: 'game', title: '동물 블록 퍼즐',          desc: '블록을 놓아 줄을 채우면 펑! 이어서 하기도 돼요', v: 1, cost: 1 },
-  { id: 'animal-merge',  cat: 'game', title: '동물 친구 합치기',        desc: '같은 친구끼리 부딪히면 더 큰 친구로 쑥!', v: 1, cost: 1 },
-  { id: 'animal-survivor', cat: 'game', title: '동물 친구 서바이벌',    desc: '몰려오는 장난꾸러기를 5분 동안 막아요', v: 1, cost: 1 },
-  { id: 'claw-machine',  cat: 'game', title: '말랑말랑 인형뽑기',       desc: '집게로 인형을 뽑아보세요', cost: 1 },
-  { id: 'bungeoppang',   cat: 'game', title: '붕어빵 타이쿤',           desc: '붕어빵을 구워 팔고 가게를 키워요', v: 1, cost: 1 },
-  { id: 'bungeoppang-shop', cat: 'game', title: '붕어빵 가게', desc: '내 가게를 꾸미고 키워요! 단골도 모아요', v: 3, cost: 1 },
-  { id: 'butcher', cat: 'game', title: '우리 정육점', desc: '부위별로 고기를 사서 썰고 구워 팔아요', v: 2, cost: 1 },
-  { id: 'bungeoppang2', cat: 'game', title: '붕어빵 서바이벌',         desc: '컷트라인을 못 넘으면 탈락! 몇 단계까지 갈까요', v: 1, cost: 1 },
-  { id: 'ice-cream',     cat: 'game', title: '아이스크림 가게 타이쿤',  desc: '주문대로 아이스크림을 쌓아 팔고 가게를 키워요', v: 1, cost: 1 },
-  { id: 'chess',         cat: 'game', title: '체스',                    desc: '컴퓨터와 겨루거나 둘이서 대결해요', v: 1, cost: 1 },
-  { id: 'sudoku',        cat: 'game', title: '스도쿠',                  desc: '숫자 퍼즐 · 4×4부터 9×9, 오늘의 퍼즐도 있어요', v: 1, cost: 1 },
-  { id: 'memory-match',  cat: 'game', title: '짝 맞추기',               desc: '같은 그림 두 장을 찾는 기억력 게임', v: 1, cost: 1 },
-  { id: 'proverb',       cat: 'game', title: '속담 맞추기',             desc: '속담을 맞히고 도감을 채워요',       v: 1, cost: 1 },
-  { id: 'word-mafia',    cat: 'game', title: '단어 마피아',             desc: '가족이 각자 폰으로! 단어를 모르는 마피아를 찾아요', v: 2 },
-  { id: 'just-one',      cat: 'game', title: '저스트 원',               desc: '가족 협동! 겹치지 않는 힌트로 정답을 맞혀요', v: 2 },
-  { id: 'catch-mind',    cat: 'game', title: '캐치마인드',              desc: '한 명이 그리면 다 같이 맞혀요! 각자 폰으로', v: 2 },
-  { id: 'same-mind',     cat: 'game', title: '이심전심',                desc: '같은 질문, 같은 답이면 점수! 마음이 통할까?', v: 3 },
-  { id: 'ito',           cat: 'game', title: '숫자 텔레파시',           desc: '비밀 숫자를 말로 표현해서 작은 순서대로! 협동', v: 3 },
-  { id: 'who-most',      cat: 'game', title: '누가 제일?',              desc: '우리 가족 중 누가 제일 ○○할까? 투표하고 칭호 받기', v: 3 },
-  { id: 'draw-relay',    cat: 'game', title: '그림 릴레이',             desc: '단어→그림→맞히기→그림… 돌고 나면 웃음 폭발', v: 2 },
-  { id: 'truth-lie',     cat: 'game', title: '진실 혹은 거짓',          desc: '내 이야기 3개 중 거짓말 하나! 찾아낼 수 있을까?', v: 2 },
-  { id: 'undercover',    cat: 'game', title: '언더커버',                desc: '나만 비슷한 다른 단어? 나도 모르는 스파이 찾기', v: 2 },
-  { id: 'word-duet',     cat: 'game', title: '단어 듀엣',              desc: '둘이 한 팀! 힌트 하나로 초록 단어 15개 찾기 (2인)', v: 1 },
-  { id: 'spice-market',  cat: 'game', title: '보석 시장',              desc: '먼저 팔수록 비싸게! 둘이서 하는 장사 대결 (2인)', v: 1 },
-  { id: 'quilt',         cat: 'game', title: '조각보 퍼즐',            desc: '조각을 사서 이불 빈칸 채우기 퍼즐 대결 (2인)', v: 1 },
-  { id: 'tile-garden',   cat: 'game', title: '타일 정원',              desc: '예쁜 타일을 골라 벽 무늬 완성하기 (2인)', v: 1 },
-  { id: 'mind-dial',     cat: 'game', title: '마음 다이얼',            desc: '"차가운↔뜨거운" 어디쯤? 한마디 힌트로 위치 맞히기', v: 1 },
-  { id: 'word-team',     cat: 'game', title: '단어 팀전',              desc: '2:2 팀 대결! 팀장 힌트로 우리 팀 단어 찾기 (4인)', v: 1 },
-  { id: 'color-guess',   cat: 'game', title: '색깔 맞히기',            desc: '색깔 이름 없이 설명하고 96가지 색 중 한 칸 맞히기', v: 1 },
-  { id: 'skull',         cat: 'game', title: '해골 블러핑',            desc: '꽃일까 해골일까? 허세와 눈치의 심리전 (3~4인)', v: 1 },
-  { id: 'fake-artist',   cat: 'game', title: '가짜 화가',              desc: '한 줄씩 이어 그리며 제시어 모르는 가짜 찾기 (3인+)', v: 1 },
+  { id: 'math-monster',  cat: 'study', title: '산수 몬스터 격파!',       desc: '계산해서 하트를 쏴요! 몬스터를 펑펑', v: 2, cost: 1 },
+  { id: 'speed-math',    cat: 'study', title: '스피드 매쓰 블리츠 2',    desc: '빠르게 풀어보는 계산 대결', v: 2, cost: 1 },
+  { id: 'animal-run',    cat: 'action', title: '동물 친구 달리기',        desc: '귀여운 동물 친구와 함께 달려요', landscape: true, v: 11, cost: 1 },
+  { id: 'animal-dash',   cat: 'action', title: '동물 친구 달리기 2',      desc: '새 엔진으로 다시 만든 달리기! 보스전·보너스 타임', landscape: true, v: 1, cost: 1 },
+  { id: 'block-puzzle',  cat: 'puzzle', title: '동물 블록 퍼즐',          desc: '블록을 놓아 줄을 채우면 펑! 이어서 하기도 돼요', v: 1, cost: 1 },
+  { id: 'animal-merge',  cat: 'puzzle', title: '동물 친구 합치기',        desc: '같은 친구끼리 부딪히면 더 큰 친구로 쑥!', v: 1, cost: 1 },
+  { id: 'animal-survivor', cat: 'action', title: '동물 친구 서바이벌',    desc: '몰려오는 장난꾸러기를 5분 동안 막아요', v: 1, cost: 1 },
+  { id: 'claw-machine',  cat: 'action', title: '말랑말랑 인형뽑기',       desc: '진짜처럼 흔들리는 집게로 동물 인형 33종 모으기', v: 2, cost: 1 },
+  { id: 'bungeoppang',   cat: 'shop', title: '붕어빵 타이쿤',           desc: '붕어빵을 구워 팔고 가게를 키워요', v: 1, cost: 1 },
+  { id: 'bungeoppang-shop', cat: 'shop', title: '붕어빵 가게', desc: '내 가게를 꾸미고 키워요! 단골도 모아요', v: 3, cost: 1 },
+  { id: 'butcher', cat: 'shop', title: '우리 정육점', desc: '부위별로 고기를 사서 썰고 구워 팔아요', v: 2, cost: 1 },
+  { id: 'bungeoppang2', cat: 'shop', title: '붕어빵 서바이벌',         desc: '컷트라인을 못 넘으면 탈락! 몇 단계까지 갈까요', v: 1, cost: 1 },
+  { id: 'ice-cream',     cat: 'shop', title: '아이스크림 가게 타이쿤',  desc: '주문대로 아이스크림을 쌓아 팔고 가게를 키워요', v: 1, cost: 1 },
+  { id: 'chess',         cat: 'duo', title: '체스',                    desc: '컴퓨터와 겨루거나 둘이서 대결해요', v: 1, cost: 1 },
+  { id: 'sudoku',        cat: 'puzzle', title: '스도쿠',                  desc: '숫자 퍼즐 · 4×4부터 9×9, 오늘의 퍼즐도 있어요', v: 1, cost: 1 },
+  { id: 'memory-match',  cat: 'puzzle', title: '짝 맞추기',               desc: '같은 그림 두 장을 찾는 기억력 게임', v: 1, cost: 1 },
+  { id: 'proverb',       cat: 'study', title: '속담 맞추기',             desc: '속담을 맞히고 도감을 채워요',       v: 1, cost: 1 },
+  { id: 'word-mafia',    cat: 'party', title: '단어 마피아',             desc: '가족이 각자 폰으로! 단어를 모르는 마피아를 찾아요', v: 2 },
+  { id: 'just-one',      cat: 'party', title: '저스트 원',               desc: '가족 협동! 겹치지 않는 힌트로 정답을 맞혀요', v: 2 },
+  { id: 'catch-mind',    cat: 'party', title: '캐치마인드',              desc: '한 명이 그리면 다 같이 맞혀요! 각자 폰으로', v: 2 },
+  { id: 'same-mind',     cat: 'party', title: '이심전심',                desc: '같은 질문, 같은 답이면 점수! 마음이 통할까?', v: 3 },
+  { id: 'ito',           cat: 'party', title: '숫자 텔레파시',           desc: '비밀 숫자를 말로 표현해서 작은 순서대로! 협동', v: 3 },
+  { id: 'who-most',      cat: 'party', title: '누가 제일?',              desc: '우리 가족 중 누가 제일 ○○할까? 투표하고 칭호 받기', v: 3 },
+  { id: 'draw-relay',    cat: 'party', title: '그림 릴레이',             desc: '단어→그림→맞히기→그림… 돌고 나면 웃음 폭발', v: 2 },
+  { id: 'truth-lie',     cat: 'party', title: '진실 혹은 거짓',          desc: '내 이야기 3개 중 거짓말 하나! 찾아낼 수 있을까?', v: 2 },
+  { id: 'undercover',    cat: 'party', title: '언더커버',                desc: '나만 비슷한 다른 단어? 나도 모르는 스파이 찾기', v: 2 },
+  { id: 'word-duet',     cat: 'duo', title: '단어 듀엣',              desc: '둘이 한 팀! 힌트 하나로 초록 단어 15개 찾기 (2인)', v: 1 },
+  { id: 'spice-market',  cat: 'duo', title: '보석 시장',              desc: '먼저 팔수록 비싸게! 둘이서 하는 장사 대결 (2인)', v: 1 },
+  { id: 'quilt',         cat: 'duo', title: '조각보 퍼즐',            desc: '조각을 사서 이불 빈칸 채우기 퍼즐 대결 (2인)', v: 1 },
+  { id: 'tile-garden',   cat: 'duo', title: '타일 정원',              desc: '예쁜 타일을 골라 벽 무늬 완성하기 (2인)', v: 1 },
+  { id: 'mind-dial',     cat: 'party', title: '마음 다이얼',            desc: '"차가운↔뜨거운" 어디쯤? 한마디 힌트로 위치 맞히기', v: 1 },
+  { id: 'word-team',     cat: 'party', title: '단어 팀전',              desc: '2:2 팀 대결! 팀장 힌트로 우리 팀 단어 찾기 (4인)', v: 1 },
+  { id: 'color-guess',   cat: 'party', title: '색깔 맞히기',            desc: '색깔 이름 없이 설명하고 96가지 색 중 한 칸 맞히기', v: 1 },
+  { id: 'skull',         cat: 'party', title: '해골 블러핑',            desc: '꽃일까 해골일까? 허세와 눈치의 심리전 (3~4인)', v: 1 },
+  { id: 'fake-artist',   cat: 'party', title: '가짜 화가',              desc: '한 줄씩 이어 그리며 제시어 모르는 가짜 찾기 (3인+)', v: 1 },
   { id: 'travel-picker', cat: 'tool', title: '우리 가족 해외여행 선택 보드', desc: '가족 여행지를 함께 골라봐요', v: 2 },
   { id: 'h1-golf',       cat: 'tool', title: 'H1 골프맵',               desc: '화성 H1 출발 1시간 이내 골프장 35곳', v: 1 }
 ];
@@ -187,10 +192,30 @@ document.addEventListener('fullscreenchange', () => {
     closeGame();
   }, 700);
 });
-(function buildGameCards() {
+// 게임 목록: 위쪽 분류 버튼(전체·다 같이·둘이서…) + 카드. 마지막에 고른 분류는 이 기기에 기억 (hub_gameCat)
+let gameCat = store.get('hub_gameCat', 'all');
+if (gameCat !== 'all' && !CATS.some(c => c.id === gameCat)) gameCat = 'all';
+function renderGameCards() {
   const box = $('gameCards');
+  const ref = box.querySelector('.tkBadge'), tkHidden = ref ? ref.hidden : true;   // 티켓 표시 상태는 그대로 (tickets.js가 정함)
+  box.replaceChildren();
+  const bar = document.createElement('div');
+  bar.className = 'flex gap-2 overflow-x-auto pb-1 -mx-1 px-1';
+  bar.style.scrollbarWidth = 'none';
+  [{ id: 'all', title: '전체' }, ...CATS].forEach(c => {
+    const n = GAMES.filter(g => !g.hidden && (c.id === 'all' || g.cat === c.id)).length;
+    if (!n) return;
+    const b = document.createElement('button');
+    const on = gameCat === c.id;
+    b.className = 'shrink-0 px-3 py-1.5 rounded-full text-[13px] font-bold border ' + (on ? 'bg-indigo-500 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-300');
+    b.textContent = c.title + ' ' + n;
+    b.addEventListener('click', () => { gameCat = c.id; store.set('hub_gameCat', c.id); renderGameCards(); });
+    bar.append(b);
+  });
+  box.append(bar);
   CATS.forEach(cat => {
-    const list = GAMES.filter(g => g.cat === cat.id);
+    if (gameCat !== 'all' && gameCat !== cat.id) return;
+    const list = GAMES.filter(g => g.cat === cat.id && !g.hidden);
     if (!list.length) return;
     const hd = document.createElement('div');
     hd.className = 'pt-2';
@@ -207,12 +232,16 @@ document.addEventListener('fullscreenchange', () => {
     list.forEach(g => grid.append(makeCard(g)));
     box.append(grid);
   });
+  box.querySelectorAll('.tkBadge').forEach(b => { b.hidden = tkHidden; });
+}
+(function buildGameCards() {
+  renderGameCards();
   renderRecent();
   $('gpBack').addEventListener('click', closeGame);
   $('gpFlip').addEventListener('click', () => { flip = !flip; store.set('hub_flip', flip ? '1' : '0'); layoutPlayer(); });
 })();
 // 최근에 한 게임 (이 기기에 기억, 최대 2개 — 게임만, 도구는 제외)
-function readRecent() { try { const a = JSON.parse(store.get('hub_recentGames', '[]')); return Array.isArray(a) ? a.filter(id => GAMES.some(g => g.id === id && g.cat === 'game')) : []; } catch { return []; } }
+function readRecent() { try { const a = JSON.parse(store.get('hub_recentGames', '[]')); return Array.isArray(a) ? a.filter(id => GAMES.some(g => g.id === id && g.cat !== 'tool')) : []; } catch { return []; } }
 function pushRecent(id) { store.set('hub_recentGames', JSON.stringify([id, ...readRecent().filter(x => x !== id)].slice(0, 4))); }
 function renderRecent() {
   const box = $('gameRecent');

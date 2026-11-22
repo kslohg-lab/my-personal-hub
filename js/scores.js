@@ -28,7 +28,8 @@ const BOARD = [
   { id: 'animal-dash', title: '동물 달리기 2 · 무한 달리기', icon: '🐰', unit: 'm', read: () => { try { return num((JSON.parse(ls('animalDashV1') || 'null') || {}).best); } catch { return 0; } } },
   { id: 'block-puzzle', title: '동물 블록 퍼즐', icon: '🧩', unit: '점', read: () => { try { return num((JSON.parse(ls('blockPuzzleV1') || 'null') || {}).best); } catch { return 0; } } },
   { id: 'animal-merge', title: '동물 친구 합치기', icon: '🫧', unit: '점', read: () => { try { return num((JSON.parse(ls('animalMergeV1') || 'null') || {}).best); } catch { return 0; } } },
-  { id: 'animal-survivor', title: '동물 서바이벌 · 버틴 시간', icon: '⚔️', unit: '초', read: () => { try { return num((JSON.parse(ls('animalSurvivorV1') || 'null') || {}).best); } catch { return 0; } } }
+  { id: 'animal-survivor', title: '동물 서바이벌 · 버틴 시간', icon: '⚔️', unit: '초', read: () => { try { return num((JSON.parse(ls('animalSurvivorV1') || 'null') || {}).best); } catch { return 0; } } },
+  { id: 'claw-machine', title: '인형뽑기 · 인형 도감', icon: '🧸', unit: '종', read: () => { try { const c = (JSON.parse(ls('clawV2') || 'null') || {}).col || {}; return num(Object.keys(c).filter(k => c[k] > 0).length); } catch { return 0; } } }
 ];
 const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
